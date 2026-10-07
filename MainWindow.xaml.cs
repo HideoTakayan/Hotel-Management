@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
+using MySql.Data.MySqlClient;
 using System.Windows.Shapes;
 
 namespace Hotel_Management
