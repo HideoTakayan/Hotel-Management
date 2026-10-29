@@ -1,0 +1,95 @@
+<Page x:Class="Hotel_Management.Pages.WorkSchedule"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      mc:Ignorable="d"
+      xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+      d:DesignHeight="566" d:DesignWidth="920" Title="Quản Lý Lịch Làm Việc" FontFamily="Times New Roman">
+
+    <Border CornerRadius="5" Background="{DynamicResource SecondaryBackgroundColor}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="65"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Label Grid.Row="0" Content="Quản Lý Lịch Làm Việc" 
+                Style="{DynamicResource LabelStyle}" 
+                HorizontalAlignment="Left" VerticalAlignment="Center" 
+                Margin="40 0 0 0" Padding="10 5 0 5"
+                BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="4 0 0 0"/>    
+            
+            <!-- Form nhập thông tin phân ca chia 2 cột đồng bộ -->
+            <Grid x:Name="AdminPanel" Grid.Row="1" Margin="20,6,20,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Cột trái: Ngày làm & Ca trực -->
+                <StackPanel Grid.Column="0" Margin="10,0,20,0">
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="110"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Ngày làm" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
+                        <DatePicker Grid.Column="1" x:Name="dpWorkDate" Width="Auto" Style="{DynamicResource DatePickerStyle}" Tag="Chọn ngày làm việc"/>
+                    </Grid>
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="110"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Ca trực" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
+                        <ComboBox Grid.Column="1" x:Name="comboboxShiftType" Width="Auto" Style="{DynamicResource ComboBoxStyle}" Tag="Chọn ca làm">
+                            <ComboBoxItem Tag="0">Ca Sáng (07:00 - 15:00)</ComboBoxItem>
+                            <ComboBoxItem Tag="1">Ca Tối (15:00 - 23:00)</ComboBoxItem>
+                        </ComboBox>
+                    </Grid>
+                </StackPanel>
+
+                <!-- Cột phải: Nhân viên 1 & Nhân viên 2 -->
+                <StackPanel Grid.Column="1" Margin="20,0,10,0">
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="110"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Nhân viên 1" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
+                        <ComboBox Grid.Column="1" x:Name="comboboxEmp1" Width="Auto" Style="{DynamicResource ComboBoxStyle}" Tag="Chọn nhân viên 1" DisplayMemberPath="FullName" SelectedValuePath="Id"/>
+                    </Grid>
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="110"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Nhân viên 2" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
+                        <ComboBox Grid.Column="1" x:Name="comboboxEmp2" Width="Auto" Style="{DynamicResource ComboBoxStyle}" Tag="Chọn nhân viên 2" DisplayMemberPath="FullName" SelectedValuePath="Id"/>
+                    </Grid>
+                </StackPanel>
+            </Grid>
+                
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,6,0,8" HorizontalAlignment="Center">
+                <Button x:Name="btnAddShift" Content="Thêm Ca" Width="120" Margin="0,0,10,0" Style="{DynamicResource PrimaryButtonStyle}" Click="btnAddShift_Click"/>
+                <Button x:Name="btnUpdateShift" Content="Cập Nhật" Width="120" Margin="0,0,10,0" Style="{DynamicResource PrimaryButtonStyle}" Click="btnUpdateShift_Click"/>
+                <Button x:Name="btnDelShift" Content="Xóa Ca" Width="120" Margin="0,0,10,0" Style="{DynamicResource SecondaryButtonStyle}" Click="btnDelShift_Click"/>
+                <Button x:Name="btnRefresh" Content="Làm Mới" Width="120" Margin="0,0,0,0" Style="{DynamicResource SecondaryButtonStyle}" Click="btnRefresh_Click"/>
+            </StackPanel>
+
+            <DataGrid Grid.Row="3" x:Name="dgShifts" Margin="20,0,20,16" SelectionChanged="dgShifts_SelectionChanged" Style="{DynamicResource DataGridStyle}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Binding="{Binding ShiftId}" Width="50" />
+                    <DataGridTextColumn Header="Ngày Làm" Binding="{Binding WorkDate, StringFormat=dd/MM/yyyy}" Width="*"/>
+                    <DataGridTextColumn Header="Ca Trực" Binding="{Binding ShiftName}" Width="*"/>
+                    <DataGridTextColumn Header="Thời Gian" Binding="{Binding TimeRange}" Width="*"/>
+                    <DataGridTextColumn Header="Nhân Viên 1" Binding="{Binding Employee1_Name}" Width="1.5*"/>
+                    <DataGridTextColumn Header="Nhân Viên 2" Binding="{Binding Employee2_Name}" Width="1.5*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </Border>
+</Page>

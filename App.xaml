@@ -1,9 +1,17 @@
-﻿<Application x:Class="Hotel_Management.App"
+<Application x:Class="Hotel_Management.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Hotel_Management"
-             StartupUri="MainWindow.xaml">
+             StartupUri="LoginWindow.xaml"
+             DispatcherUnhandledException="Application_DispatcherUnhandledException">
     <Application.Resources>
-         
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Themes/DarkMode.xaml"/>
+                <ResourceDictionary Source="Assets/Icons.xaml"/>
+                <ResourceDictionary Source="Styles/MainStyle.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>
+

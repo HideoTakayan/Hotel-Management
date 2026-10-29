@@ -1,0 +1,129 @@
+<Page x:Class="Hotel_Management.Pages.Users"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Hotel_Management.Pages"
+      mc:Ignorable="d" 
+      d:DesignHeight="566" d:DesignWidth="920" Title="Quản Lý Người Dùng" FontFamily="Times New Roman">
+    <Border CornerRadius="5" Background="{DynamicResource SecondaryBackgroundColor}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="65"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Label Grid.Row="0" Content="Quản Lý Người Dùng" 
+                           Style="{DynamicResource LabelStyle}" 
+                           HorizontalAlignment="Left" VerticalAlignment="Center" 
+                           Margin="40 0 0 0" Padding="10 5 0 5"
+                           BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="4 0 0 0"/>
+
+            <!-- Form nhập thông tin người dùng chia 2 cột đồng bộ -->
+            <Grid Grid.Row="1" Margin="20,4,20,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Cột trái: Tài khoản, Họ tên, Mật khẩu -->
+                <StackPanel Grid.Column="0" Margin="10,0,20,0">
+                    <StackPanel Margin="0,0,0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Tên tài khoản" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
+                            <TextBox Grid.Column="1" x:Name="txtUsername" Width="Auto" Style="{DynamicResource TextBoxStyle}" Tag="Tên tài khoản"/>
+                        </Grid>
+                        <TextBlock x:Name="txtUsernameError" Text="Tên tài khoản không được để trống" Margin="110,2,0,0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Họ và tên" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
+                            <TextBox Grid.Column="1" x:Name="txtFullName" Width="Auto" Style="{DynamicResource TextBoxStyle}" Tag="Họ và tên"/>
+                        </Grid>
+                        <TextBlock x:Name="txtFullNameError" Text="Họ và tên không được để trống" Margin="110,2,0,0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Mật khẩu" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
+                            <PasswordBox Grid.Column="1" x:Name="txtPassword" Width="Auto" Style="{DynamicResource PasswordBoxStyle}"/>
+                        </Grid>
+                        <TextBlock Text="(Khi Cập nhật: để trống nếu giữ nguyên mật khẩu cũ)" Margin="110,2,0,0" Foreground="{DynamicResource PrimaryGrayColor}" FontSize="11" FontStyle="Italic"/>
+                        <TextBlock x:Name="txtPasswordError" Text="Mật khẩu không được để trống" Margin="110,2,0,0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Cột phải: Email, Số điện thoại, Vai trò -->
+                <StackPanel Grid.Column="1" Margin="20,0,10,0">
+                    <StackPanel Margin="0,0,0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Email" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
+                            <TextBox Grid.Column="1" x:Name="txtEmail" Width="Auto" Style="{DynamicResource TextBoxStyle}" Tag="Email"/>
+                        </Grid>
+                        <TextBlock x:Name="txtEmailError" Text="Vui lòng nhập đúng định dạng email" Margin="110,2,0,0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Số điện thoại" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
+                            <TextBox Grid.Column="1" x:Name="txtPhone" Width="Auto" Style="{DynamicResource TextBoxStyle}" Tag="Số điện thoại"/>
+                        </Grid>
+                        <TextBlock x:Name="txtPhoneError" Text="Số điện thoại phải từ 9 đến 12 chữ số" Margin="110,2,0,0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Vai trò" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
+                            <ComboBox Grid.Column="1" x:Name="comboboxRole" Width="Auto" Style="{DynamicResource ComboBoxStyle}" Tag="Chọn vai trò">
+                                <ComboBoxItem Content="Quản lý" Tag="0"/>
+                                <ComboBoxItem Content="Nhân viên" Tag="1"/>
+                            </ComboBox>
+                        </Grid>
+                        <TextBlock x:Name="txtRoleError" Text="Vui lòng chọn vai trò" Margin="110,2,0,0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,6,0,8" HorizontalAlignment="Center">
+                <Button x:Name="btnAddUser" Content="Thêm Mới" Width="120" Margin="0,0,10,0" Style="{DynamicResource PrimaryButtonStyle}" Click="BtnAddUser_Click"/>
+                <Button x:Name="btnUpdateUser" Content="Cập Nhật" Width="120" Margin="0,0,10,0" Style="{DynamicResource PrimaryButtonStyle}" Click="BtnUpdateUser_Click"/>
+                <Button x:Name="btnDelUser" Content="Xóa" Width="120" Margin="0,0,10,0" Style="{DynamicResource SecondaryButtonStyle}" Click="BtnDelUser_Click"/>
+                <Button x:Name="btnRefresh" Content="Làm Mới" Width="120" Margin="0,0,0,0" Style="{DynamicResource SecondaryButtonStyle}" Click="btnRefresh_Click" />
+            </StackPanel>
+
+            <DataGrid Grid.Row="3" x:Name="UsersDataGrid" Margin="20,0,20,16" SelectionChanged="UsersDataGrid_SelectionChanged" Style="{DynamicResource DataGridStyle}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="0.45*" MinWidth="45" />
+                    <DataGridTextColumn Header="Tên tài khoản" Binding="{Binding Username}" Width="1.1*" MinWidth="110" />
+                    <DataGridTextColumn Header="Họ và tên" Binding="{Binding FullName}" Width="1.3*" MinWidth="130" />
+                    <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="1.5*" MinWidth="150"/>
+                    <DataGridTextColumn Header="Số điện thoại" Binding="{Binding Phone}" Width="1.0*" MinWidth="105" />
+                    <DataGridTextColumn Header="Vai trò" Binding="{Binding RoleName}" Width="0.9*" MinWidth="95" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </Border>
+</Page>

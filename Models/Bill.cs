@@ -21,9 +21,8 @@ namespace Hotel_Management.Models
         [MaxLength(50)]
         public string FullName { get; set; }
 
-        [Required]
         [MaxLength(100)]
-        public string Email { get; set; }
+        public string Email { get; set; } // Cho phép NULL (khớp SQL)
 
         [Required]
         [MaxLength(12)]
@@ -51,18 +50,11 @@ namespace Hotel_Management.Models
                 {
                     0 => "Chưa thanh toán",
                     1 => "Đã thanh toán",
-                    2 => "Hủy",
-                    3 => "Check in",
-                    4 => "Check out",
+                    2 => "Đã hủy",
+                    3 => "Check-in",
+                    4 => "Check-out",
                     _ => "Không xác định"
                 };
-            }
-        }
-        public void CalculateTotal()
-        {
-            if (Room != null && EndDate > StartDate)
-            {
-                Total = (decimal)(EndDate.Date - StartDate.Date).TotalDays * Room.Price;
             }
         }
     }

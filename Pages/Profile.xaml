@@ -1,0 +1,81 @@
+<Page x:Class="Hotel_Management.Pages.Profile"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      mc:Ignorable="d" 
+      d:DesignHeight="566" d:DesignWidth="920" Title="Hồ Sơ Cá Nhân" FontFamily="Times New Roman">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Border CornerRadius="5" Background="{DynamicResource SecondaryBackgroundColor}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="70"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Header -->
+                <Label Grid.Row="0" Content="Hồ Sơ Cá Nhân" 
+                       Style="{DynamicResource LabelStyle}" 
+                       HorizontalAlignment="Left" VerticalAlignment="Center" 
+                       Margin="40 0 0 0" Padding="10 5 0 5"
+                       BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="4 0 0 0"/> 
+
+                <!-- Form chia 2 cột đồng bộ với toàn hệ thống -->
+                <Border Grid.Row="1" Margin="30,15,30,15" Padding="25,20" Background="{DynamicResource PrimaryBackgroundColor}" CornerRadius="6" BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="1">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Cột trái: Thông tin liên hệ -->
+                        <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                            <TextBlock Text="THÔNG TIN CÁ NHÂN" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryBlueColor}" Margin="0,0,0,15"/>
+
+                            <StackPanel Margin="0,0,0,15">
+                                <TextBlock Text="Họ và Tên" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                                <TextBox x:Name="txtFullName" Width="Auto" Style="{DynamicResource TextBoxStyle}" Tag="Nhập họ và tên..."/>
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,15">
+                                <TextBlock Text="Địa chỉ Email" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                                <TextBox x:Name="txtEmail" Width="Auto" Style="{DynamicResource TextBoxStyle}" Tag="Nhập địa chỉ email..."/>
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,5">
+                                <TextBlock Text="Số điện thoại" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                                <TextBox x:Name="txtPhone" Width="Auto" Style="{DynamicResource TextBoxStyle}" Tag="Số điện thoại (9 - 12 số)"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Cột phải: Đổi mật khẩu & Bảo mật -->
+                        <StackPanel Grid.Column="1" Margin="20,0,0,0">
+                            <TextBlock Text="BẢO MẬT &amp; MẬT KHẨU" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryBlueColor}" Margin="0,0,0,15"/>
+
+                            <StackPanel Margin="0,0,0,15">
+                                <TextBlock Text="Mật khẩu mới (Bỏ trống nếu không đổi)" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                                <PasswordBox x:Name="txtPassword" Width="Auto" Style="{DynamicResource PasswordBoxStyle}"/>
+                            </StackPanel>
+
+                            <Border Margin="0,10,0,0" Padding="14" Background="{DynamicResource SecondaryBackgroundColor}" CornerRadius="5" BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock Text="🔒 Lưu ý bảo mật:" FontWeight="Bold" Foreground="{DynamicResource PrimaryBlueColor}" Margin="0,0,0,6"/>
+                                    <TextBlock Text="- Mật khẩu mới (nếu nhập) phải có ít nhất 4 ký tự và sẽ được mã hóa chuẩn BCrypt." FontSize="12" Foreground="{DynamicResource TextSecondaryColor}" Margin="0,0,0,4" TextWrapping="Wrap"/>
+                                    <TextBlock Text="- Nếu bạn chỉ muốn cập nhật Họ tên, Email hoặc Số điện thoại, hãy để trống ô Mật khẩu mới." FontSize="12" Foreground="{DynamicResource TextSecondaryColor}" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,20">
+                    <Button x:Name="btnSave" Content="Lưu Thay Đổi" Width="140" Margin="0,0,12,0" Style="{DynamicResource PrimaryButtonStyle}" Click="BtnSave_Click"/>
+                    <Button x:Name="btnResetProfile" Content="Khôi Phục" Width="130" Margin="0,0,0,0" Style="{DynamicResource SecondaryButtonStyle}" Click="BtnResetProfile_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </ScrollViewer>
+</Page>

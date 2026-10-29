@@ -1,0 +1,197 @@
+<Page x:Class="Hotel_Management.Pages.Rooms"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Hotel_Management.Pages" 
+      mc:Ignorable="d" 
+      d:DesignHeight="566" d:DesignWidth="920" Title="Quản Lý Phòng" FontFamily="Times New Roman">
+    
+    <Border CornerRadius="5" Background="{DynamicResource SecondaryBackgroundColor}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="65"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Label Grid.Row="0" Content="Quản Lý Phòng" 
+                Style="{DynamicResource LabelStyle}" 
+                HorizontalAlignment="Left" VerticalAlignment="Center" 
+                Margin="40 0 0 0" Padding="10 5 0 5"
+                BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="4 0 0 0"/>    
+
+            <!-- Thanh tìm kiếm và lọc phòng -->
+            <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,20,0">
+                <TextBox x:Name="txtSearchRoom" Width="170" Height="36" Style="{DynamicResource TextBoxStyle}" Tag="Tìm số phòng (101-205)..." TextChanged="txtSearchRoom_TextChanged"/>
+                <ComboBox x:Name="cbFilterRoomStatus" Width="165" Height="36" Margin="10,0,0,0" Style="{DynamicResource ComboBoxStyle}" Tag="Lọc trạng thái" SelectionChanged="cbFilterRoomStatus_SelectionChanged">
+                    <ComboBoxItem Content="Tất cả trạng thái" IsSelected="True"/>
+                    <ComboBoxItem Content="Trống (Sẵn sàng)" Tag="0"/>
+                    <ComboBoxItem Content="Đã đặt" Tag="1"/>
+                    <ComboBoxItem Content="Đang sử dụng" Tag="2"/>
+                    <ComboBoxItem Content="Chờ dọn dẹp" Tag="3"/>
+                    <ComboBoxItem Content="Đang dọn dẹp" Tag="4"/>
+                </ComboBox>
+            </StackPanel>
+
+            <!-- Form nhập thông tin phòng chia 2 cột co giãn linh hoạt -->
+            <Grid Grid.Row="1" Margin="20,2,20,2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Cột trái: Thông tin cơ bản & Giá -->
+                <StackPanel Grid.Column="0" Margin="10,0,20,0">
+                    <StackPanel Margin="0,0,0,6">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Số phòng" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
+                            <TextBox Grid.Column="1" x:Name="txtRoomNumber" Width="Auto" Style="{DynamicResource TextBoxStyle}" Tag="Số phòng (VD: 101, 201)"/>
+                        </Grid>
+                        <TextBlock x:Name="txtRoomNumberError" Text="Số phòng không được để trống" Margin="110,2,0,0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,0,6">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Số người" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
+                            <TextBox Grid.Column="1" x:Name="txtNumberPeople" Width="Auto" Style="{DynamicResource TextBoxStyle}" Tag="Số người"/>
+                        </Grid>
+                        <TextBlock x:Name="txtNumberPeopleError" Text="Số người phải lớn hơn 0" Margin="110,2,0,0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,0,6">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Số đệm/giường" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
+                            <TextBox Grid.Column="1" x:Name="txtNumberBed" Width="Auto" Style="{DynamicResource TextBoxStyle}" Tag="Số đệm/giường"/>
+                        </Grid>
+                        <TextBlock x:Name="txtNumberBedError" Text="Số đệm/giường phải lớn hơn 0" Margin="110,2,0,0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,0,6">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Chất lượng" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
+                            <ComboBox Grid.Column="1" x:Name="comboboxQuality" Width="Auto" Style="{DynamicResource ComboBoxStyle}" Tag="Chọn chất lượng">
+                                <ComboBoxItem Tag="1">1 ★</ComboBoxItem>
+                                <ComboBoxItem Tag="2">2 ★</ComboBoxItem>
+                                <ComboBoxItem Tag="3">3 ★</ComboBoxItem>
+                                <ComboBoxItem Tag="4">4 ★</ComboBoxItem>
+                                <ComboBoxItem Tag="5">5 ★</ComboBoxItem>
+                            </ComboBox>
+                        </Grid>
+                        <TextBlock x:Name="txtQualityError" Text="Vui lòng chọn chất lượng" Margin="110,2,0,0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,0,6">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Giá (VND)" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
+                            <TextBox Grid.Column="1" x:Name="txtPrice" Width="Auto" Style="{DynamicResource TextBoxStyle}" Tag="Giá phòng"/>
+                        </Grid>
+                        <TextBlock x:Name="txtPriceError" Text="Đơn giá không hợp lệ" Margin="110,2,0,0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Cột phải: Loại phòng, Loại giường, Diện tích, Trạng thái -->
+                <StackPanel Grid.Column="1" Margin="20,0,10,0">
+                    <StackPanel Margin="0,0,0,6">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Loại phòng" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
+                            <ComboBox Grid.Column="1" x:Name="comboboxRoomType" Width="Auto" Style="{DynamicResource ComboBoxStyle}" Tag="Chọn loại phòng">
+                                <ComboBoxItem Tag="Phòng đơn">Phòng đơn</ComboBoxItem>
+                                <ComboBoxItem Tag="Phòng đôi">Phòng đôi</ComboBoxItem>
+                                <ComboBoxItem Tag="Phòng gia đình">Phòng gia đình</ComboBoxItem>
+                            </ComboBox>
+                        </Grid>
+                        <TextBlock x:Name="txtRoomTypeError" Text="Vui lòng chọn loại phòng" Margin="110,2,0,0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,0,6">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Đệm / Giường" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
+                            <ComboBox Grid.Column="1" x:Name="comboboxBedType" Width="Auto" Style="{DynamicResource ComboBoxStyle}" Tag="Chọn loại đệm/giường">
+                                <ComboBoxItem Tag="Nệm Futon (Tatami)">Nệm Futon (Tatami)</ComboBoxItem>
+                                <ComboBoxItem Tag="Giường đôi">Giường đôi</ComboBoxItem>
+                                <ComboBoxItem Tag="Giường đơn">Giường đơn</ComboBoxItem>
+                            </ComboBox>
+                        </Grid>
+                        <TextBlock x:Name="txtBedTypeError" Text="Vui lòng chọn loại đệm/giường" Margin="110,2,0,0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,0,6">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Diện tích (m²)" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
+                            <TextBox Grid.Column="1" x:Name="txtRoomArea" Width="Auto" Style="{DynamicResource TextBoxStyle}" Tag="Diện tích"/>
+                        </Grid>
+                        <TextBlock x:Name="txtRoomAreaError" Text="Diện tích phải lớn hơn 0" Margin="110,2,0,0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,0,6">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Trạng thái" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
+                            <ComboBox Grid.Column="1" x:Name="comboboxStatus" Width="Auto" Style="{DynamicResource ComboBoxStyle}" Tag="Chọn trạng thái">
+                                <ComboBoxItem Tag="0">Trống (Sẵn sàng)</ComboBoxItem>
+                                <ComboBoxItem Tag="1">Đã đặt</ComboBoxItem>
+                                <ComboBoxItem Tag="2">Đang sử dụng</ComboBoxItem>
+                                <ComboBoxItem Tag="3">Chờ dọn dẹp</ComboBoxItem>
+                                <ComboBoxItem Tag="4">Đang dọn dẹp</ComboBoxItem>
+                            </ComboBox>
+                        </Grid>
+                        <TextBlock x:Name="txtStatusError" Text="Vui lòng chọn trạng thái" Margin="110,2,0,0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,6,0,8" HorizontalAlignment="Center">
+                <Button x:Name="btnAddRoom" Content="Thêm Mới" Width="120" Margin="0,0,10,0" Style="{DynamicResource PrimaryButtonStyle}" Click="BtnAddRoom_Click"/>
+                <Button x:Name="btnUpdateRoom" Content="Cập Nhật" Width="120" Margin="0,0,10,0" Style="{DynamicResource PrimaryButtonStyle}" Click="BtnUpdateRoom_Click"/>
+                <Button x:Name="btnDelRoom" Content="Xóa" Width="120" Margin="0,0,10,0" Style="{DynamicResource SecondaryButtonStyle}" Click="BtnDelRoom_Click"/>
+                <Button x:Name="btnRefresh" Content="Làm Mới" Width="120" Margin="0,0,0,0" Style="{DynamicResource SecondaryButtonStyle}" Click="BtnRefresh_Click"/>
+            </StackPanel>
+
+            <DataGrid Grid.Row="3" x:Name="RoomsDataGrid" Margin="20,0,20,16" SelectionChanged="RoomsDataGrid_SelectionChanged" Style="{DynamicResource DataGridStyle}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Binding="{Binding RoomId}" Width="0.45*" MinWidth="42" />
+                    <DataGridTextColumn Header="Phòng" Binding="{Binding RoomNumber}" Width="0.7*" MinWidth="65" />
+                    <DataGridTextColumn Header="Số khách" Binding="{Binding NumberPeople}" Width="0.75*" MinWidth="70" />
+                    <DataGridTextColumn Header="Số đệm" Binding="{Binding NumberBed}" Width="0.7*" MinWidth="65" />
+                    <DataGridTextColumn Header="Chất lượng" Binding="{Binding QualityName}" Width="0.85*" MinWidth="80"/>
+                    <DataGridTextColumn Header="Đệm / Giường" Binding="{Binding BedType}" Width="1.4*" MinWidth="130" />
+                    <DataGridTextColumn Header="Loại phòng" Binding="{Binding RoomType}" Width="1.15*" MinWidth="105" />
+                    <DataGridTextColumn Header="Diện tích (m²)" Binding="{Binding RoomArea}" Width="0.95*" MinWidth="90"/>
+                    <DataGridTextColumn Header="Giá (VND)" Binding="{Binding Price, StringFormat=N0}" Width="1.05*" MinWidth="95" />
+                    <DataGridTextColumn Header="Trạng thái" Binding="{Binding StatusName}" Width="1.2*" MinWidth="110" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </Border>
+</Page>

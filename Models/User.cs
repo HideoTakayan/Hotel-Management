@@ -13,6 +13,7 @@ namespace Hotel_Management.Models
         public string Username { get; set; }
 
         [Required]
+        [MaxLength(255)]
         public string Password { get; set; }
 
         [Required]
@@ -39,5 +40,7 @@ namespace Hotel_Management.Models
                 };
             }
         }
+
+        public override string ToString() => FullName ?? Username ?? string.Empty;
     }
 }

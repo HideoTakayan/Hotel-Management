@@ -1,12 +1,200 @@
-﻿<Window x:Class="Hotel_Management.MainWindow"
+<Window x:Class="Hotel_Management.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Hotel_Management"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        x:Name="home"
+        Title="Kinkaku-ji Onsen - Quản Lý Khách Sạn Suối Nước Nóng" Height="650" Width="1000"
+        MaxHeight="{x:Static SystemParameters.MaximizedPrimaryScreenHeight}"
+        MaxWidth="{x:Static SystemParameters.MaximizedPrimaryScreenWidth}"
+        WindowStartupLocation="CenterScreen" WindowStyle="None"
+        Background="Transparent" AllowsTransparency="True"
+        ResizeMode="NoResize" WindowState="Normal"
+        FontFamily="Times New Roman"
+        MouseLeftButtonDown="Window_MouseLeftButtonDown"
+        PreviewMouseWheel="Window_PreviewMouseWheel"
+        PreviewKeyDown="Window_PreviewKeyDown"
+        Icon="/Assets/icon.ico">
+    <Border Background="{DynamicResource PrimaryBackgroundColor}">
+        <Border.Style>
+            <Style TargetType="Border">
+                <Setter Property="CornerRadius" Value="8"/>
+                <Setter Property="Margin" Value="0"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding ElementName=home, Path=WindowState}" Value="Maximized">
+                        <Setter Property="CornerRadius" Value="0"/>
+                        <Setter Property="Margin" Value="7"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
 
-    </Grid>
+            <!--Left Menu-->
+            <Border Grid.Column="0" Background="{DynamicResource SecondaryBackgroundColor}">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="8,0,0,8"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ElementName=home, Path=WindowState}" Value="Maximized">
+                                <Setter Property="CornerRadius" Value="0"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <Grid x:Name="gridMenu" Width="60" ClipToBounds="True">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50"/>
+                        <RowDefinition Height="50"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Logo căn chuẩn trong cột 60px để khi đóng menu không bị lòi chữ -->
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center" ToolTip="Kinkaku-ji Onsen &amp; Ryokan">
+                        <Grid Width="60">
+                            <Rectangle x:Name="Logo" Width="32" Height="32" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <Rectangle.Fill>
+                                    <ImageBrush ImageSource="/Assets/logo.png" />
+                                </Rectangle.Fill>
+                            </Rectangle>
+                        </Grid>
+                        <Label Content="Kinkaku-ji Onsen" Foreground="{DynamicResource PrimaryBlueColor}" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Padding="0" Margin="2,0,0,0"/>
+                    </StackPanel>
+
+                    <!-- Menu Toggle Button -->
+                    <ToggleButton x:Name="btnMenu" HorizontalAlignment="Right" BorderThickness="0" Background="Transparent" VerticalAlignment="Center" Style="{StaticResource MenuIconStyle}" Margin="0 0 15 0" ToolTip="Mở rộng / Thu gọn thanh điều hướng">
+                        <ToggleButton.Triggers>
+                            <EventTrigger RoutedEvent="ToggleButton.Unchecked">
+                                <BeginStoryboard>
+                                    <Storyboard x:Name="HideStackPanel">
+                                        <DoubleAnimation Storyboard.TargetName="gridMenu" Storyboard.TargetProperty="Width" BeginTime="0:0:0" From="200" To="60" Duration="0:0:0.25"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                            <EventTrigger RoutedEvent="ToggleButton.Checked">
+                                <BeginStoryboard>
+                                    <Storyboard x:Name="ShowStackPanel">
+                                        <DoubleAnimation Storyboard.TargetName="gridMenu" Storyboard.TargetProperty="Width" BeginTime="0:0:0" From="60" To="200" Duration="0:0:0.25"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </ToggleButton.Triggers>
+                    </ToggleButton>
+
+                    <!-- Menu Items -->
+                    <StackPanel Grid.Row="2" Orientation="Vertical" VerticalAlignment="Top" HorizontalAlignment="Left" Width="200">
+                        <RadioButton x:Name="rdHome" IsChecked="True" Content="Trang Chủ" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource home}" Margin="0 2 0 2" Click="rdHome_Click" />
+                        <RadioButton x:Name="rdRooms" Content="Phòng" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource room}" Margin="0 2 0 2" Click="rdRooms_Click" />
+                        <RadioButton x:Name="rdBooking" Content="Đặt Phòng" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource booking}" Margin="0 2 0 2" Click="rdBooking_Click"  />
+                        <RadioButton x:Name="rdShifts" Content="Lịch Làm Việc" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource calendar}" Margin="0 2 0 2" Click="rdShifts_Click" />
+                        <RadioButton x:Name="rdTasks" Content="Nhiệm Vụ Của Tôi" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource checklist}" Margin="0 2 0 2" Click="rdTasks_Click" />
+                        <RadioButton x:Name="rdBills" Content="Hóa Đơn" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource notes}" Margin="0 2 0 2" Click="rdBills_Click"/>
+                        <RadioButton x:Name="rdServices" Content="Dịch Vụ" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource list}" Margin="0 2 0 2" Click="rdServices_Click"/>
+                        <RadioButton x:Name="rdUsers" Content="Người Dùng" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource users}" Margin="0 2 0 2" Click="rdUsers_Click"/>
+                        <RadioButton x:Name="rdStats" Content="Thống Kê" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource stats}" Margin="0 2 0 2" Click="rdStats_Click" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Vertical" Grid.Row="2" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="200" Margin="0,0,0,0">
+                        <RadioButton x:Name="rdLogout" Content="Đăng Xuất" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource logout}" Margin="0 0 0 6" Click="rdLogout_Click"/>
+                        <StackPanel x:Name="btnProfile" MouseLeftButtonDown="btnProfile_Click" Background="Transparent" Orientation="Horizontal" Width="200" Margin="0,0,0,15" Cursor="Hand" ToolTip="Hồ sơ cá nhân &amp; Đổi mật khẩu">
+                            <Grid Width="60">
+                                <Ellipse Width="34" Height="34" Fill="{DynamicResource PrimaryBlueColor}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <iconPacks:PackIconBootstrapIcons Width="34" Height="34" 
+                                            HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center" 
+                                            Kind="PersonCircle" 
+                                            Foreground="White"/>
+                            </Grid>
+                            <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="4,0,0,0">
+                                <TextBlock x:Name="txtUsername" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14" FontWeight="SemiBold" HorizontalAlignment="Left" TextTrimming="CharacterEllipsis" MaxWidth="130"/>
+                                <TextBlock Text="Đổi mật khẩu/Hồ sơ" Foreground="{DynamicResource PrimaryBlueColor}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Left" TextDecorations="Underline"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                    
+                </Grid>
+            </Border>
+
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="38"/>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!--Button: Close | Restore | Minimize | Theme | Zoom -->
+                <StackPanel Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,2,10,0" Height="30" Orientation="Horizontal" FlowDirection="RightToLeft">
+                    <Button x:Name="btnClose" Style="{StaticResource IconButtonsStyle}" Content="{DynamicResource close}" Click="btnClose_Click" Tag="IsCloseButton" ToolTip="Đóng ứng dụng"/>
+                    <Button x:Name="btnRestore" Margin="5,0" Click="btnRestore_Click" ToolTip="Phóng to / Khôi phục cửa sổ">
+                        <Button.Style>
+                            <Style TargetType="{x:Type Button}" BasedOn="{StaticResource IconButtonsStyle}">
+                                <Setter Property="Content" Value="{DynamicResource maximize}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=home, Path=WindowState}" Value="Maximized">
+                                        <Setter Property="Content" Value="{DynamicResource restore}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <Button x:Name="btnMinimize" Style="{DynamicResource IconButtonsStyle}" Content="{DynamicResource minimize}" Click="btnMinimize_Click" ToolTip="Thu nhỏ cửa sổ"/>
+                    <Button x:Name="btnThemeToggle" Margin="5,0" Click="btnThemeToggle_Click" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextSecondaryColor}" Cursor="Hand" ToolTip="Đổi giao diện Sáng / Tối">
+                        <iconPacks:PackIconBootstrapIcons x:Name="iconTheme" Kind="MoonFill"/>
+                    </Button>
+
+                    <!-- Cụm Điều Khiển Thu Phóng (Zoom) -->
+                    <Border Background="{DynamicResource SecondaryBackgroundColor}" CornerRadius="12" Margin="10,2,5,2" Padding="4,0" BorderBrush="{DynamicResource PrimaryGrayColor}" BorderThickness="1" FlowDirection="LeftToRight" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button x:Name="btnZoomOut" Content="−" Width="20" Height="22" FontSize="13" FontWeight="Bold" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextSecondaryColor}" Cursor="Hand" Click="btnZoomOut_Click" ToolTip="Thu nhỏ nội dung (Ctrl + Lăn chuột xuống / Ctrl + '-')"/>
+                            <Button x:Name="btnZoomReset" Width="44" Height="22" Background="Transparent" BorderThickness="0" Cursor="Hand" Click="btnZoomReset_Click" ToolTip="Bấm để đặt lại 100% (Ctrl + 0)">
+                                <TextBlock x:Name="txtZoomPercent" Text="100%" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource PrimaryBlueColor}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Button>
+                            <Button x:Name="btnZoomIn" Content="+" Width="20" Height="22" FontSize="13" FontWeight="Bold" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextSecondaryColor}" Cursor="Hand" Click="btnZoomIn_Click" ToolTip="Phóng to nội dung (Ctrl + Lăn chuột lên / Ctrl + '+')"/>
+                        </StackPanel>
+                    </Border>
+
+                </StackPanel>
+                <!--Button: Close | Restore | Minimize -->
+
+                <Border Grid.Row="1" Margin="10,4,10,4" CornerRadius="5" Background="{DynamicResource PrimaryBlueColor}">
+                    <Grid Margin="0,0,10,0">
+                        <TextBlock Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0">
+                            <Run Text="Hệ thống quản lý Khách sạn Suối Nước Nóng Kinkaku-ji - "/>
+                            <Run Text="v1.0" FontWeight="Bold"/>
+                        </TextBlock>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <TextBlock Text="Kinkaku-ji Onsen &amp; Ryokan" Foreground="White" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold" Margin="10,0,15,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="2" Margin="10,0,10,10">
+                    <Frame x:Name="PagesNavigation" NavigationUIVisibility="Hidden">
+                        <Frame.LayoutTransform>
+                            <ScaleTransform x:Name="pageScaleTransform" ScaleX="1.0" ScaleY="1.0"/>
+                        </Frame.LayoutTransform>
+                        <!-- Page Content -->
+
+                    </Frame>
+                </Border>
+
+                <StackPanel Grid.Row="2" x:Name="placeHolder" Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,0,20" Visibility="Visible">
+                    <iconPacks:PackIconBootstrapIcons Width="50"
+                                                      Height="50"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"
+                                                      Kind="Buildings"
+                                                      Foreground="{DynamicResource PrimaryBlueColor}"/>
+                    <Label Content="Chọn một trang để bắt đầu" HorizontalContentAlignment="Center" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryColor}"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
 </Window>

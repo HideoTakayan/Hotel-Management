@@ -17,12 +17,14 @@ namespace Hotel_Management.Models
 
         [Required]
         public int NumberBed { get; set; }
+
         [Required]
         public int Quality { get; set; }
 
         [Required]
         [MaxLength(50)]
         public string BedType { get; set; }
+
         [Required]
         public decimal Price { get; set; }
 
@@ -32,6 +34,25 @@ namespace Hotel_Management.Models
 
         [Required]
         public float RoomArea { get; set; }
+
+        [Required]
+        public int Status { get; set; } = 0; // 0: Trống, 1: Đã đặt, 2: Đang sử dụng, 3: Chờ dọn dẹp, 4: Đang dọn dẹp
+
+        public string StatusName
+        {
+            get
+            {
+                return Status switch
+                {
+                    0 => "Trống (Sẵn sàng)",
+                    1 => "Đã đặt",
+                    2 => "Đang sử dụng",
+                    3 => "Chờ dọn dẹp",
+                    4 => "Đang dọn dẹp",
+                    _ => "Không xác định"
+                };
+            }
+        }
 
         public string QualityName
         {
@@ -48,5 +69,7 @@ namespace Hotel_Management.Models
                 };
             }
         }
+
+        public override string ToString() => RoomNumber ?? string.Empty;
     }
 }
