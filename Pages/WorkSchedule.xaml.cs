@@ -78,6 +78,7 @@ namespace Hotel_Management.Pages
                 using (MySqlConnection conn = DatabaseHelper.GetConnection())
                 {
                     conn.Open();
+                    DatabaseHelper.SyncAllDataToCurrentDate(conn);
                     string query = @"
                         SELECT s.ShiftId, s.WorkDate, s.ShiftType,
                                s.Employee1_Id, s.Employee2_Id,
@@ -251,6 +252,12 @@ namespace Hotel_Management.Pages
             if (dpWorkDate.SelectedDate == null)
             {
                 MessageBox.Show("Vui lòng chọn ngày làm việc!", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            DateTime oldWorkDate = rowView["WorkDate"] != DBNull.Value ? Convert.ToDateTime(rowView["WorkDate"]).Date : DateTime.Today;
+            if (dpWorkDate.SelectedDate.Value.Date < DateTime.Today && dpWorkDate.SelectedDate.Value.Date != oldWorkDate)
+            {
+                MessageBox.Show("Không thể chuyển ca làm việc sang ngày trong quá khứ!", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
             if (comboboxShiftType.SelectedItem is not ComboBoxItem shiftItem || !int.TryParse(shiftItem.Tag?.ToString(), out int shiftType))

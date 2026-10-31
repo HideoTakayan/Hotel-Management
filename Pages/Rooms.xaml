@@ -61,22 +61,18 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="110"/>
                                 <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Số người" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
-                            <TextBox Grid.Column="1" x:Name="txtNumberPeople" Width="Auto" Style="{DynamicResource TextBoxStyle}" Tag="Số người"/>
-                        </Grid>
-                        <TextBlock x:Name="txtNumberPeopleError" Text="Số người phải lớn hơn 0" Margin="110,2,0,0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
-                    </StackPanel>
-                    <StackPanel Margin="0,0,0,6">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Số đệm/giường" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
-                            <TextBox Grid.Column="1" x:Name="txtNumberBed" Width="Auto" Style="{DynamicResource TextBoxStyle}" Tag="Số đệm/giường"/>
+                            <TextBlock Grid.Column="0" Text="Số người" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
+                            <TextBox Grid.Column="1" x:Name="txtNumberPeople" Width="Auto" Style="{DynamicResource TextBoxStyle}" Tag="Số khách"/>
+                            <TextBlock Grid.Column="2" Text="Số đệm" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14" Margin="12,0,8,0"/>
+                            <TextBox Grid.Column="3" x:Name="txtNumberBed" Width="Auto" Style="{DynamicResource TextBoxStyle}" Tag="Số đệm"/>
                         </Grid>
-                        <TextBlock x:Name="txtNumberBedError" Text="Số đệm/giường phải lớn hơn 0" Margin="110,2,0,0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
+                        <StackPanel Orientation="Horizontal" Margin="110,2,0,0">
+                            <TextBlock x:Name="txtNumberPeopleError" Text="Số người phải lớn hơn 0   " Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
+                            <TextBlock x:Name="txtNumberBedError" Text="Số đệm/giường phải lớn hơn 0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
+                        </StackPanel>
                     </StackPanel>
                     <StackPanel Margin="0,0,0,6">
                         <Grid>
@@ -180,16 +176,16 @@
 
             <DataGrid Grid.Row="3" x:Name="RoomsDataGrid" Margin="20,0,20,16" SelectionChanged="RoomsDataGrid_SelectionChanged" Style="{DynamicResource DataGridStyle}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding RoomId}" Width="0.45*" MinWidth="42" />
-                    <DataGridTextColumn Header="Phòng" Binding="{Binding RoomNumber}" Width="0.7*" MinWidth="65" />
-                    <DataGridTextColumn Header="Số khách" Binding="{Binding NumberPeople}" Width="0.75*" MinWidth="70" />
-                    <DataGridTextColumn Header="Số đệm" Binding="{Binding NumberBed}" Width="0.7*" MinWidth="65" />
-                    <DataGridTextColumn Header="Chất lượng" Binding="{Binding QualityName}" Width="0.85*" MinWidth="80"/>
-                    <DataGridTextColumn Header="Đệm / Giường" Binding="{Binding BedType}" Width="1.4*" MinWidth="130" />
-                    <DataGridTextColumn Header="Loại phòng" Binding="{Binding RoomType}" Width="1.15*" MinWidth="105" />
-                    <DataGridTextColumn Header="Diện tích (m²)" Binding="{Binding RoomArea}" Width="0.95*" MinWidth="90"/>
-                    <DataGridTextColumn Header="Giá (VND)" Binding="{Binding Price, StringFormat=N0}" Width="1.05*" MinWidth="95" />
-                    <DataGridTextColumn Header="Trạng thái" Binding="{Binding StatusName}" Width="1.2*" MinWidth="110" />
+                    <DataGridTextColumn Header="ID" Binding="{Binding RoomId}" Width="0.45*" MinWidth="36" />
+                    <DataGridTextColumn Header="Phòng" Binding="{Binding RoomNumber}" Width="0.7*" MinWidth="54" />
+                    <DataGridTextColumn Header="Số khách" Binding="{Binding NumberPeople}" Width="0.75*" MinWidth="60" />
+                    <DataGridTextColumn Header="Số đệm" Binding="{Binding NumberBed}" Width="0.7*" MinWidth="56" />
+                    <DataGridTextColumn Header="Chất lượng" Binding="{Binding QualityName}" Width="0.85*" MinWidth="70"/>
+                    <DataGridTextColumn Header="Đệm / Giường" Binding="{Binding BedType}" Width="1.4*" MinWidth="110" />
+                    <DataGridTextColumn Header="Loại phòng" Binding="{Binding RoomType}" Width="1.15*" MinWidth="90" />
+                    <DataGridTextColumn Header="Diện tích (m²)" Binding="{Binding RoomArea}" Width="0.95*" MinWidth="80"/>
+                    <DataGridTextColumn Header="Giá (VND)" Binding="{Binding Price, StringFormat=N0}" Width="1.05*" MinWidth="82" />
+                    <DataGridTextColumn Header="Trạng thái" Binding="{Binding StatusName}" Width="1.2*" MinWidth="92" />
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

@@ -66,7 +66,7 @@ namespace Hotel_Management.Pages
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(email) || email.Length > 100 || !email.Contains("@"))
+            if (string.IsNullOrWhiteSpace(email) || email.Length > 100 || !email.Contains("@") || !email.Contains("."))
             {
                 MessageBox.Show("Email không hợp lệ hoặc vượt quá 100 ký tự!", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;

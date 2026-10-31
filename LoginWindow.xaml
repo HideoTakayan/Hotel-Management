@@ -29,9 +29,9 @@
             <Grid Grid.Column="1">
                 <!-- Window Controls -->
                 <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Orientation="Horizontal" FlowDirection="RightToLeft" Margin="0,10,12,0" Height="30">
-                    <Button x:Name="btnClose" Style="{DynamicResource IconButtonsStyle}" Content="{DynamicResource close}" Tag="IsCloseButton" Click="btnClose_Click" ToolTip="Đóng ứng dụng"/>
-                    <Button x:Name="btnMinimize" Style="{DynamicResource IconButtonsStyle}" Content="{DynamicResource minimize}" Margin="5,0" Click="btnMinimize_Click" ToolTip="Thu nhỏ cửa sổ"/>
-                    <Button x:Name="btnThemeToggle" Margin="5,0" Click="btnThemeToggle_Click" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextSecondaryColor}" Cursor="Hand" ToolTip="Đổi giao diện Sáng / Tối">
+                    <Button Style="{DynamicResource IconButtonsStyle}" Content="{DynamicResource close}" Tag="IsCloseButton" Click="btnClose_Click" ToolTip="Đóng ứng dụng"/>
+                    <Button Style="{DynamicResource IconButtonsStyle}" Content="{DynamicResource minimize}" Margin="5,0" Click="btnMinimize_Click" ToolTip="Thu nhỏ cửa sổ"/>
+                    <Button Margin="5,0" Click="btnThemeToggle_Click" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextSecondaryColor}" Cursor="Hand" ToolTip="Đổi giao diện Sáng / Tối">
                         <iconPacks:PackIconBootstrapIcons x:Name="iconTheme" Kind="MoonFill"/>
                     </Button>
                 </StackPanel>

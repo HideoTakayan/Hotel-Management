@@ -82,7 +82,7 @@
 
             <DataGrid Grid.Row="3" x:Name="dgShifts" Margin="20,0,20,16" SelectionChanged="dgShifts_SelectionChanged" Style="{DynamicResource DataGridStyle}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding ShiftId}" Width="50" />
+                    <DataGridTextColumn Header="ID" Binding="{Binding ShiftId}" Width="0.45*" MinWidth="45" />
                     <DataGridTextColumn Header="Ngày Làm" Binding="{Binding WorkDate, StringFormat=dd/MM/yyyy}" Width="*"/>
                     <DataGridTextColumn Header="Ca Trực" Binding="{Binding ShiftName}" Width="*"/>
                     <DataGridTextColumn Header="Thời Gian" Binding="{Binding TimeRange}" Width="*"/>

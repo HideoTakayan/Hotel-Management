@@ -123,22 +123,38 @@ INSERT INTO `Rooms` (`RoomId`, `RoomNumber`, `NumberPeople`, `NumberBed`, `Quali
 (9, '204', 2, 2, 4, 'Nệm Futon (Tatami)', 2800000.00, 'Phòng đôi', 40.0, 1),
 (10, '205', 4, 2, 5, 'Nệm Futon (Tatami)', 4200000.00, 'Phòng gia đình', 55.0, 4);
 
--- Tạo 14 dịch vụ suối khoáng nóng Onsen & Ryokan thực tế
+-- Tạo 22 dịch vụ suối khoáng nóng Onsen & Ryokan thực tế (Trải nghiệm Onsen & Phục vụ tại phòng)
 INSERT INTO `Services` (`ServiceId`, `ServiceName`, `Price`, `Unit`) VALUES
-(1, 'Vé tắm khoáng nóng Public Onsen (Bể Kakaroyu, Bể Chum, Jacuzzi)', 350000.00, 'Lượt'),
-(2, 'Thuê phòng tắm khoáng riêng tư (Private Kashikiri Hinoki Onsen)', 750000.00, 'Giờ'),
-(3, 'Xông hơi trị liệu Ganbanyoku (Đá muối Himalaya & Tuyết lạnh)', 250000.00, 'Lượt'),
+(1, 'Vé tắm khoáng nóng Public Onsen (Bể Rotenburo & Jacuzzi)', 350000.00, 'Lượt'),
+(2, 'Thuê bồn khoáng riêng tư gia đình (Private Kashikiri Hinoki)', 750000.00, 'Giờ'),
+(3, 'Xông hơi trị liệu đá muối Himalaya & Tuyết lạnh (Ganbanyoku)', 250000.00, 'Lượt'),
 (4, 'Ngâm bùn khoáng nóng dưỡng da & Xông thảo dược ngải cứu', 230000.00, 'Lượt'),
-(5, 'Trị liệu bấm huyệt Shiatsu Nhật Bản chuyên sâu (60 phút)', 550000.00, 'Lượt'),
-(6, 'Thực đơn tối thượng hạng Kaiseki Ryori truyền thống (9 món)', 850000.00, 'Suất'),
-(7, 'Buffet Ẩm thực Nhật Bản (Sushi, Sashimi, Tempura & Lẩu Shabu)', 550000.00, 'Suất'),
-(8, 'Set bữa sáng Ryokan truyền thống (Cá hồi nướng, Súp Miso)', 220000.00, 'Suất'),
-(9, 'Trứng trường thọ luộc suối khoáng nóng (Onsen Tamago)', 65000.00, 'Phần'),
-(10, 'Trà đạo Uji Matcha thượng hạng & Bánh ngọt Wagashi theo mùa', 120000.00, 'Phần'),
-(11, 'Rượu Sake Junmai Daiginjo (Hâm nóng Atsukan / Ướp lạnh)', 380000.00, 'Bình'),
-(12, 'Thuê trang phục Yukata cao cấp kèm đai Obi & Guốc gỗ Geta', 150000.00, 'Bộ'),
-(13, 'Ngâm chân khoáng nóng thảo dược (Ashiyu) & Massage bàn chân', 150000.00, 'Lượt'),
-(14, 'Dịch vụ giặt hấp & Là hơi trang phục cao cấp', 80000.00, 'Kg');
+(5, 'Ngâm bồn gỗ Bách Mộc thảo mộc bưởi vàng Yuzu (Yuzuyu Onsen)', 300000.00, 'Lượt'),
+(6, 'Ngâm chân khoáng nóng ngoài trời (Ashiyu) ngắm hoa anh đào', 120000.00, 'Lượt'),
+(7, 'Trải nghiệm tắm rừng trị liệu thiên nhiên (Shinrin-yoku)', 200000.00, 'Lượt'),
+(8, 'Vé tham quan vườn thiền Karesansui & Trải nghiệm thiền trà Zen', 180000.00, 'Lượt'),
+(9, 'Thực đơn tối thượng hạng Kaiseki Ryori truyền thống (9 món)', 850000.00, 'Suất'),
+(10, 'Set Bò Wagyu A5 thượng hạng nướng đá nham thạch tại phòng', 950000.00, 'Suất'),
+(11, 'Buffet Ẩm thực Nhật Bản (Sushi, Sashimi cá hồi & Lẩu Shabu)', 550000.00, 'Suất'),
+(12, 'Set bữa sáng Ryokan truyền thống (Cá hồi nướng, Súp Miso)', 220000.00, 'Suất'),
+(13, 'Mì Ramen đêm truyền thống phục vụ tại phòng (Yonaki Soba)', 130000.00, 'Bát'),
+(14, 'Trứng trường thọ luộc suối khoáng nóng (Onsen Tamago 4 quả)', 65000.00, 'Phần'),
+(15, 'Trà đạo Uji Matcha thượng hạng & Bánh ngọt Wagashi theo mùa', 120000.00, 'Phần'),
+(16, 'Rượu Sake Junmai Daiginjo ướp lạnh (Chai 720ml cao cấp)', 680000.00, 'Chai'),
+(17, 'Rượu Mơ Nhật Bản Umeshu thủ công kèm đá viên tinh khiết', 320000.00, 'Bình'),
+(18, 'Bia thủ công Nhật Bản Asahi Super Dry / Sapporo ướp lạnh', 55000.00, 'Lon'),
+(19, 'Trị liệu bấm huyệt Shiatsu Nhật Bản chuyên sâu (60 phút)', 550000.00, 'Lượt'),
+(20, 'Thuê trang phục Kimono / Yukata cao cấp (kèm guốc Geta & quạt)', 180000.00, 'Bộ'),
+(21, 'Dịch vụ giặt hấp & Là hơi trang phục cao cấp lấy nhanh', 80000.00, 'Kg'),
+(22, 'Thêm bộ nệm Futon & Chiếu cói Tatami dự phòng cho khách', 250000.00, 'Bộ'),
+-- Trò chơi Giải trí Onsen & Ryokan (Văn hóa Ryokan Nhật Bản / Thám tử Conan)
+(23, 'Bóng bàn Onsen truyền thống (Onsen Takkyu - kèm vợt & bóng)', 80000.00, 'Giờ'),
+(24, 'Phòng Bida lỗ giải trí (Billiards Club - Bàn & Cơ cao cấp)', 120000.00, 'Giờ'),
+(25, 'Quầy bắn súng nút bấc trúng thưởng kiểu Nhật (Shateki Game)', 50000.00, 'Lượt'),
+(26, 'Thuê bàn cờ Tướng Nhật Bản Shogi & Cờ Vây (kèm trà xanh)', 60000.00, 'Buổi'),
+(27, 'Khu máy trò chơi điện tử Retro & Gắp thú Onsen (Xu chơi game)', 50000.00, '10 Xu'),
+(28, 'Phòng hát Karaoke Ryokan cách âm cao cấp (kèm micro & dàn loa)', 250000.00, 'Giờ'),
+(29, 'Trò chơi ném vòng trúng thưởng dân gian Onsen (Wanage Game)', 40000.00, 'Lượt');
 
 -- Tạo lịch trực
 INSERT INTO `Shifts` (`ShiftId`, `WorkDate`, `ShiftType`, `Employee1_Id`, `Employee2_Id`) VALUES

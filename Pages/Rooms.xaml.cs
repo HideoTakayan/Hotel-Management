@@ -37,6 +37,7 @@ namespace Hotel_Management.Pages
                 using (var conn = DatabaseHelper.GetConnection())
                 {
                     conn.Open();
+                    DatabaseHelper.SyncAllDataToCurrentDate(conn);
                     string query = "SELECT RoomId, RoomNumber, NumberPeople, NumberBed, Quality, BedType, Price, RoomType, RoomArea, Status FROM Rooms";
                     using (var cmd = new MySqlCommand(query, conn))
                     using (var reader = cmd.ExecuteReader())
@@ -152,7 +153,7 @@ namespace Hotel_Management.Pages
             if (rawPrice.EndsWith(".00") || rawPrice.EndsWith(",00"))
                 rawPrice = rawPrice.Substring(0, rawPrice.Length - 3);
             rawPrice = rawPrice.Replace(",", "").Replace(".", "");
-            if (string.IsNullOrWhiteSpace(rawPrice) || !decimal.TryParse(rawPrice, out price) || price < 0)
+            if (string.IsNullOrWhiteSpace(rawPrice) || !decimal.TryParse(rawPrice, out price) || price <= 0)
             {
                 txtPriceError.Visibility = Visibility.Visible;
                 isValid = false;
@@ -233,6 +234,12 @@ namespace Hotel_Management.Pages
                 return;
             }
 
+            if (status == 1 || status == 2)
+            {
+                MessageBox.Show("Phòng mới tạo chưa có khách đặt hay lưu trú, chỉ có thể đặt trạng thái 'Trống (Sẵn sàng)' hoặc 'Chờ / Đang dọn dẹp'!", "Không hợp lệ với thực tế", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             try
             {
                 using (var conn = DatabaseHelper.GetConnection())
@@ -299,17 +306,40 @@ namespace Hotel_Management.Pages
                 {
                     conn.Open();
 
-                    // Không cho đặt phòng về 'Trống' khi vẫn còn hóa đơn đang hoạt động (Chưa thanh toán / Check-in)
-                    if (status == 0 && selectedRoom.Status != 0)
+                    // Tự động đồng bộ trạng thái Hóa đơn nếu quản trị viên thay đổi trạng thái phòng
+                    if (status != selectedRoom.Status)
                     {
-                        string checkQuery = "SELECT COUNT(*) FROM Bills WHERE RoomId = @RoomId AND Status IN (0, 3)";
-                        using (var checkCmd = new MySqlCommand(checkQuery, conn))
+                        if (status == 2) // Quản trị viên chuyển phòng sang 'Đang ở'
                         {
-                            checkCmd.Parameters.Add("@RoomId", MySqlDbType.Int32).Value = selectedRoom.RoomId;
-                            if (Convert.ToInt32(checkCmd.ExecuteScalar()) > 0)
+                            // Nếu phòng có hóa đơn đặt trước (Status = 0), tự động chuyển đơn sang Check-in (Status = 3)
+                            string syncBillSql = "UPDATE Bills SET Status = 3 WHERE RoomId = @RoomId AND Status = 0";
+                            using (var syncBillCmd = new MySqlCommand(syncBillSql, conn))
                             {
-                                MessageBox.Show("Phòng đang có hóa đơn hoạt động (Chưa thanh toán/Check-in). Hãy xử lý hóa đơn trước khi chuyển phòng về 'Trống'!", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
-                                return;
+                                syncBillCmd.Parameters.Add("@RoomId", MySqlDbType.Int32).Value = selectedRoom.RoomId;
+                                syncBillCmd.ExecuteNonQuery();
+                            }
+                        }
+                        else if (status == 3 || status == 4) // Quản trị viên chuyển sang 'Chờ dọn dẹp' hoặc 'Đang dọn dẹp'
+                        {
+                            // Nếu phòng đang Check-in (Status = 3), tự động chuyển đơn sang Check-out (Status = 4)
+                            string syncBillSql = "UPDATE Bills SET Status = 4 WHERE RoomId = @RoomId AND Status = 3";
+                            using (var syncBillCmd = new MySqlCommand(syncBillSql, conn))
+                            {
+                                syncBillCmd.Parameters.Add("@RoomId", MySqlDbType.Int32).Value = selectedRoom.RoomId;
+                                syncBillCmd.ExecuteNonQuery();
+                            }
+                        }
+                        else if (status == 0) // Quản trị viên chuyển phòng về 'Trống (Sẵn sàng)'
+                        {
+                            // Nếu có đơn đặt trước (0) thì hủy (2); nếu có đơn đang ở (3) hoặc check-out (4) thì thanh toán hoàn tất (1)
+                            string syncBillSql = @"
+                                UPDATE Bills 
+                                SET Status = CASE WHEN Status = 0 THEN 2 ELSE 1 END 
+                                WHERE RoomId = @RoomId AND Status IN (0, 3, 4)";
+                            using (var syncBillCmd = new MySqlCommand(syncBillSql, conn))
+                            {
+                                syncBillCmd.Parameters.Add("@RoomId", MySqlDbType.Int32).Value = selectedRoom.RoomId;
+                                syncBillCmd.ExecuteNonQuery();
                             }
                         }
                     }
@@ -346,14 +376,24 @@ namespace Hotel_Management.Pages
                             if (activeTaskCount == 0)
                             {
                                 int shiftId = DatabaseHelper.GetOrCreateCurrentShiftId(conn);
+                                int? onDutyEmpId = null;
+                                string getDutyEmpQuery = "SELECT Employee1_Id FROM Shifts WHERE ShiftId = @ShiftId";
+                                using (var cmdDuty = new MySqlCommand(getDutyEmpQuery, conn))
+                                {
+                                    cmdDuty.Parameters.Add("@ShiftId", MySqlDbType.Int32).Value = shiftId;
+                                    var empRes = cmdDuty.ExecuteScalar();
+                                    if (empRes != null && empRes != DBNull.Value) onDutyEmpId = Convert.ToInt32(empRes);
+                                }
+
                                 int taskStatus = (status == 4) ? 1 : 0;
-                                string insertTaskQuery = @"INSERT INTO Tasks (RoomId, ShiftId, TaskName, TaskStatus) 
-                                                          VALUES (@RoomId, @ShiftId, @TaskName, @TaskStatus)";
+                                string insertTaskQuery = @"INSERT INTO Tasks (RoomId, ShiftId, AssignedTo, TaskName, TaskStatus) 
+                                                          VALUES (@RoomId, @ShiftId, @AssignedTo, @TaskName, @TaskStatus)";
                                 using (var insertTaskCmd = new MySqlCommand(insertTaskQuery, conn))
                                 {
                                     insertTaskCmd.Parameters.Add("@RoomId", MySqlDbType.Int32).Value = selectedRoom.RoomId;
                                     insertTaskCmd.Parameters.Add("@ShiftId", MySqlDbType.Int32).Value = shiftId;
-                                    insertTaskCmd.Parameters.Add("@TaskName", MySqlDbType.VarChar, 255).Value = $"Dọn phòng {txtRoomNumber.Text.Trim()}";
+                                    insertTaskCmd.Parameters.Add("@AssignedTo", MySqlDbType.Int32).Value = onDutyEmpId.HasValue ? (object)onDutyEmpId.Value : DBNull.Value;
+                                    insertTaskCmd.Parameters.Add("@TaskName", MySqlDbType.VarChar, 255).Value = $"Dọn dẹp phòng {txtRoomNumber.Text.Trim()}";
                                     insertTaskCmd.Parameters.Add("@TaskStatus", MySqlDbType.Int32).Value = taskStatus;
                                     insertTaskCmd.ExecuteNonQuery();
                                 }

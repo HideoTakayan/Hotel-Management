@@ -41,7 +41,8 @@ namespace Hotel_Management.Pages
                 using (var conn = DatabaseHelper.GetConnection())
                 {
                     conn.Open();
-                    string query = "SELECT ServiceId, ServiceName, Price, Unit FROM Services";
+                    DatabaseHelper.EnsureDefaultOnsenServices(conn);
+                    string query = "SELECT ServiceId, ServiceName, Price, Unit FROM Services ORDER BY ServiceId ASC";
                     using (var cmd = new MySqlCommand(query, conn))
                     using (var reader = cmd.ExecuteReader())
                     {
@@ -63,6 +64,7 @@ namespace Hotel_Management.Pages
                 {
                     cbServices.SelectedIndex = 0;
                 }
+                UpdateStaffAssignmentUI();
             }
             catch (MySqlException ex)
             {
@@ -114,16 +116,31 @@ namespace Hotel_Management.Pages
                         cbRooms.SelectedIndex = 0;
                     }
 
-                    // Load staff (Role = 1)
-                    string staffQuery = "SELECT Id, FullName FROM Users WHERE Role = 1";
+                    // Load staff (Role = 1) và ưu tiên hiển thị nhân viên đang trong ca trực hiện tại
+                    int currentShiftType = (DateTime.Now.Hour >= 15) ? 1 : 0;
+                    string staffQuery = @"
+                        SELECT u.Id, u.FullName,
+                               EXISTS(
+                                   SELECT 1 FROM Shifts s 
+                                   WHERE s.WorkDate = CURDATE() AND s.ShiftType = @ShiftType 
+                                     AND (s.Employee1_Id = u.Id OR s.Employee2_Id = u.Id)
+                               ) AS IsOnDuty
+                        FROM Users u 
+                        WHERE u.Role = 1 
+                        ORDER BY IsOnDuty DESC, u.FullName ASC";
                     var staffList = new List<User>();
                     using (var cmd = new MySqlCommand(staffQuery, conn))
-                    using (var reader = cmd.ExecuteReader())
                     {
-                        staffList.Add(new User { Id = 0, FullName = "-- Chung (Cả ca) --" });
-                        while (reader.Read())
+                        cmd.Parameters.Add("@ShiftType", MySqlDbType.Int32).Value = currentShiftType;
+                        using (var reader = cmd.ExecuteReader())
                         {
-                            staffList.Add(new User { Id = reader.GetInt32("Id"), FullName = reader.GetString("FullName") });
+                            staffList.Add(new User { Id = 0, FullName = "-- Chung (Cả ca) --" });
+                            while (reader.Read())
+                            {
+                                bool onDuty = Convert.ToInt32(reader["IsOnDuty"]) == 1;
+                                string name = reader.GetString("FullName") + (onDuty ? " (Đang trực)" : "");
+                                staffList.Add(new User { Id = reader.GetInt32("Id"), FullName = name });
+                            }
                         }
                     }
                     cbStaff.ItemsSource = staffList;
@@ -166,7 +183,7 @@ namespace Hotel_Management.Pages
             if (rawPrice.EndsWith(".00") || rawPrice.EndsWith(",00"))
                 rawPrice = rawPrice.Substring(0, rawPrice.Length - 3);
             rawPrice = rawPrice.Replace(",", "").Replace(".", "");
-            if (string.IsNullOrWhiteSpace(rawPrice) || !decimal.TryParse(rawPrice, out price) || price < 0)
+            if (string.IsNullOrWhiteSpace(rawPrice) || !decimal.TryParse(rawPrice, out price) || price <= 0)
             {
                 txtPriceError.Visibility = Visibility.Visible;
                 isValid = false;
@@ -377,6 +394,46 @@ namespace Hotel_Management.Pages
             ServicesDataGrid.SelectedItem = null;
         }
 
+        private void cbServices_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdateStaffAssignmentUI();
+        }
+
+        private void UpdateStaffAssignmentUI()
+        {
+            if (cbServices?.SelectedItem is Service service)
+            {
+                if (service.RequiresStaffDelivery)
+                {
+                    if (gridStaffSelect != null) gridStaffSelect.Visibility = Visibility.Visible;
+                    if (cbStaff != null) cbStaff.IsEnabled = true;
+                    if (txtServiceStaffHint != null)
+                    {
+                        txtServiceStaffHint.Text = "🚚 Dịch vụ phục vụ tại phòng: Hệ thống sẽ tự động tạo nhiệm vụ cho nhân viên mang đồ đến phòng.";
+                        txtServiceStaffHint.Foreground = (System.Windows.Media.Brush)FindResource("TextSecondaryColor");
+                        txtServiceStaffHint.Visibility = Visibility.Visible;
+                    }
+                    if (btnOrderService != null) btnOrderService.Content = "Xác nhận & Giao việc";
+                }
+                else
+                {
+                    if (gridStaffSelect != null) gridStaffSelect.Visibility = Visibility.Collapsed;
+                    if (cbStaff != null) cbStaff.IsEnabled = false;
+                    if (txtServiceStaffHint != null)
+                    {
+                        txtServiceStaffHint.Text = "✨ Dịch vụ trải nghiệm & giải trí Onsen: Tự động ghi vào hóa đơn phòng, khách tự chơi / trải nghiệm (không cần nhân viên giao).";
+                        txtServiceStaffHint.Foreground = (System.Windows.Media.Brush)FindResource("PrimaryBlueColor");
+                        txtServiceStaffHint.Visibility = Visibility.Visible;
+                    }
+                    if (btnOrderService != null) btnOrderService.Content = "Ghi Vào Hóa Đơn";
+                }
+            }
+            else
+            {
+                if (txtServiceStaffHint != null) txtServiceStaffHint.Visibility = Visibility.Collapsed;
+            }
+        }
+
         private void btnOrderService_Click(object sender, RoutedEventArgs e)
         {
             if (cbRooms.SelectedItem is not OrderRoomItem selectedRoom)
@@ -385,9 +442,18 @@ namespace Hotel_Management.Pages
                 return;
             }
 
-            if (cbServices.SelectedItem is not Service selectedService || cbStaff.SelectedItem is not User selectedStaff)
+            if (cbServices.SelectedItem is not Service selectedService)
             {
-                MessageBox.Show("Vui lòng chọn đầy đủ Dịch vụ và Nhân viên thực hiện!", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Vui lòng chọn dịch vụ cần thêm!", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            bool requiresDelivery = selectedService.RequiresStaffDelivery;
+            User selectedStaff = cbStaff.SelectedItem as User;
+
+            if (requiresDelivery && selectedStaff == null)
+            {
+                MessageBox.Show("Dịch vụ này phục vụ tại phòng, vui lòng chọn nhân viên thực hiện (hoặc chọn '-- Chung (Cả ca) --')!", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -402,7 +468,7 @@ namespace Hotel_Management.Pages
             int serviceId = selectedService.ServiceId;
             string serviceName = selectedService.ServiceName;
             decimal price = selectedService.Price;
-            int? staffId = selectedStaff.Id == 0 ? (int?)null : selectedStaff.Id;
+            int? staffId = (requiresDelivery && selectedStaff != null && selectedStaff.Id > 0) ? selectedStaff.Id : null;
             decimal total = price * quantity;
 
             try
@@ -426,7 +492,7 @@ namespace Hotel_Management.Pages
                                 cmd1.ExecuteNonQuery();
                             }
 
-                            // Cập nhật tổng tiền của Bill an toàn (xử lý trường hợp Total bị NULL)
+                            // 2. Cập nhật tổng tiền của Bill an toàn (xử lý trường hợp Total bị NULL)
                             string queryUpdateBill = "UPDATE Bills SET Total = COALESCE(Total, 0) + @Amount WHERE BillId = @BillId";
                             using (var cmdUpdateBill = new MySqlCommand(queryUpdateBill, conn, trans))
                             {
@@ -435,23 +501,32 @@ namespace Hotel_Management.Pages
                                 cmdUpdateBill.ExecuteNonQuery();
                             }
 
-                            int shiftId = DatabaseHelper.GetOrCreateCurrentShiftId(conn, trans);
-
-                            // 3. Tạo Task giao việc cho nhân viên
-                            string taskName = $"Giao dịch vụ: {serviceName} (SL: {quantity})";
-                            string query2 = @"INSERT INTO Tasks (RoomId, AssignedTo, ShiftId, TaskStatus, TaskName) 
-                                              VALUES (@RoomId, @AssignedTo, @ShiftId, 0, @TaskName)";
-                            using (var cmd2 = new MySqlCommand(query2, conn, trans))
+                            // 3. Chỉ tạo Task giao việc NẾU dịch vụ yêu cầu nhân viên giao tận phòng
+                            if (requiresDelivery)
                             {
-                                cmd2.Parameters.Add("@RoomId", MySqlDbType.Int32).Value = roomId;
-                                cmd2.Parameters.Add("@AssignedTo", MySqlDbType.Int32).Value = staffId.HasValue ? staffId.Value : (object)DBNull.Value;
-                                cmd2.Parameters.Add("@ShiftId", MySqlDbType.Int32).Value = shiftId;
-                                cmd2.Parameters.Add("@TaskName", MySqlDbType.VarChar, 255).Value = taskName;
-                                cmd2.ExecuteNonQuery();
+                                int shiftId = DatabaseHelper.GetOrCreateCurrentShiftId(conn, trans);
+                                int initialTaskStatus = staffId.HasValue ? 1 : 0;
+                                string taskName = $"Giao dịch vụ: {serviceName} (SL: {quantity})";
+                                string query2 = @"INSERT INTO Tasks (RoomId, AssignedTo, ShiftId, TaskStatus, TaskName) 
+                                                  VALUES (@RoomId, @AssignedTo, @ShiftId, @TaskStatus, @TaskName)";
+                                using (var cmd2 = new MySqlCommand(query2, conn, trans))
+                                {
+                                    cmd2.Parameters.Add("@RoomId", MySqlDbType.Int32).Value = roomId;
+                                    cmd2.Parameters.Add("@AssignedTo", MySqlDbType.Int32).Value = staffId.HasValue ? staffId.Value : (object)DBNull.Value;
+                                    cmd2.Parameters.Add("@ShiftId", MySqlDbType.Int32).Value = shiftId;
+                                    cmd2.Parameters.Add("@TaskStatus", MySqlDbType.Int32).Value = initialTaskStatus;
+                                    cmd2.Parameters.Add("@TaskName", MySqlDbType.VarChar, 255).Value = taskName;
+                                    cmd2.ExecuteNonQuery();
+                                }
                             }
 
                             trans.Commit();
-                            MessageBox.Show($"Đã tạo order và giao việc cho {selectedStaff.FullName} thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                            string successMessage = requiresDelivery
+                                ? $"Đã thêm dịch vụ vào hóa đơn và tạo nhiệm vụ giao việc cho {(staffId.HasValue ? selectedStaff.FullName : "nhân viên ca trực")} thành công!"
+                                : $"Đã thêm dịch vụ '{serviceName}' vào hóa đơn {selectedRoom.RoomNumber} thành công!\n(Dịch vụ trải nghiệm & giải trí tự động ghi vào hóa đơn, không cần nhân viên giao phòng).";
+
+                            MessageBox.Show(successMessage, "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                             
                             // Reset form & tải lại danh sách
                             txtQuantity.Text = "1";

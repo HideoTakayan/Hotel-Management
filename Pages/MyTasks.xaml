@@ -37,46 +37,46 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,16,0" VerticalAlignment="Center">
-                            <TextBlock Text="Phòng:" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14" Margin="0,0,8,0"/>
-                            <ComboBox x:Name="cbTaskRoom" Width="125" Height="36" Style="{DynamicResource ComboBoxStyle}" DisplayMemberPath="RoomNumber" SelectedValuePath="RoomId"/>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,12,0" VerticalAlignment="Center">
+                            <TextBlock Text="Phòng:" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14" Margin="0,0,6,0"/>
+                            <ComboBox x:Name="cbTaskRoom" Width="115" Height="36" Style="{DynamicResource ComboBoxStyle}" DisplayMemberPath="RoomNumber" SelectedValuePath="RoomId"/>
                         </StackPanel>
 
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,16,0" VerticalAlignment="Center">
-                            <TextBlock Text="Giao cho:" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14" Margin="0,0,8,0"/>
-                            <ComboBox x:Name="cbTaskStaff" Width="185" Height="36" Style="{DynamicResource ComboBoxStyle}" DisplayMemberPath="FullName" SelectedValuePath="Id"/>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,12,0" VerticalAlignment="Center">
+                            <TextBlock Text="Giao cho:" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14" Margin="0,0,6,0"/>
+                            <ComboBox x:Name="cbTaskStaff" Width="175" Height="36" Style="{DynamicResource ComboBoxStyle}" DisplayMemberPath="FullName" SelectedValuePath="Id"/>
                         </StackPanel>
 
-                        <Grid Grid.Column="2" Margin="0,0,16,0" VerticalAlignment="Center">
+                        <Grid Grid.Column="2" Margin="0,0,12,0" VerticalAlignment="Center">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Nhiệm vụ:" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14" Margin="0,0,8,0"/>
+                            <TextBlock Grid.Column="0" Text="Nhiệm vụ:" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14" Margin="0,0,6,0"/>
                             <TextBox Grid.Column="1" x:Name="txtTaskName" Width="Auto" Height="36" Style="{DynamicResource TextBoxStyle}" Tag="Nhập tên công việc cần giao..."/>
                         </Grid>
 
-                        <Button Grid.Column="3" x:Name="btnCreateTask" Content="Giao Việc" Width="115" Height="36" Style="{DynamicResource PrimaryButtonStyle}" Click="btnCreateTask_Click"/>
+                        <Button Grid.Column="3" x:Name="btnCreateTask" Content="Giao Việc" Width="105" Height="36" Style="{DynamicResource PrimaryButtonStyle}" Click="btnCreateTask_Click"/>
                     </Grid>
                 </StackPanel>
             </Border>
             
             <DataGrid Grid.Row="2" x:Name="dgTasks" Margin="20,0,20,20" Style="{DynamicResource DataGridStyle}" RowHeight="40">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Ngày Làm" Binding="{Binding WorkDate, StringFormat=dd/MM/yyyy}" Width="0.9*" MinWidth="82"/>
-                    <DataGridTextColumn Header="Ca Trực" Binding="{Binding ShiftName}" Width="0.75*" MinWidth="68"/>
-                    <DataGridTextColumn Header="Phòng" Binding="{Binding RoomNumber}" Width="0.6*" MinWidth="56"/>
-                    <DataGridTextColumn Header="Tên Nhiệm Vụ" Binding="{Binding TaskName}" Width="2.1*" MinWidth="160"/>
-                    <DataGridTextColumn Header="Người Phụ Trách" Binding="{Binding AssigneeName}" Width="1.2*" MinWidth="112"/>
-                    <DataGridTextColumn Header="Trạng Thái" Binding="{Binding StatusName}" Width="1.05*" MinWidth="95"/>
-                    <DataGridTextColumn Header="Hoàn Thành Lúc" Binding="{Binding CompletedAtText}" Width="1.2*" MinWidth="110"/>
+                    <DataGridTextColumn Header="Ngày Làm" Binding="{Binding WorkDate, StringFormat=dd/MM/yyyy}" Width="0.9*" MinWidth="74"/>
+                    <DataGridTextColumn Header="Ca Trực" Binding="{Binding ShiftName}" Width="0.72*" MinWidth="58"/>
+                    <DataGridTextColumn Header="Phòng" Binding="{Binding RoomNumber}" Width="0.58*" MinWidth="50"/>
+                    <DataGridTextColumn Header="Tên Nhiệm Vụ" Binding="{Binding TaskName}" Width="1.95*" MinWidth="125"/>
+                    <DataGridTextColumn Header="Người Phụ Trách" Binding="{Binding AssigneeName}" Width="1.25*" MinWidth="95"/>
+                    <DataGridTextColumn Header="Trạng Thái" Binding="{Binding StatusName}" Width="1.05*" MinWidth="82"/>
+                    <DataGridTextColumn Header="Hoàn Thành Lúc" Binding="{Binding CompletedAtText}" Width="1.25*" MinWidth="95"/>
                     
-                    <DataGridTemplateColumn Header="Thao Tác" Width="210">
+                    <DataGridTemplateColumn Header="Thao Tác" Width="1.95*" MinWidth="195">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <!-- Nút Thao tác chính (Nhận việc / Báo cáo xong / Duyệt đạt) -->
-                                    <Button Content="{Binding PrimaryActionText}" MinWidth="82" Height="28" FontSize="12.5" Margin="2,0" Padding="8,0"
+                                    <Button Content="{Binding PrimaryActionText}" MinWidth="76" Height="28" FontSize="12.5" Margin="2,0" Padding="8,0"
                                             Click="btnUpdateTask_Click" Tag="{Binding TaskId}">
                                         <Button.Style>
                                             <Style TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
@@ -90,12 +90,26 @@
                                     </Button>
 
                                     <!-- Nút Yêu cầu làm lại (chỉ hiển thị cho Quản lý khi task Chờ xác nhận) -->
-                                    <Button Content="Yêu cầu làm lại" MinWidth="100" Height="28" FontSize="12.5" Margin="2,0" Padding="8,0"
+                                    <Button Content="Yêu cầu làm lại" MinWidth="96" Height="28" FontSize="12.5" Margin="2,0" Padding="8,0"
                                             Click="btnRejectTask_Click" Tag="{Binding TaskId}">
                                         <Button.Style>
                                             <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding ShowRejectAction}" Value="False">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+
+                                    <!-- Nút Hủy nhiệm vụ (chỉ hiển thị cho Quản lý khi task chưa hoàn thành) -->
+                                    <Button Content="Hủy" MinWidth="55" Height="28" FontSize="12.5" Margin="2,0" Padding="6,0"
+                                            Click="btnDeleteTask_Click" Tag="{Binding TaskId}">
+                                        <Button.Style>
+                                            <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ShowDeleteAction}" Value="False">
                                                         <Setter Property="Visibility" Value="Collapsed"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>

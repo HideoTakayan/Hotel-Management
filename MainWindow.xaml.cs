@@ -2,6 +2,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Hotel_Management.Helpers;
 
 namespace Hotel_Management
 {
@@ -17,12 +18,14 @@ namespace Hotel_Management
         {
             Application.Current.MainWindow = this;
             InitializeComponent();
+            WindowMaximizeHelper.Attach(this);
         }
 
         public MainWindow(int userId, string username, string fullName, string email, int role = 1)
         {
             Application.Current.MainWindow = this;
             InitializeComponent();
+            WindowMaximizeHelper.Attach(this);
             CurrentUserId = userId;
             CurrentUsername = username;
             SetFullName(fullName);
@@ -68,16 +71,7 @@ namespace Hotel_Management
 
         private void btnRestore_Click(object sender, RoutedEventArgs e)
         {
-            if (WindowState == WindowState.Normal)
-            {
-                MaxHeight = SystemParameters.MaximizedPrimaryScreenHeight;
-                MaxWidth = SystemParameters.MaximizedPrimaryScreenWidth;
-                WindowState = WindowState.Maximized;
-            }
-            else
-            {
-                WindowState = WindowState.Normal;
-            }
+            WindowState = (WindowState == WindowState.Normal) ? WindowState.Maximized : WindowState.Normal;
         }
 
         private void btnMinimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
@@ -97,6 +91,14 @@ namespace Hotel_Management
         private void rdBooking_Click(object sender, RoutedEventArgs e) => NavigateToPage("Pages/Booking.xaml");
         private void rdShifts_Click(object sender, RoutedEventArgs e) => NavigateToPage("Pages/WorkSchedule.xaml");
         private void rdTasks_Click(object sender, RoutedEventArgs e) => NavigateToPage("Pages/MyTasks.xaml");
+
+        public void NavigateToBills(int? selectedBillId = null)
+        {
+            rdBills.IsChecked = true;
+            placeHolder.Visibility = Visibility.Collapsed;
+            var billsPage = new Pages.Bills(selectedBillId);
+            PagesNavigation.Navigate(billsPage);
+        }
 
         public void SetFullName(string fullName)
         {
@@ -154,6 +156,52 @@ namespace Hotel_Management
         private const double MaxZoom = 1.8;
         private const double ZoomStep = 0.1;
 
+        // Kích thước tối thiểu của trang (trước khi zoom). Nhỏ hơn mức này sẽ hiện thanh cuộn thay vì bóp méo/cắt mất nội dung.
+        private const double MinPageWidth = 760;
+        private const double MinPageHeight = 540;
+
+        private void borderPageHost_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            UpdatePageSize();
+        }
+
+        private void UpdatePageSize()
+        {
+            if (borderPageHost == null || pageScroller == null || PagesNavigation == null) return;
+            if (borderPageHost.ActualWidth <= 0 || borderPageHost.ActualHeight <= 0) return;
+
+            double unscaledWidth = borderPageHost.ActualWidth / _currentZoom;
+            double unscaledHeight = borderPageHost.ActualHeight / _currentZoom;
+
+            bool needHScroll = unscaledWidth < MinPageWidth;
+            bool needVScroll = unscaledHeight < MinPageHeight;
+
+            if (!needHScroll && !needVScroll)
+            {
+                // Khi đủ không gian (mặc định 100% ở cả Cửa sổ & Toàn màn hình), để WPF tự co giãn 100% không qua thanh cuộn ngoài
+                pageScroller.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                pageScroller.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                PagesNavigation.Width = double.NaN;
+                PagesNavigation.Height = double.NaN;
+                PagesNavigation.HorizontalAlignment = HorizontalAlignment.Stretch;
+                PagesNavigation.VerticalAlignment = VerticalAlignment.Stretch;
+            }
+            else
+            {
+                // Khi Zoom lớn khiến không gian thực nhỏ hơn mức tối thiểu, bật thanh cuộn để giữ nguyên bố cục trang
+                pageScroller.HorizontalScrollBarVisibility = needHScroll ? ScrollBarVisibility.Auto : ScrollBarVisibility.Disabled;
+                pageScroller.VerticalScrollBarVisibility = needVScroll ? ScrollBarVisibility.Auto : ScrollBarVisibility.Disabled;
+
+                double availW = Math.Max(0, borderPageHost.ActualWidth - (needVScroll ? 18 : 0));
+                double availH = Math.Max(0, borderPageHost.ActualHeight - (needHScroll ? 18 : 0));
+
+                PagesNavigation.HorizontalAlignment = HorizontalAlignment.Left;
+                PagesNavigation.VerticalAlignment = VerticalAlignment.Top;
+                PagesNavigation.Width = Math.Max(Math.Floor(availW / _currentZoom), MinPageWidth);
+                PagesNavigation.Height = Math.Max(Math.Floor(availH / _currentZoom), MinPageHeight);
+            }
+        }
+
         private void Window_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             if (Keyboard.Modifiers == ModifierKeys.Control)
@@ -205,6 +253,7 @@ namespace Hotel_Management
             {
                 txtZoomPercent.Text = $"{(int)(_currentZoom * 100)}%";
             }
+            UpdatePageSize();
         }
 
         private void btnZoomIn_Click(object sender, RoutedEventArgs e) => ZoomIn();

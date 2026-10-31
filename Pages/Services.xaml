@@ -53,16 +53,23 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" Text="Dịch vụ" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
-                            <ComboBox Grid.Column="1" x:Name="cbServices" Width="Auto" Style="{DynamicResource ComboBoxStyle}" DisplayMemberPath="ServiceName" SelectedValuePath="ServiceId" Tag="Chọn dịch vụ"/>
+                            <ComboBox Grid.Column="1" x:Name="cbServices" Width="Auto" Style="{DynamicResource ComboBoxStyle}" DisplayMemberPath="ServiceName" SelectedValuePath="ServiceId" Tag="Chọn dịch vụ" SelectionChanged="cbServices_SelectionChanged"/>
                         </Grid>
-                        <Grid Margin="0,0,0,12">
+
+                        <!-- Dòng chọn nhân viên phục vụ / giao đồ (Tự động ẩn/hiện theo tính chất dịch vụ) -->
+                        <Grid x:Name="gridStaffSelect" Margin="0,0,0,8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="110"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" Text="Nhân viên giao" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
-                            <ComboBox Grid.Column="1" x:Name="cbStaff" Width="Auto" Style="{DynamicResource ComboBoxStyle}" DisplayMemberPath="FullName" SelectedValuePath="Id" Tag="Chọn nhân viên"/>
+                            <ComboBox Grid.Column="1" x:Name="cbStaff" Width="Auto" Style="{DynamicResource ComboBoxStyle}" DisplayMemberPath="FullName" SelectedValuePath="Id" Tag="Chọn nhân viên phục vụ"/>
                         </Grid>
+                        
+                        <!-- Gợi ý tính chất dịch vụ: Trải nghiệm & Giải trí vs Phục vụ tại phòng -->
+                        <TextBlock x:Name="txtServiceStaffHint" 
+                                   Text="✨ Dịch vụ trải nghiệm &amp; giải trí Onsen: Tự động ghi vào hóa đơn, không cần nhân viên giao hàng." 
+                                   TextWrapping="Wrap" Foreground="{DynamicResource PrimaryBlueColor}" FontSize="12" Margin="110,-4,0,8" Visibility="Collapsed"/>
 
                         <Button x:Name="btnOrderService" Content="Xác nhận &amp; Giao việc" Width="190" Height="36" Margin="110,0,0,0" HorizontalAlignment="Left" Style="{DynamicResource PrimaryButtonStyle}" Click="btnOrderService_Click"/>
                     </StackPanel>
@@ -107,12 +114,12 @@
                             <TextBlock x:Name="txtUnitError" Text="Đơn vị tính không được để trống" Margin="110,2,0,0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
                         </StackPanel>
 
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,0" HorizontalAlignment="Center">
-                            <Button x:Name="btnAdd" Content="Thêm Mới" Width="92" Margin="0,0,8,0" Style="{DynamicResource PrimaryButtonStyle}" Click="BtnAdd_Click"/>
-                            <Button x:Name="btnUpdate" Content="Cập Nhật" Width="92" Margin="0,0,8,0" Style="{DynamicResource PrimaryButtonStyle}" Click="BtnUpdate_Click"/>
-                            <Button x:Name="btnDel" Content="Xóa" Width="92" Margin="0,0,8,0" Style="{DynamicResource SecondaryButtonStyle}" Click="BtnDel_Click"/>
-                            <Button x:Name="btnRefresh" Content="Làm Mới" Width="92" Margin="0,0,0,0" Style="{DynamicResource SecondaryButtonStyle}" Click="BtnRefresh_Click" />
-                        </StackPanel>
+                        <UniformGrid Rows="1" HorizontalAlignment="Stretch" MaxWidth="420">
+                            <Button x:Name="btnAdd" Content="Thêm Mới" Margin="0,0,4,0" Padding="4,5" Style="{DynamicResource PrimaryButtonStyle}" Click="BtnAdd_Click"/>
+                            <Button x:Name="btnUpdate" Content="Cập Nhật" Margin="4,0,4,0" Padding="4,5" Style="{DynamicResource PrimaryButtonStyle}" Click="BtnUpdate_Click"/>
+                            <Button x:Name="btnDel" Content="Xóa" Margin="4,0,4,0" Padding="4,5" Style="{DynamicResource SecondaryButtonStyle}" Click="BtnDel_Click"/>
+                            <Button x:Name="btnRefresh" Content="Làm Mới" Margin="4,0,0,0" Padding="4,5" Style="{DynamicResource SecondaryButtonStyle}" Click="BtnRefresh_Click" />
+                        </UniformGrid>
                     </StackPanel>
                 </Border>
             </Grid>
@@ -120,9 +127,10 @@
             <DataGrid Grid.Row="2" x:Name="ServicesDataGrid" Margin="20,0,20,16" SelectionChanged="ServicesDataGrid_SelectionChanged" Style="{DynamicResource DataGridStyle}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="ID" Binding="{Binding ServiceId}" Width="0.45*" MinWidth="45" />
-                    <DataGridTextColumn Header="Tên Dịch Vụ" Binding="{Binding ServiceName}" Width="3.2*" MinWidth="240" />
-                    <DataGridTextColumn Header="Đơn Giá (VND)" Binding="{Binding Price, StringFormat=N0}" Width="1.1*" MinWidth="120" />
-                    <DataGridTextColumn Header="Đơn Vị Tính" Binding="{Binding Unit}" Width="0.9*" MinWidth="100"/>
+                    <DataGridTextColumn Header="Tên Dịch Vụ" Binding="{Binding ServiceName}" Width="2.8*" MinWidth="220" />
+                    <DataGridTextColumn Header="Đơn Giá (VND)" Binding="{Binding Price, StringFormat=N0}" Width="1.1*" MinWidth="110" />
+                    <DataGridTextColumn Header="Đơn Vị Tính" Binding="{Binding Unit}" Width="0.8*" MinWidth="85"/>
+                    <DataGridTextColumn Header="Phân Loại" Binding="{Binding ServiceTypeDisplay}" Width="1.2*" MinWidth="125"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

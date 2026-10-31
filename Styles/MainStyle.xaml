@@ -99,10 +99,12 @@
                             <Path x:Name="Icon" Data="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type RadioButton}}}" Height="24" Width="24" Stretch="None" Fill="{DynamicResource PrimaryGrayColor}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0"/>
 
                             <!-- Text -->
-                            <TextBlock x:Name="txtName" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="4,0,0,0"
-                                            Grid.Column="1" Text="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}"
-                                            FontWeight="{TemplateBinding FontWeight}"
-                                            FontSize="{TemplateBinding FontSize}"/>
+                            <Border Grid.Column="1" ClipToBounds="True">
+                                <TextBlock x:Name="txtName" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="4,0,0,0"
+                                                Text="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}"
+                                                FontWeight="{TemplateBinding FontWeight}"
+                                                FontSize="{TemplateBinding FontSize}"/>
+                            </Border>
                         </Grid>
                     </Border>
                     <ControlTemplate.Triggers>

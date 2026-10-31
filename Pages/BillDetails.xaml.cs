@@ -46,9 +46,12 @@ namespace Hotel_Management.Pages
                         }
                     }
 
-                    // 2. Lấy danh sách dịch vụ của Bill này
+                    // 2. Lấy danh sách dịch vụ của Bill này (Đơn giá tính theo thời điểm gọi dịch vụ = Total / Quantity để không bị lệch nếu sau này danh mục đổi giá)
                     string queryServices = @"
-                        SELECT s.ServiceName, s.Price, bs.Quantity, bs.Total
+                        SELECT s.ServiceName, 
+                               CASE WHEN bs.Quantity > 0 THEN (bs.Total / bs.Quantity) ELSE s.Price END AS Price, 
+                               bs.Quantity, 
+                               bs.Total
                         FROM Bill_Services bs
                         JOIN Services s ON bs.ServiceId = s.ServiceId
                         WHERE bs.BillId = @BillId";

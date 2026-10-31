@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Windows;
+using System.Windows.Controls;
+using Hotel_Management.Helpers;
 using Hotel_Management.Models;
 using MySql.Data.MySqlClient;
 
@@ -9,10 +11,12 @@ namespace Hotel_Management.Pages
     public partial class RoomPick : Window
     {
         public Room SelectedRoom { get; private set; }
+        private List<Room> _allRooms = new List<Room>();
 
         public RoomPick()
         {
             InitializeComponent();
+            WindowMaximizeHelper.Attach(this);
             LoadRooms();
         }
 
@@ -24,8 +28,9 @@ namespace Hotel_Management.Pages
                 using (var conn = DatabaseHelper.GetConnection())
                 {
                     conn.Open();
-                    // Chỉ lấy các phòng trống (Status = 0)
-                    string query = "SELECT RoomId, RoomNumber, NumberPeople, NumberBed, Quality, BedType, Price, RoomType, RoomArea, Status FROM Rooms WHERE Status = 0";
+                    DatabaseHelper.SyncAllDataToCurrentDate(conn);
+                    // Lấy tất cả các phòng để hiển thị toàn bộ hiện trạng
+                    string query = "SELECT RoomId, RoomNumber, NumberPeople, NumberBed, Quality, BedType, Price, RoomType, RoomArea, Status FROM Rooms ORDER BY RoomNumber ASC";
                     using (var cmd = new MySqlCommand(query, conn))
                     using (var reader = cmd.ExecuteReader())
                     {
@@ -47,7 +52,8 @@ namespace Hotel_Management.Pages
                         }
                     }
                 }
-                RoomsDataGrid.ItemsSource = rooms;
+                _allRooms = rooms;
+                ApplyFilter();
             }
             catch (MySqlException ex)
             {
@@ -62,13 +68,51 @@ namespace Hotel_Management.Pages
             }
         }
 
+        private void ApplyFilter()
+        {
+            if (RoomsDataGrid == null || _allRooms == null) return;
+
+            int selectedStatus = -1;
+            if (cbFilterStatus?.SelectedItem is ComboBoxItem item && item.Tag != null)
+            {
+                int.TryParse(item.Tag.ToString(), out selectedStatus);
+            }
+
+            if (selectedStatus == -1)
+            {
+                RoomsDataGrid.ItemsSource = _allRooms;
+            }
+            else
+            {
+                RoomsDataGrid.ItemsSource = _allRooms.FindAll(r => r.Status == selectedStatus);
+            }
+        }
+
+        private void cbFilterStatus_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ApplyFilter();
+        }
+
+        private void ConfirmRoomSelection(Room selectedRoom)
+        {
+            if (selectedRoom == null) return;
+
+            if (selectedRoom.Status != 0)
+            {
+                MessageBox.Show($"Phòng {selectedRoom.RoomNumber} hiện đang ở trạng thái '{selectedRoom.StatusName}'.\nChỉ có thể chọn các phòng đang 'Trống (Sẵn sàng)' để đặt phòng mới!", "Không Thể Chọn Phòng", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            SelectedRoom = selectedRoom;
+            DialogResult = true;
+            Close();
+        }
+
         private void RoomsDataGrid_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (RoomsDataGrid.SelectedItem is Room selectedRoom)
             {
-                SelectedRoom = selectedRoom;
-                DialogResult = true;
-                Close();
+                ConfirmRoomSelection(selectedRoom);
             }
         }
 
@@ -79,16 +123,7 @@ namespace Hotel_Management.Pages
 
         private void btnRestore_Click(object sender, RoutedEventArgs e)
         {
-            if (WindowState == WindowState.Normal)
-            {
-                MaxHeight = SystemParameters.MaximizedPrimaryScreenHeight;
-                MaxWidth = SystemParameters.MaximizedPrimaryScreenWidth;
-                WindowState = WindowState.Maximized;
-            }
-            else
-            {
-                WindowState = WindowState.Normal;
-            }
+            WindowState = (WindowState == WindowState.Normal) ? WindowState.Maximized : WindowState.Normal;
         }
 
         private void btnMinimize_Click(object sender, RoutedEventArgs e)
@@ -100,13 +135,11 @@ namespace Hotel_Management.Pages
         {
             if (RoomsDataGrid.SelectedItem is Room selectedRoom)
             {
-                SelectedRoom = selectedRoom;
-                DialogResult = true;
-                Close();
+                ConfirmRoomSelection(selectedRoom);
             }
             else
             {
-                MessageBox.Show("Hãy chọn một phòng!", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Hãy chọn một phòng trống trong danh sách!", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 

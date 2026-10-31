@@ -90,7 +90,7 @@ namespace Hotel_Management.Pages
             else txtFullNameError.Visibility = Visibility.Collapsed;
 
             string email = txtEmail.Text.Trim();
-            if (string.IsNullOrWhiteSpace(email) || email.Length > 100 || !email.Contains("@"))
+            if (string.IsNullOrWhiteSpace(email) || email.Length > 100 || !email.Contains("@") || !email.Contains("."))
             {
                 txtEmailError.Visibility = Visibility.Visible;
                 isValid = false;
@@ -238,6 +238,10 @@ namespace Hotel_Management.Pages
 
                         cmd.ExecuteNonQuery();
                     }
+                }
+                if (currentMain != null && currentMain.CurrentUserId == selectedUser.Id)
+                {
+                    currentMain.SetFullName(txtFullName.Text.Trim());
                 }
                 MessageBox.Show("Cập nhật người dùng thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                 LoadData();

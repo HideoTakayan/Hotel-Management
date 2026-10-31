@@ -44,10 +44,10 @@
                     <StackPanel Orientation="Vertical">
                         <TextBlock Foreground="{DynamicResource TextSecondaryColor}" FontSize="13" FontWeight="Bold" Text="Lượt Đặt Phòng"/>
                         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                            <iconPacks:PackIconBootstrapIcons Width="28" Height="28" Kind="Buildings" Foreground="{DynamicResource PrimaryBlueColor}" VerticalAlignment="Center"/>
-                            <StackPanel Margin="10,0,0,0">
-                                <TextBlock x:Name="txtSoLan" Foreground="{DynamicResource TextSecondaryColor}" FontSize="16" FontWeight="Bold" Text="0 lượt"/>
-                                <TextBlock Text="Đã thanh toán" FontSize="11" Foreground="{DynamicResource PrimaryGrayColor}" Margin="0,2,0,0"/>
+                            <iconPacks:PackIconBootstrapIcons Width="24" Height="24" Kind="Buildings" Foreground="{DynamicResource PrimaryBlueColor}" VerticalAlignment="Center"/>
+                            <StackPanel Margin="8,0,0,0">
+                                <TextBlock x:Name="txtSoLan" Foreground="{DynamicResource TextSecondaryColor}" FontSize="15" FontWeight="Bold" Text="0 lượt"/>
+                                <TextBlock Text="Hoàn tất lưu trú" FontSize="11" Foreground="{DynamicResource PrimaryGrayColor}" Margin="0,2,0,0"/>
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
@@ -58,9 +58,9 @@
                     <StackPanel Orientation="Vertical">
                         <TextBlock Foreground="{DynamicResource TextSecondaryColor}" FontSize="13" FontWeight="Bold" Text="Tiền Phòng"/>
                         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                            <iconPacks:PackIconBootstrapIcons Width="28" Height="28" Kind="DoorOpenFill" Foreground="{DynamicResource PrimaryBlueColor}" VerticalAlignment="Center"/>
-                            <StackPanel Margin="10,0,0,0">
-                                <TextBlock x:Name="txtTienPhong" Foreground="{DynamicResource TextSecondaryColor}" FontSize="16" FontWeight="Bold" Text="0 VND"/>
+                            <iconPacks:PackIconBootstrapIcons Width="24" Height="24" Kind="DoorOpenFill" Foreground="{DynamicResource PrimaryBlueColor}" VerticalAlignment="Center"/>
+                            <StackPanel Margin="8,0,0,0">
+                                <TextBlock x:Name="txtTienPhong" Foreground="{DynamicResource TextSecondaryColor}" FontSize="15" FontWeight="Bold" Text="0 VND"/>
                                 <TextBlock Text="Thu từ phòng" FontSize="11" Foreground="{DynamicResource PrimaryGrayColor}" Margin="0,2,0,0"/>
                             </StackPanel>
                         </StackPanel>
@@ -72,9 +72,9 @@
                     <StackPanel Orientation="Vertical">
                         <TextBlock Foreground="{DynamicResource TextSecondaryColor}" FontSize="13" FontWeight="Bold" Text="Tiền Dịch Vụ"/>
                         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                            <iconPacks:PackIconBootstrapIcons Width="28" Height="28" Kind="CupHotFill" Foreground="{DynamicResource PrimaryBlueColor}" VerticalAlignment="Center"/>
-                            <StackPanel Margin="10,0,0,0">
-                                <TextBlock x:Name="txtTienDichVu" Foreground="{DynamicResource TextSecondaryColor}" FontSize="16" FontWeight="Bold" Text="0 VND"/>
+                            <iconPacks:PackIconBootstrapIcons Width="24" Height="24" Kind="CupHotFill" Foreground="{DynamicResource PrimaryBlueColor}" VerticalAlignment="Center"/>
+                            <StackPanel Margin="8,0,0,0">
+                                <TextBlock x:Name="txtTienDichVu" Foreground="{DynamicResource TextSecondaryColor}" FontSize="15" FontWeight="Bold" Text="0 VND"/>
                                 <TextBlock Text="Dịch vụ phát sinh" FontSize="11" Foreground="{DynamicResource PrimaryGrayColor}" Margin="0,2,0,0"/>
                             </StackPanel>
                         </StackPanel>
@@ -86,9 +86,9 @@
                     <StackPanel Orientation="Vertical">
                         <TextBlock Foreground="{DynamicResource TextSecondaryColor}" FontSize="13" FontWeight="Bold" Text="Tổng Doanh Thu"/>
                         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                            <iconPacks:PackIconBootstrapIcons Width="28" Height="28" Kind="CashCoin" Foreground="{DynamicResource SuccessNotification}" VerticalAlignment="Center"/>
-                            <StackPanel Margin="10,0,0,0">
-                                <TextBlock x:Name="txtLoiNhuan" Foreground="{DynamicResource SuccessNotification}" FontSize="16" FontWeight="Bold" Text="0 VND"/>
+                            <iconPacks:PackIconBootstrapIcons Width="24" Height="24" Kind="CashCoin" Foreground="{DynamicResource SuccessNotification}" VerticalAlignment="Center"/>
+                            <StackPanel Margin="8,0,0,0">
+                                <TextBlock x:Name="txtLoiNhuan" Foreground="{DynamicResource SuccessNotification}" FontSize="15" FontWeight="Bold" Text="0 VND"/>
                                 <TextBlock Text="Toàn bộ tháng" FontSize="11" Foreground="{DynamicResource PrimaryGrayColor}" Margin="0,2,0,0"/>
                             </StackPanel>
                         </StackPanel>

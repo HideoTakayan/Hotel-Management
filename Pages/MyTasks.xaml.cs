@@ -47,16 +47,31 @@ namespace Hotel_Management.Pages
                     cbTaskRoom.ItemsSource = rooms;
                     if (rooms.Count > 0) cbTaskRoom.SelectedIndex = 0;
 
-                    // Load staff (Role = 1)
-                    string queryStaff = "SELECT Id, FullName FROM Users WHERE Role = 1 ORDER BY FullName";
+                    // Load staff (Role = 1) và đánh dấu nhân viên đang trong ca trực hiện tại
+                    int currentShiftType = (DateTime.Now.Hour >= 15) ? 1 : 0;
+                    string queryStaff = @"
+                        SELECT u.Id, u.FullName,
+                               EXISTS(
+                                   SELECT 1 FROM Shifts s 
+                                   WHERE s.WorkDate = CURDATE() AND s.ShiftType = @ShiftType 
+                                     AND (s.Employee1_Id = u.Id OR s.Employee2_Id = u.Id)
+                               ) AS IsOnDuty
+                        FROM Users u 
+                        WHERE u.Role = 1 
+                        ORDER BY IsOnDuty DESC, u.FullName ASC";
                     var staffList = new System.Collections.Generic.List<User>();
                     staffList.Add(new User { Id = 0, FullName = "-- Ai rảnh nhận việc --" });
                     using (MySqlCommand cmd = new MySqlCommand(queryStaff, conn))
-                    using (var reader = cmd.ExecuteReader())
                     {
-                        while (reader.Read())
+                        cmd.Parameters.Add("@ShiftType", MySqlDbType.Int32).Value = currentShiftType;
+                        using (var reader = cmd.ExecuteReader())
                         {
-                            staffList.Add(new User { Id = reader.GetInt32("Id"), FullName = reader.GetString("FullName") });
+                            while (reader.Read())
+                            {
+                                bool onDuty = Convert.ToInt32(reader["IsOnDuty"]) == 1;
+                                string name = reader.GetString("FullName") + (onDuty ? " (Đang trực)" : "");
+                                staffList.Add(new User { Id = reader.GetInt32("Id"), FullName = name });
+                            }
                         }
                     }
                     cbTaskStaff.ItemsSource = staffList;
@@ -101,11 +116,11 @@ namespace Hotel_Management.Pages
             int roomId = selectedRoom.RoomId;
             int? assignedTo = (selectedStaff != null && selectedStaff.Id > 0) ? (int?)selectedStaff.Id : null;
 
-            string taskName = txtTaskName.Text.Trim();
-            if (string.IsNullOrWhiteSpace(taskName))
-            {
-                taskName = $"Dọn dẹp {selectedRoom.RoomNumber}";
-            }
+            string rawInputTaskName = txtTaskName.Text.Trim();
+            string taskName = string.IsNullOrWhiteSpace(rawInputTaskName)
+                ? $"Dọn dẹp {selectedRoom.RoomNumber}"
+                : rawInputTaskName;
+            bool isCleaning = IsCleaningTaskName(taskName);
 
             try
             {
@@ -116,6 +131,21 @@ namespace Hotel_Management.Pages
                     {
                         try
                         {
+                            if (isCleaning && string.IsNullOrWhiteSpace(rawInputTaskName))
+                            {
+                                string checkDupQuery = "SELECT COUNT(*) FROM Tasks WHERE RoomId = @RoomId AND TaskStatus IN (0, 1, 2, 4)";
+                                using (MySqlCommand checkCmd = new MySqlCommand(checkDupQuery, conn, trans))
+                                {
+                                    checkCmd.Parameters.Add("@RoomId", MySqlDbType.Int32).Value = roomId;
+                                    if (Convert.ToInt32(checkCmd.ExecuteScalar()) > 0)
+                                    {
+                                        trans.Rollback();
+                                        MessageBox.Show($"{selectedRoom.RoomNumber} hiện đã có nhiệm vụ đang thực hiện!\nNếu muốn giao thêm việc phụ khác, vui lòng nhập rõ tên công việc vào ô 'Nhiệm vụ'.", "Cảnh báo trùng việc", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                        return;
+                                    }
+                                }
+                            }
+
                             int shiftId = DatabaseHelper.GetOrCreateCurrentShiftId(conn, trans);
 
                             int initialStatus = assignedTo.HasValue ? 1 : 0;
@@ -131,11 +161,10 @@ namespace Hotel_Management.Pages
                                 cmd.ExecuteNonQuery();
                             }
 
-                            bool isCleaning = IsCleaningTaskName(taskName);
                             if (isCleaning)
                             {
                                 int newRoomStatus = assignedTo.HasValue ? 4 : 3;
-                                string updateRoom = "UPDATE Rooms SET Status = @NewStatus WHERE RoomId = @RoomId AND Status = 0";
+                                string updateRoom = "UPDATE Rooms SET Status = @NewStatus WHERE RoomId = @RoomId AND Status IN (0, 3)";
                                 using (MySqlCommand cmdRoom = new MySqlCommand(updateRoom, conn, trans))
                                 {
                                     cmdRoom.Parameters.Add("@NewStatus", MySqlDbType.Int32).Value = newRoomStatus;
@@ -184,6 +213,7 @@ namespace Hotel_Management.Pages
                 using (MySqlConnection conn = DatabaseHelper.GetConnection())
                 {
                     conn.Open();
+                    DatabaseHelper.SyncAllDataToCurrentDate(conn);
                     string query = @"
                         SELECT t.TaskId, t.TaskName, s.WorkDate, s.ShiftType, r.RoomNumber, t.TaskStatus, t.AssignedTo, u.FullName as AssigneeName, t.CompletedAt
                         FROM Tasks t
@@ -227,6 +257,7 @@ namespace Hotel_Management.Pages
                             dt.Columns.Add("PrimaryActionText", typeof(string));
                             dt.Columns.Add("ShowPrimaryAction", typeof(bool));
                             dt.Columns.Add("ShowRejectAction", typeof(bool));
+                            dt.Columns.Add("ShowDeleteAction", typeof(bool));
                             dt.Columns.Add("CompletedAtText", typeof(string));
 
                             bool isAdmin = (mainWindow.CurrentRole == 0);
@@ -260,32 +291,16 @@ namespace Hotel_Management.Pages
                                 bool isAssigned = !row.IsNull("AssignedTo");
                                 int assignedId = isAssigned ? Convert.ToInt32(row["AssignedTo"]) : 0;
                                 bool isMine = isAssigned && assignedId == mainWindow.CurrentUserId;
+                                bool isUnassigned = !isAssigned;
 
                                 var task = new Hotel_Management.Models.Task { TaskStatus = status };
                                 row["StatusName"] = task.StatusName;
 
-                                if (status == 0) // Chờ nhận việc
+                                if (isAdmin)
                                 {
-                                    row["PrimaryActionText"] = "Nhận việc";
-                                    row["ShowPrimaryAction"] = true;
-                                    row["ShowRejectAction"] = false;
-                                }
-                                else if (status == 1) // Đang thực hiện
-                                {
-                                    if (isMine || isAdmin)
-                                    {
-                                        row["PrimaryActionText"] = "Báo cáo xong";
-                                        row["ShowPrimaryAction"] = true;
-                                    }
-                                    else
-                                    {
-                                        row["ShowPrimaryAction"] = false;
-                                    }
-                                    row["ShowRejectAction"] = false;
-                                }
-                                else if (status == 2) // Chờ xác nhận
-                                {
-                                    if (isAdmin)
+                                    // Quản lý (Admin) KHÔNG nhận việc hay báo cáo dọn phòng!
+                                    // Quản lý chỉ kiểm tra nghiệm thu: Duyệt đạt hoặc Yêu cầu làm lại khi nhân viên báo cáo xong (status == 2)
+                                    if (status == 2) // Chờ xác nhận
                                     {
                                         row["PrimaryActionText"] = "Duyệt đạt";
                                         row["ShowPrimaryAction"] = true;
@@ -296,24 +311,57 @@ namespace Hotel_Management.Pages
                                         row["ShowPrimaryAction"] = false;
                                         row["ShowRejectAction"] = false;
                                     }
+
+                                    // Quản lý có thể Hủy/Xóa các nhiệm vụ chưa hoàn thành nếu giao nhầm hoặc không cần nữa
+                                    row["ShowDeleteAction"] = (status != 3);
                                 }
-                                else if (status == 4) // Yêu cầu làm lại
+                                else // Nhân viên (Role == 1)
                                 {
-                                    if (isMine || isAdmin)
+                                    row["ShowRejectAction"] = false;
+                                    row["ShowDeleteAction"] = false;
+
+                                    if (status == 0) // Chờ nhận việc
                                     {
-                                        row["PrimaryActionText"] = "Làm lại & Báo cáo";
-                                        row["ShowPrimaryAction"] = true;
+                                        // Nhân viên chỉ được nhận việc nếu việc đó chưa ai nhận (chung cho ca) HOẶC được giao đích danh cho mình
+                                        if (isUnassigned || isMine)
+                                        {
+                                            row["PrimaryActionText"] = "Nhận việc";
+                                            row["ShowPrimaryAction"] = true;
+                                        }
+                                        else
+                                        {
+                                            // Đã giao cho nhân viên khác trong ca thì nhân viên này không thể nhận thay
+                                            row["ShowPrimaryAction"] = false;
+                                        }
                                     }
-                                    else
+                                    else if (status == 1) // Đang thực hiện
+                                    {
+                                        if (isMine)
+                                        {
+                                            row["PrimaryActionText"] = "Báo cáo xong";
+                                            row["ShowPrimaryAction"] = true;
+                                        }
+                                        else
+                                        {
+                                            row["ShowPrimaryAction"] = false;
+                                        }
+                                    }
+                                    else if (status == 4) // Yêu cầu làm lại
+                                    {
+                                        if (isMine)
+                                        {
+                                            row["PrimaryActionText"] = "Làm lại & Báo cáo";
+                                            row["ShowPrimaryAction"] = true;
+                                        }
+                                        else
+                                        {
+                                            row["ShowPrimaryAction"] = false;
+                                        }
+                                    }
+                                    else // status == 2 (Chờ duyệt) hoặc status == 3 (Hoàn thành)
                                     {
                                         row["ShowPrimaryAction"] = false;
                                     }
-                                    row["ShowRejectAction"] = false;
-                                }
-                                else // status == 3: Hoàn thành
-                                {
-                                    row["ShowPrimaryAction"] = false;
-                                    row["ShowRejectAction"] = false;
                                 }
                             }
 
@@ -348,6 +396,18 @@ namespace Hotel_Management.Pages
             
             var mainWindow = Application.Current.MainWindow as MainWindow;
             if (mainWindow == null) return;
+
+            if (currentStatus == 0 && mainWindow.CurrentRole == 0)
+            {
+                MessageBox.Show("Tài khoản Quản trị viên chỉ quản lý và giao việc, không trực tiếp nhận việc!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            if ((currentStatus == 1 || currentStatus == 4) && mainWindow.CurrentRole == 0)
+            {
+                MessageBox.Show("Chỉ nhân viên phụ trách mới thực hiện báo cáo hoàn thành nhiệm vụ!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
 
             string confirmMsg = "Xác nhận thực hiện thao tác này?";
             if (currentStatus == 0) confirmMsg = "Bạn muốn nhận nhiệm vụ này?";
@@ -384,13 +444,16 @@ namespace Hotel_Management.Pages
                             }
                             isCleaningTask = roomId > 0 && IsCleaningTaskName(taskName);
 
-                            if (currentStatus == 0) // Nhận việc
+                            if (currentStatus == 0) // Nhận việc -> chuyển sang Đang thực hiện (1)
                             {
-                                string query = "UPDATE Tasks SET AssignedTo = @UserId, TaskStatus = 1 WHERE TaskId = @TaskId AND (AssignedTo IS NULL OR AssignedTo = @UserId)";
+                                string query = @"UPDATE Tasks 
+                                                 SET AssignedTo = COALESCE(AssignedTo, @UserId), TaskStatus = 1 
+                                                 WHERE TaskId = @TaskId AND (AssignedTo IS NULL OR AssignedTo = @UserId OR @IsAdmin = 1)";
                                 using (MySqlCommand cmd = new MySqlCommand(query, conn, trans))
                                 {
                                     cmd.Parameters.Add("@UserId", MySqlDbType.Int32).Value = mainWindow.CurrentUserId;
                                     cmd.Parameters.Add("@TaskId", MySqlDbType.Int32).Value = taskId;
+                                    cmd.Parameters.Add("@IsAdmin", MySqlDbType.Int32).Value = (mainWindow.CurrentRole == 0) ? 1 : 0;
                                     if (cmd.ExecuteNonQuery() == 0)
                                         throw new InvalidOperationException("Nhiệm vụ này đã được nhân viên khác nhận!");
                                 }
@@ -405,9 +468,21 @@ namespace Hotel_Management.Pages
                                     }
                                 }
                             }
-                            else if (currentStatus == 2 || ((currentStatus == 1 || currentStatus == 4) && mainWindow.CurrentRole == 0))
+                            else if (currentStatus == 1 || currentStatus == 4) // Báo cáo xong -> chuyển sang Chờ xác nhận (2)
                             {
-                                // Quản lý Duyệt đạt (từ trạng thái 2) hoặc trực tiếp chốt hoàn thành (từ trạng thái 1, 4)
+                                string query = @"UPDATE Tasks 
+                                                 SET TaskStatus = 2 
+                                                 WHERE TaskId = @TaskId AND (AssignedTo = @UserId OR @IsAdmin = 1)";
+                                using (MySqlCommand cmd = new MySqlCommand(query, conn, trans))
+                                {
+                                    cmd.Parameters.Add("@TaskId", MySqlDbType.Int32).Value = taskId;
+                                    cmd.Parameters.Add("@UserId", MySqlDbType.Int32).Value = mainWindow.CurrentUserId;
+                                    cmd.Parameters.Add("@IsAdmin", MySqlDbType.Int32).Value = (mainWindow.CurrentRole == 0) ? 1 : 0;
+                                    cmd.ExecuteNonQuery();
+                                }
+                            }
+                            else if (currentStatus == 2 && mainWindow.CurrentRole == 0) // Quản lý Duyệt đạt -> Hoàn thành (3)
+                            {
                                 string query = "UPDATE Tasks SET TaskStatus = 3, CompletedAt = @CompletedAt WHERE TaskId = @TaskId";
                                 using (MySqlCommand cmd = new MySqlCommand(query, conn, trans))
                                 {
@@ -418,22 +493,24 @@ namespace Hotel_Management.Pages
 
                                 if (isCleaningTask)
                                 {
-                                    string updateRoom = "UPDATE Rooms SET Status = 0 WHERE RoomId = @RoomId AND Status IN (3, 4)";
-                                    using (MySqlCommand cmdRoom = new MySqlCommand(updateRoom, conn, trans))
+                                    // Chỉ giải phóng phòng về Trống (0) nếu không còn công việc dọn phòng nào khác đang treo ở phòng đó
+                                    string checkRemaining = "SELECT COUNT(*) FROM Tasks WHERE RoomId = @RoomId AND TaskStatus IN (0, 1, 2, 4)";
+                                    int remainingTasks = 0;
+                                    using (MySqlCommand cmdCheck = new MySqlCommand(checkRemaining, conn, trans))
                                     {
-                                        cmdRoom.Parameters.Add("@RoomId", MySqlDbType.Int32).Value = roomId;
-                                        cmdRoom.ExecuteNonQuery();
+                                        cmdCheck.Parameters.Add("@RoomId", MySqlDbType.Int32).Value = roomId;
+                                        remainingTasks = Convert.ToInt32(cmdCheck.ExecuteScalar());
                                     }
-                                }
-                            }
-                            else if (currentStatus == 1 || currentStatus == 4) // Nhân viên báo cáo xong -> chuyển sang Chờ xác nhận (2)
-                            {
-                                string query = "UPDATE Tasks SET TaskStatus = 2 WHERE TaskId = @TaskId AND AssignedTo = @UserId";
-                                using (MySqlCommand cmd = new MySqlCommand(query, conn, trans))
-                                {
-                                    cmd.Parameters.Add("@TaskId", MySqlDbType.Int32).Value = taskId;
-                                    cmd.Parameters.Add("@UserId", MySqlDbType.Int32).Value = mainWindow.CurrentUserId;
-                                    cmd.ExecuteNonQuery();
+
+                                    if (remainingTasks == 0)
+                                    {
+                                        string updateRoom = "UPDATE Rooms SET Status = 0 WHERE RoomId = @RoomId AND Status IN (3, 4)";
+                                        using (MySqlCommand cmdRoom = new MySqlCommand(updateRoom, conn, trans))
+                                        {
+                                            cmdRoom.Parameters.Add("@RoomId", MySqlDbType.Int32).Value = roomId;
+                                            cmdRoom.ExecuteNonQuery();
+                                        }
+                                    }
                                 }
                             }
 
@@ -450,7 +527,7 @@ namespace Hotel_Management.Pages
                 string successMsg = "Cập nhật nhiệm vụ thành công!";
                 if (currentStatus == 0) successMsg = "Nhận việc thành công!";
                 else if (currentStatus == 1 || currentStatus == 4) 
-                    successMsg = (mainWindow.CurrentRole == 0) ? "Nhiệm vụ đã hoàn thành!" : "Đã gửi báo cáo! Đang chờ Quản lý nghiệm thu.";
+                    successMsg = "Đã gửi báo cáo hoàn thành! Nhiệm vụ chuyển sang trạng thái 'Chờ xác nhận'.";
                 else if (currentStatus == 2)
                     successMsg = isCleaningTask ? "Nghiệm thu thành công! Phòng đã sẵn sàng đón khách." : "Đã nghiệm thu hoàn thành nhiệm vụ!";
 
@@ -506,6 +583,54 @@ namespace Hotel_Management.Pages
             catch (Exception ex)
             {
                 MessageBox.Show("Lỗi khi cập nhật nhiệm vụ: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void btnDeleteTask_Click(object sender, RoutedEventArgs e)
+        {
+            var mainWindow = Application.Current.MainWindow as MainWindow;
+            if (mainWindow == null || mainWindow.CurrentRole != 0)
+            {
+                MessageBox.Show("Chỉ Quản trị viên mới có quyền hủy nhiệm vụ!", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var btn = sender as Button;
+            if (btn == null || btn.DataContext == null) return;
+            var rowView = btn.DataContext as DataRowView;
+            if (rowView == null) return;
+
+            int taskId = Convert.ToInt32(rowView["TaskId"]);
+            string taskName = rowView["TaskName"]?.ToString() ?? "";
+
+            var result = MessageBox.Show($"Xác nhận HỦY nhiệm vụ '{taskName}'?", "Xác nhận hủy", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result != MessageBoxResult.Yes) return;
+
+            try
+            {
+                using (MySqlConnection conn = DatabaseHelper.GetConnection())
+                {
+                    conn.Open();
+                    string query = "DELETE FROM Tasks WHERE TaskId = @TaskId";
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.Add("@TaskId", MySqlDbType.Int32).Value = taskId;
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                MessageBox.Show("Đã hủy nhiệm vụ thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                LoadData();
+            }
+            catch (MySqlException ex)
+            {
+                if (ex.Number == 1042 || ex.Number == 0)
+                    MessageBox.Show("Mất kết nối đến máy chủ CSDL. Vui lòng kiểm tra lại mạng!", "Lỗi Kết Nối", MessageBoxButton.OK, MessageBoxImage.Error);
+                else
+                    MessageBox.Show($"Lỗi Cơ Sở Dữ Liệu: {ex.Message}", "Lỗi CSDL", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi khi hủy nhiệm vụ: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

@@ -6,8 +6,6 @@
         xmlns:local="clr-namespace:Hotel_Management.Pages"
         mc:Ignorable="d"
         Title="Chọn Phòng" Height="500" Width="880"
-        MaxHeight="{x:Static SystemParameters.MaximizedPrimaryScreenHeight}"
-        MaxWidth="{x:Static SystemParameters.MaximizedPrimaryScreenWidth}"
         WindowStartupLocation="CenterScreen" WindowStyle="None"
         Background="Transparent" AllowsTransparency="True"
         ResizeMode="NoResize" WindowState="Normal" FontFamily="Times New Roman"
@@ -16,11 +14,9 @@
         <Border.Style>
             <Style TargetType="Border">
                 <Setter Property="CornerRadius" Value="8"/>
-                <Setter Property="Margin" Value="0"/>
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=WindowState}" Value="Maximized">
                         <Setter Property="CornerRadius" Value="0"/>
-                        <Setter Property="Margin" Value="7"/>
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
@@ -28,8 +24,8 @@
         <Grid>
             <!--Button: Close | Restore | Minimize -->
             <StackPanel Panel.ZIndex="10" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0 8 10 0" Height="30" Orientation="Horizontal" FlowDirection="RightToLeft">
-                <Button x:Name="btnClose" Style="{DynamicResource IconButtonsStyle}" Content="{DynamicResource close}" Click="btnClose_Click" Tag="IsCloseButton"/>
-                <Button x:Name="btnRestore" Margin="5,0" Click="btnRestore_Click">
+                <Button Style="{DynamicResource IconButtonsStyle}" Content="{DynamicResource close}" Click="btnClose_Click" Tag="IsCloseButton"/>
+                <Button Margin="5,0" Click="btnRestore_Click">
                     <Button.Style>
                         <Style TargetType="{x:Type Button}" BasedOn="{StaticResource IconButtonsStyle}">
                             <Setter Property="Content" Value="{DynamicResource maximize}"/>
@@ -41,7 +37,7 @@
                         </Style>
                     </Button.Style>
                 </Button>
-                <Button x:Name="btnMinimize" Style="{DynamicResource IconButtonsStyle}" Content="{DynamicResource minimize}" Click="btnMinimize_Click"/>
+                <Button Style="{DynamicResource IconButtonsStyle}" Content="{DynamicResource minimize}" Click="btnMinimize_Click"/>
             </StackPanel>
 
             <Grid>
@@ -51,23 +47,37 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <Label Grid.Row="0" Content="Chọn Phòng Trống (Sẵn Sàng)" 
-                       Style="{DynamicResource LabelStyle}" 
-                       HorizontalAlignment="Left" VerticalAlignment="Center" 
-                       Margin="40 0 0 0" Padding="10 5 0 5"
-                       BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="4 0 0 0"/>
+                <Grid Grid.Row="0">
+                    <Label Content="Danh Sách Phòng Khách Sạn" 
+                           Style="{DynamicResource LabelStyle}" 
+                           HorizontalAlignment="Left" VerticalAlignment="Center" 
+                           Margin="40 0 0 0" Padding="10 5 0 5"
+                           BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="4 0 0 0"/>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,120,0">
+                        <TextBlock Text="Lọc trạng thái:" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="13" FontWeight="SemiBold" Margin="0,0,8,0"/>
+                        <ComboBox x:Name="cbFilterStatus" Width="170" Height="34" Style="{DynamicResource ComboBoxStyle}" SelectionChanged="cbFilterStatus_SelectionChanged">
+                            <ComboBoxItem Content="Tất cả phòng" IsSelected="True"/>
+                            <ComboBoxItem Content="Trống (Sẵn sàng)" Tag="0"/>
+                            <ComboBoxItem Content="Đang sử dụng" Tag="2"/>
+                            <ComboBoxItem Content="Đã đặt" Tag="1"/>
+                            <ComboBoxItem Content="Chờ dọn dẹp" Tag="3"/>
+                        </ComboBox>
+                    </StackPanel>
+                </Grid>
                 
                 <!-- Bảng danh sách phòng -->
                 <DataGrid Grid.Row="1" x:Name="RoomsDataGrid" Margin="20,0,20,10" Style="{DynamicResource DataGridStyle}" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single" MouseDoubleClick="RoomsDataGrid_MouseDoubleClick">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="ID" Binding="{Binding RoomId}" Width="0.45*" MinWidth="42" />
                         <DataGridTextColumn Header="Số phòng" Binding="{Binding RoomNumber}" Width="0.75*" MinWidth="68" />
+                        <DataGridTextColumn Header="Trạng thái" Binding="{Binding StatusName}" Width="1.15*" MinWidth="110"/>
                         <DataGridTextColumn Header="Số khách" Binding="{Binding NumberPeople}" Width="0.75*" MinWidth="68" />
                         <DataGridTextColumn Header="Số đệm" Binding="{Binding NumberBed}" Width="0.7*" MinWidth="65" />
                         <DataGridTextColumn Header="Chất lượng" Binding="{Binding QualityName}" Width="0.85*" MinWidth="80"/>
-                        <DataGridTextColumn Header="Đệm / Giường" Binding="{Binding BedType}" Width="1.4*" MinWidth="130" />
-                        <DataGridTextColumn Header="Loại phòng" Binding="{Binding RoomType}" Width="1.15*" MinWidth="105" />
-                        <DataGridTextColumn Header="Diện tích (m²)" Binding="{Binding RoomArea}" Width="0.95*" MinWidth="90"/>
+                        <DataGridTextColumn Header="Đệm / Giường" Binding="{Binding BedType}" Width="1.3*" MinWidth="120" />
+                        <DataGridTextColumn Header="Loại phòng" Binding="{Binding RoomType}" Width="1.1*" MinWidth="100" />
+                        <DataGridTextColumn Header="Diện tích" Binding="{Binding RoomArea, StringFormat='{}{0} m²'}" Width="0.9*" MinWidth="85"/>
                         <DataGridTextColumn Header="Giá (VND)" Binding="{Binding Price, StringFormat=N0}" Width="1.1*" MinWidth="100" />
                     </DataGrid.Columns>
                 </DataGrid>

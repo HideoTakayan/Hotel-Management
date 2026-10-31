@@ -9,10 +9,18 @@ namespace Hotel_Management.Pages
 {
     public partial class Bills : Page
     {
-        public Bills()
+        private int? _targetBillId;
+
+        public Bills() : this(null)
         {
+        }
+
+        public Bills(int? targetBillId)
+        {
+            _targetBillId = targetBillId;
             InitializeComponent();
             CheckPermissions();
+            this.Loaded += (s, e) => LoadData();
             LoadData();
         }
 
@@ -31,12 +39,15 @@ namespace Hotel_Management.Pages
 
         private void LoadData()
         {
+            int? preservedSelectedId = _targetBillId ?? (BillsDataGrid?.SelectedItem as Bill)?.BillId;
+
             try
             {
                 var bills = new List<Bill>();
                 using (var conn = DatabaseHelper.GetConnection())
                 {
                     conn.Open();
+                    DatabaseHelper.SyncAllDataToCurrentDate(conn);
                     string query = @"SELECT b.BillId, b.RoomId, r.RoomNumber, b.CreatedAt, b.FullName, b.Email, b.Phone, 
                                             b.StartDate, b.EndDate, b.NumberPeople, b.Total, b.Status 
                                      FROM Bills b
@@ -66,6 +77,7 @@ namespace Hotel_Management.Pages
                     }
                 }
                 _allBills = bills;
+                _targetBillId = preservedSelectedId;
                 ApplyFilter();
             }
             catch (MySqlException ex)
@@ -106,6 +118,26 @@ namespace Hotel_Management.Pages
             });
 
             BillsDataGrid.ItemsSource = filtered;
+
+            if (_targetBillId.HasValue)
+            {
+                var target = _allBills.Find(b => b.BillId == _targetBillId.Value);
+                if (target != null)
+                {
+                    // Nếu target đang bị bộ lọc ẩn đi, reset lại bộ lọc để người dùng nhìn thấy hóa đơn
+                    if (!filtered.Contains(target))
+                    {
+                        if (cbFilterStatus != null) cbFilterStatus.SelectedIndex = 0;
+                        if (txtSearchBill != null) txtSearchBill.Text = "";
+                        filtered = _allBills;
+                        BillsDataGrid.ItemsSource = filtered;
+                    }
+                    BillsDataGrid.SelectedItem = target;
+                    BillsDataGrid.ScrollIntoView(target);
+                    LoadBillServices(target);
+                }
+                _targetBillId = null;
+            }
         }
 
         private void txtSearchBill_TextChanged(object sender, TextChangedEventArgs e)
@@ -129,15 +161,15 @@ namespace Hotel_Management.Pages
             {
                 txtKhachHang.Text = bill.FullName;
                 txtPhong.Text = bill.Room?.RoomNumber ?? "";
-                txtEmail.Text = bill.Email;
                 txtPhone.Text = bill.Phone;
-                txtNgayNhan.Text = bill.StartDate.ToString("dd/MM/yyyy HH:mm");
-                txtNgayTra.Text = bill.EndDate.ToString("dd/MM/yyyy HH:mm");
-                txtSoNguoi.Text = bill.NumberPeople.ToString();
-                txtTongTien.Text = bill.Total?.ToString("N0") + " VND";
+                txtThoiGianLuuTru.Text = $"{bill.StartDate:dd/MM} - {bill.EndDate:dd/MM/yyyy}";
+                txtSoNguoi.Text = $"{bill.NumberPeople} người";
+
+                LoadBillServices(bill);
                 SetComboBoxStatusByTag(bill.Status);
 
                 bool isFinal = (bill.Status == 1 || bill.Status == 2);
+                txtSelectBillPrompt.Visibility = Visibility.Collapsed;
                 if (isStaff)
                 {
                     comboboxTrangThai.IsEnabled = false;
@@ -155,20 +187,109 @@ namespace Hotel_Management.Pages
             {
                 txtKhachHang.Text = "---";
                 txtPhong.Text = "---";
-                txtEmail.Text = "---";
                 txtPhone.Text = "---";
-                txtNgayNhan.Text = "---";
-                txtNgayTra.Text = "---";
+                txtThoiGianLuuTru.Text = "---";
                 txtSoNguoi.Text = "---";
-                txtTongTien.Text = "---";
+                txtTienPhongDetail.Text = "0 VND";
+                txtTienDichVuDetail.Text = "0 VND";
+                txtTongTien.Text = "0 VND";
+                dgBillServices.ItemsSource = null;
+                dgBillServices.Visibility = Visibility.Collapsed;
+                txtNoServicesHint.Visibility = Visibility.Visible;
+
                 comboboxTrangThai.SelectedIndex = -1;
                 txtStatusLockedHint.Visibility = Visibility.Collapsed;
+                txtSelectBillPrompt.Visibility = Visibility.Visible;
 
-                if (!isStaff)
+                comboboxTrangThai.IsEnabled = false;
+                btnUpdateBill.IsEnabled = false;
+            }
+        }
+
+        private void LoadBillServices(Bill bill)
+        {
+            if (bill == null) return;
+
+            try
+            {
+                using (var conn = DatabaseHelper.GetConnection())
                 {
-                    comboboxTrangThai.IsEnabled = true;
-                    btnUpdateBill.IsEnabled = true;
+                    conn.Open();
+
+                    // Lấy Total mới nhất từ DB để đồng bộ thời gian thực nếu vừa có dịch vụ thêm
+                    decimal totalBill = bill.Total ?? 0;
+                    string queryBillTotal = "SELECT Total FROM Bills WHERE BillId = @BillId";
+                    using (var cmdTotal = new MySqlCommand(queryBillTotal, conn))
+                    {
+                        cmdTotal.Parameters.Add("@BillId", MySqlDbType.Int32).Value = bill.BillId;
+                        var res = cmdTotal.ExecuteScalar();
+                        if (res != null && res != DBNull.Value)
+                        {
+                            totalBill = Convert.ToDecimal(res);
+                            bill.Total = totalBill;
+                        }
+                    }
+
+                    string queryServices = @"
+                        SELECT s.ServiceName, 
+                               CASE WHEN bs.Quantity > 0 THEN (bs.Total / bs.Quantity) ELSE s.Price END AS Price, 
+                               bs.Quantity, 
+                               bs.Total
+                        FROM Bill_Services bs
+                        JOIN Services s ON bs.ServiceId = s.ServiceId
+                        WHERE bs.BillId = @BillId";
+
+                    var servicesList = new List<BillService>();
+                    decimal tienDichVu = 0;
+
+                    using (var cmd = new MySqlCommand(queryServices, conn))
+                    {
+                        cmd.Parameters.Add("@BillId", MySqlDbType.Int32).Value = bill.BillId;
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                decimal itemTotal = reader.GetDecimal("Total");
+                                tienDichVu += itemTotal;
+                                servicesList.Add(new BillService
+                                {
+                                    ServiceName = reader.GetString("ServiceName"),
+                                    Price = reader.GetDecimal("Price"),
+                                    Quantity = reader.GetInt32("Quantity"),
+                                    Total = itemTotal
+                                });
+                            }
+                        }
+                    }
+
+                    dgBillServices.ItemsSource = servicesList;
+                    if (servicesList.Count > 0)
+                    {
+                        txtNoServicesHint.Visibility = Visibility.Collapsed;
+                        dgBillServices.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        txtNoServicesHint.Visibility = Visibility.Visible;
+                        dgBillServices.Visibility = Visibility.Collapsed;
+                    }
+
+                    decimal tienPhong = Math.Max(0, totalBill - tienDichVu);
+                    txtTienPhongDetail.Text = $"{tienPhong:N0} VND";
+                    txtTienDichVuDetail.Text = $"{tienDichVu:N0} VND";
+                    txtTongTien.Text = $"{totalBill:N0} VND";
                 }
+            }
+            catch (MySqlException ex)
+            {
+                if (ex.Number == 1042 || ex.Number == 0)
+                    MessageBox.Show("Mất kết nối đến máy chủ CSDL. Vui lòng kiểm tra lại mạng!", "Lỗi Kết Nối", MessageBoxButton.OK, MessageBoxImage.Error);
+                else
+                    MessageBox.Show($"Lỗi tải dịch vụ hóa đơn: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi hệ thống: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -205,14 +326,17 @@ namespace Hotel_Management.Pages
                 return;
             }
 
-            // Quy trình hợp lệ: Chưa thanh toán(0) -> Check-in(3) / Đã thanh toán(1) / Hủy(2)
-            //                   Check-in(3) -> Check-out(4) / Đã thanh toán(1) / Hủy(2)
-            //                   Check-out(4) -> Đã thanh toán(1)
-            //                   Đã thanh toán(1), Đã hủy(2): trạng thái cuối, không đổi được
+            // Quy trình nghiệp vụ khách sạn thực tế:
+            // - Chưa thanh toán / Đặt trước (0) -> Chỉ được chuyển sang: Nhận phòng Check-in (3) hoặc Đã hủy (2).
+            //   (Khách chưa nhận phòng thì không thể nhảy cóc sang Chờ thanh toán (4) hay Đã thanh toán (1) làm giải phóng phòng).
+            // - Đang ở Check-in (3) -> Chỉ được chuyển sang: Trả phòng (Chờ thanh toán) (4) hoặc Đã thanh toán (1 - trả phòng & tất toán luôn).
+            //   (Khách đã vào ở và sử dụng phòng/dịch vụ thì không thể bấm 'Đã hủy' (2) để biến phòng đang ở thành phòng trống chưa dọn).
+            // - Chờ thanh toán (4) -> Chỉ được chuyển sang: Đã thanh toán (1).
+            // - Đã thanh toán (1), Đã hủy (2): Trạng thái kết thúc, đã khóa.
             bool isValidTransition = selectedBill.Status switch
             {
-                0 => newStatus == 3 || newStatus == 2 || newStatus == 1,
-                3 => newStatus == 4 || newStatus == 1 || newStatus == 2,
+                0 => newStatus == 3 || newStatus == 2,
+                3 => newStatus == 4 || newStatus == 1,
                 4 => newStatus == 1,
                 _ => false
             };
@@ -220,17 +344,31 @@ namespace Hotel_Management.Pages
             {
                 string hint = selectedBill.Status switch
                 {
-                    0 => "Hóa đơn 'Chưa thanh toán' có thể chuyển sang 'Check-in', 'Đã thanh toán' hoặc 'Đã hủy'.",
-                    3 => "Khách đang ở chỉ có thể chuyển sang 'Check-out', 'Đã thanh toán' hoặc 'Đã hủy'.",
-                    4 => "Hóa đơn đã Check-out chỉ có thể chuyển sang 'Đã thanh toán'.",
+                    0 => "Khách mới đặt phòng ('Chưa thanh toán') chỉ có thể chuyển sang 'Đã nhận phòng (Check-in)' khi khách đến, hoặc 'Đã hủy' nếu khách hủy đặt.\n(Không thể tất toán/trả phòng khi khách chưa nhận phòng).",
+                    3 => "Khách đang lưu trú ('Check-in') chỉ có thể chuyển sang 'Trả phòng (Chờ thanh toán)' hoặc 'Đã thanh toán' (trả phòng & thanh toán luôn).\n(Không thể hủy đơn khi khách đã nhận phòng).",
+                    4 => "Hóa đơn đang 'Chờ thanh toán' chỉ có thể chuyển sang 'Đã thanh toán' sau khi thu tiền hoàn tất.",
                     _ => "Hóa đơn đã thanh toán hoặc đã hủy thì không thể thay đổi trạng thái nữa."
                 };
-                MessageBox.Show(hint, "Thao tác không hợp lệ", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(hint, "Thao tác không hợp lệ với thực tế", MessageBoxButton.OK, MessageBoxImage.Warning);
                 SetComboBoxStatusByTag(selectedBill.Status);
                 return;
             }
 
-            var result = MessageBox.Show($"Xác nhận đổi trạng thái hóa đơn ID {selectedBill.BillId} thành {((ComboBoxItem)comboboxTrangThai.SelectedItem).Content}?", "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            decimal tienDichVu = 0;
+            if (dgBillServices.ItemsSource is List<BillService> list)
+            {
+                foreach (var item in list) tienDichVu += item.Total;
+            }
+            decimal tongTien = selectedBill.Total ?? 0;
+            decimal tienPhong = Math.Max(0, tongTien - tienDichVu);
+
+            string statusText = ((ComboBoxItem)comboboxTrangThai.SelectedItem).Content.ToString();
+            string confirmMsg = $"Xác nhận cập nhật hóa đơn ID {selectedBill.BillId} (Phòng {selectedBill.Room?.RoomNumber}) sang '{statusText}'?\n\n"
+                              + $"• Tiền phòng: {tienPhong:N0} VND\n"
+                              + $"• Tiền dịch vụ ({(dgBillServices.ItemsSource as List<BillService>)?.Count ?? 0} món): {tienDichVu:N0} VND\n"
+                              + $"• TỔNG CỘNG HÓA ĐƠN: {tongTien:N0} VND";
+
+            var result = MessageBox.Show(confirmMsg, "Xác Nhận Hóa Đơn", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
             {
                 try
@@ -276,18 +414,13 @@ namespace Hotel_Management.Pages
                                         roomStatus = 3; // Chờ dọn dẹp
                                         createCleaningTask = true;
                                     }
-                                    else if (currentRoomStatus == 1)
+                                }
+                                else if (newStatus == 2) // Hủy đặt phòng trước khi ở
+                                {
+                                    if (currentRoomStatus == 1)
                                     {
-                                        roomStatus = 0; // Giải phóng phòng về Trống nếu thanh toán thẳng từ Đã đặt
+                                        roomStatus = 0; // Giải phóng phòng về Trống
                                     }
-                                }
-                                else if (newStatus == 2) // Hủy
-                                {
-                                    roomStatus = 0; // Trống
-                                }
-                                else if (newStatus == 0) // Chưa thanh toán
-                                {
-                                    roomStatus = 1; // Đã đặt
                                 }
 
                                 if (roomStatus != -1)
@@ -314,13 +447,23 @@ namespace Hotel_Management.Pages
                                     if (activeTaskCount == 0)
                                     {
                                         int shiftId = DatabaseHelper.GetOrCreateCurrentShiftId(conn, trans);
+                                        int? onDutyEmpId = null;
+                                        string getDutyEmpQuery = "SELECT Employee1_Id FROM Shifts WHERE ShiftId = @ShiftId";
+                                        using (var cmdDuty = new MySqlCommand(getDutyEmpQuery, conn, trans))
+                                        {
+                                            cmdDuty.Parameters.Add("@ShiftId", MySqlDbType.Int32).Value = shiftId;
+                                            var empRes = cmdDuty.ExecuteScalar();
+                                            if (empRes != null && empRes != DBNull.Value) onDutyEmpId = Convert.ToInt32(empRes);
+                                        }
 
-                                        string insertTask = @"INSERT INTO Tasks (RoomId, ShiftId, TaskName, TaskStatus) 
-                                                              VALUES (@RoomId, @ShiftId, 'Dọn phòng sau Check-out', 0)";
+                                        string insertTask = @"INSERT INTO Tasks (RoomId, ShiftId, AssignedTo, TaskName, TaskStatus) 
+                                                              VALUES (@RoomId, @ShiftId, @AssignedTo, @TaskName, 0)";
                                         using (var cmd = new MySqlCommand(insertTask, conn, trans))
                                         {
                                             cmd.Parameters.Add("@RoomId", MySqlDbType.Int32).Value = selectedBill.RoomId;
                                             cmd.Parameters.Add("@ShiftId", MySqlDbType.Int32).Value = shiftId;
+                                            cmd.Parameters.Add("@AssignedTo", MySqlDbType.Int32).Value = onDutyEmpId.HasValue ? (object)onDutyEmpId.Value : DBNull.Value;
+                                            cmd.Parameters.Add("@TaskName", MySqlDbType.VarChar, 255).Value = $"Dọn dẹp phòng {selectedBill.Room?.RoomNumber ?? ""}";
                                             cmd.ExecuteNonQuery();
                                         }
                                     }
@@ -360,9 +503,21 @@ namespace Hotel_Management.Pages
                 return;
             }
 
+            if (selectedBill.Status == 0)
+            {
+                MessageBox.Show("Hóa đơn đang giữ phòng đặt trước ('Chưa thanh toán').\nNếu khách hủy đặt, vui lòng cập nhật trạng thái thành 'Đã hủy' trước khi xóa!", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             if (selectedBill.Status == 3)
             {
-                MessageBox.Show("Khách đang ở phòng (Check-in). Hãy Check-out trước, không thể xóa hóa đơn lúc này!", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Khách đang lưu trú trong phòng ('Check-in'). Không thể xóa hóa đơn lúc này!", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (selectedBill.Status == 4)
+            {
+                MessageBox.Show("Khách đã trả phòng ('Chờ thanh toán') nhưng chưa hoàn tất thanh toán.\nVui lòng cập nhật sang 'Đã thanh toán' sau khi thu tiền trước khi xóa lịch sử!", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -378,19 +533,7 @@ namespace Hotel_Management.Pages
                         {
                             try
                             {
-                                // 1. Giải phóng phòng (Chỉ giải phóng nếu hóa đơn đang kích hoạt: Chưa thanh toán hoặc Đang Check-in)
-                                // Tránh lỗi: Xóa hóa đơn cũ từ tháng trước làm phòng đang có khách hiện tại tự dưng thành phòng trống.
-                                if (selectedBill.Status == 0 || selectedBill.Status == 3)
-                                {
-                                    string updateRoom = "UPDATE Rooms SET Status = 0 WHERE RoomId = @RoomId";
-                                    using (var cmd = new MySqlCommand(updateRoom, conn, trans))
-                                    {
-                                        cmd.Parameters.Add("@RoomId", MySqlDbType.Int32).Value = selectedBill.RoomId;
-                                        cmd.ExecuteNonQuery();
-                                    }
-                                }
-
-                                // 2. Xóa các dịch vụ đã gọi của hóa đơn này (tránh lỗi khóa ngoại)
+                                // 1. Xóa các dịch vụ đã gọi của hóa đơn này (tránh lỗi khóa ngoại)
                                 string deleteBillServices = "DELETE FROM Bill_Services WHERE BillId = @BillId";
                                 using (var cmd = new MySqlCommand(deleteBillServices, conn, trans))
                                 {
@@ -398,7 +541,7 @@ namespace Hotel_Management.Pages
                                     cmd.ExecuteNonQuery();
                                 }
 
-                                // 3. Xóa hóa đơn
+                                // 2. Xóa hóa đơn
                                 string deleteBill = "DELETE FROM Bills WHERE BillId = @BillId";
                                 using (var cmd = new MySqlCommand(deleteBill, conn, trans))
                                 {
@@ -440,6 +583,9 @@ namespace Hotel_Management.Pages
             cbFilterStatus.SelectedIndex = 0;
             BillsDataGrid.SelectedItem = null;
             txtStatusLockedHint.Visibility = Visibility.Collapsed;
+            txtSelectBillPrompt.Visibility = Visibility.Visible;
+            comboboxTrangThai.IsEnabled = false;
+            btnUpdateBill.IsEnabled = false;
             LoadData();
         }
 

@@ -1,11 +1,16 @@
 using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.CompilerServices;
 
 namespace Hotel_Management.Models
 {
-    public class Bill
+    public class Bill : INotifyPropertyChanged
     {
+        private decimal? _total;
+        private int _status;
+
         [Key]
         public int BillId { get; set; }
 
@@ -22,7 +27,7 @@ namespace Hotel_Management.Models
         public string FullName { get; set; }
 
         [MaxLength(100)]
-        public string Email { get; set; } // Cho phép NULL (khớp SQL)
+        public string Email { get; set; }
 
         [Required]
         [MaxLength(12)]
@@ -37,10 +42,33 @@ namespace Hotel_Management.Models
         [Required]
         public int NumberPeople { get; set; }
 
-        // Lưu trữ tổng tiền
-        public decimal? Total { get; set; }
+        public decimal? Total
+        {
+            get => _total;
+            set
+            {
+                if (_total != value)
+                {
+                    _total = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         [Required]
-        public int Status { get; set; }
+        public int Status
+        {
+            get => _status;
+            set
+            {
+                if (_status != value)
+                {
+                    _status = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(StatusName));
+                }
+            }
+        }
 
         public string StatusName
         {
@@ -52,10 +80,16 @@ namespace Hotel_Management.Models
                     1 => "Đã thanh toán",
                     2 => "Đã hủy",
                     3 => "Check-in",
-                    4 => "Check-out",
+                    4 => "Chờ thanh toán",
                     _ => "Không xác định"
                 };
             }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string propName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
         }
     }
 }

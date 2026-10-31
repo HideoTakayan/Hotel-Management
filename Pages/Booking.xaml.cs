@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using Hotel_Management.Models;
@@ -14,6 +15,16 @@ namespace Hotel_Management.Pages
         {
             InitializeComponent();
             CheckPermissions();
+            InitDefaultDates();
+            LoadRoomStatusBoard();
+        }
+
+        private void InitDefaultDates()
+        {
+            dateNgayNhan.DisplayDateStart = DateTime.Today;
+            dateNgayTra.DisplayDateStart = DateTime.Today.AddDays(1);
+            dateNgayNhan.SelectedDate = DateTime.Today;
+            dateNgayTra.SelectedDate = DateTime.Today.AddDays(1);
         }
 
         private void CheckPermissions()
@@ -26,6 +37,247 @@ namespace Hotel_Management.Pages
             }
         }
 
+        public void LoadRoomStatusBoard()
+        {
+            try
+            {
+                var roomCards = new List<RoomCardItem>();
+                using (var conn = DatabaseHelper.GetConnection())
+                {
+                    conn.Open();
+                    // Đồng bộ dữ liệu theo ngày thực tế trước khi tải sơ đồ
+                    DatabaseHelper.SyncAllDataToCurrentDate(conn);
+
+                    string query = @"
+                        SELECT r.RoomId, r.RoomNumber, r.NumberPeople, r.NumberBed, r.BedType, r.Price, r.RoomType, r.RoomArea, r.Quality, r.Status,
+                               b.BillId, b.FullName AS CustomerName, b.Phone AS CustomerPhone, b.Email AS CustomerEmail,
+                               b.StartDate, b.EndDate, b.NumberPeople AS BookingGuests, b.Total AS BillTotal, b.Status AS BillStatus
+                        FROM Rooms r
+                        LEFT JOIN (
+                            SELECT b1.*
+                            FROM Bills b1
+                            INNER JOIN (
+                                SELECT RoomId, MAX(BillId) AS MaxBillId
+                                FROM Bills
+                                WHERE Status IN (0, 3, 4)
+                                GROUP BY RoomId
+                            ) latest ON b1.BillId = latest.MaxBillId
+                        ) b ON r.RoomId = b.RoomId
+                        ORDER BY r.RoomNumber ASC";
+
+                    using (var cmd = new MySqlCommand(query, conn))
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            int status = reader.GetInt32("Status");
+                            int numPeople = reader.GetInt32("NumberPeople");
+                            string customer = reader.IsDBNull(reader.GetOrdinal("CustomerName")) ? "" : reader.GetString("CustomerName");
+
+                            int? billId = reader.IsDBNull(reader.GetOrdinal("BillId")) ? (int?)null : reader.GetInt32("BillId");
+                            string customerPhone = reader.IsDBNull(reader.GetOrdinal("CustomerPhone")) ? "" : reader.GetString("CustomerPhone");
+                            string customerEmail = reader.IsDBNull(reader.GetOrdinal("CustomerEmail")) ? "" : reader.GetString("CustomerEmail");
+                            DateTime? startDate = reader.IsDBNull(reader.GetOrdinal("StartDate")) ? (DateTime?)null : reader.GetDateTime("StartDate");
+                            DateTime? endDate = reader.IsDBNull(reader.GetOrdinal("EndDate")) ? (DateTime?)null : reader.GetDateTime("EndDate");
+                            int? bookingGuests = reader.IsDBNull(reader.GetOrdinal("BookingGuests")) ? (int?)null : reader.GetInt32("BookingGuests");
+                            decimal? billTotal = reader.IsDBNull(reader.GetOrdinal("BillTotal")) ? (decimal?)null : reader.GetDecimal("BillTotal");
+                            int? billStatus = reader.IsDBNull(reader.GetOrdinal("BillStatus")) ? (int?)null : reader.GetInt32("BillStatus");
+
+                            string statusText;
+                            string statusColor;
+                            string statusBg;
+                            string displaySubtitle;
+
+                            switch (status)
+                            {
+                                case 0: // Trống
+                                    statusText = "Trống";
+                                    statusColor = "#2ECC71";
+                                    statusBg = "#102ECC71";
+                                    displaySubtitle = $"Tối đa {numPeople} người";
+                                    break;
+                                case 1: // Đã đặt
+                                    statusText = "Đã đặt";
+                                    statusColor = "#F39C12";
+                                    statusBg = "#10F39C12";
+                                    displaySubtitle = !string.IsNullOrWhiteSpace(customer) ? $"Khách: {customer}" : "Đã giữ chỗ";
+                                    break;
+                                case 2: // Đang sử dụng
+                                    statusText = "Đang ở";
+                                    statusColor = "#3498DB";
+                                    statusBg = "#103498DB";
+                                    displaySubtitle = !string.IsNullOrWhiteSpace(customer) ? $"Khách: {customer}" : "Đang lưu trú";
+                                    break;
+                                case 3: // Chờ dọn dẹp
+                                case 4: // Đang dọn dẹp
+                                    statusText = "Chờ dọn";
+                                    statusColor = "#E74C3C";
+                                    statusBg = "#10E74C3C";
+                                    displaySubtitle = "Cần dọn dẹp phòng";
+                                    break;
+                                default:
+                                    statusText = "Khác";
+                                    statusColor = "#95A5A6";
+                                    statusBg = "#1095A5A6";
+                                    displaySubtitle = "";
+                                    break;
+                            }
+
+                            roomCards.Add(new RoomCardItem
+                            {
+                                RoomId = reader.GetInt32("RoomId"),
+                                RoomNumber = reader.GetString("RoomNumber"),
+                                NumberPeople = numPeople,
+                                NumberBed = reader.GetInt32("NumberBed"),
+                                Quality = reader.GetInt32("Quality"),
+                                BedType = reader.GetString("BedType"),
+                                Price = reader.GetDecimal("Price"),
+                                RoomType = reader.GetString("RoomType"),
+                                RoomArea = Convert.ToSingle(reader["RoomArea"]),
+                                Status = status,
+                                StatusText = statusText,
+                                StatusColor = statusColor,
+                                StatusBg = statusBg,
+                                CustomerName = customer,
+                                DisplaySubtitle = displaySubtitle,
+                                BillId = billId,
+                                CustomerPhone = customerPhone,
+                                CustomerEmail = customerEmail,
+                                StartDate = startDate,
+                                EndDate = endDate,
+                                BookingGuests = bookingGuests,
+                                BillTotal = billTotal,
+                                BillStatus = billStatus
+                            });
+                        }
+                    }
+                }
+                icRoomStatus.ItemsSource = roomCards;
+
+                // Cảnh báo quản trị viên về các phòng đến hạn trả phòng hôm nay
+                var dueRooms = roomCards.FindAll(r => r.IsDueToday);
+                if (dueRooms.Count > 0)
+                {
+                    borderCheckoutNotice.Visibility = Visibility.Visible;
+                    string roomNames = string.Join(", ", dueRooms.ConvertAll(r => $"Phòng {r.RoomNumber} ({r.CustomerName})"));
+                    txtCheckoutNoticeTitle.Text = $"🔔 CẢNH BÁO: CÓ {dueRooms.Count} PHÒNG ĐẾN HẠN TRẢ PHÒNG HÔM NAY ({DateTime.Now:dd/MM/yyyy})!";
+                    txtCheckoutNoticeDesc.Text = $"Các phòng cần kiểm tra trả phòng / thanh toán: {roomNames}.";
+                }
+                else
+                {
+                    borderCheckoutNotice.Visibility = Visibility.Collapsed;
+                }
+            }
+            catch (MySqlException ex)
+            {
+                if (ex.Number == 1042 || ex.Number == 0)
+                    MessageBox.Show("Mất kết nối đến máy chủ CSDL. Vui lòng kiểm tra lại mạng!", "Lỗi Kết Nối", MessageBoxButton.OK, MessageBoxImage.Error);
+                else
+                    MessageBox.Show($"Lỗi tải sơ đồ phòng: {ex.Message}", "Lỗi CSDL", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi hệ thống: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void BtnViewDueCheckouts_Click(object sender, RoutedEventArgs e)
+        {
+            var mainWindow = Application.Current.MainWindow as MainWindow;
+            if (mainWindow != null)
+            {
+                var dueRooms = (icRoomStatus.ItemsSource as List<RoomCardItem>)?.FindAll(r => r.IsDueToday);
+                int? targetBillId = (dueRooms != null && dueRooms.Count > 0) ? dueRooms[0].BillId : null;
+                mainWindow.NavigateToBills(targetBillId);
+            }
+        }
+
+        private void RoomCard_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is RoomCardItem card)
+            {
+                if (card.Status == 0) // Trống (Sẵn sàng) -> Tự động chọn vào form đặt phòng
+                {
+                    _selectedRoom = new Room
+                    {
+                        RoomId = card.RoomId,
+                        RoomNumber = card.RoomNumber,
+                        NumberPeople = card.NumberPeople,
+                        NumberBed = card.NumberBed,
+                        Quality = card.Quality,
+                        BedType = card.BedType,
+                        Price = card.Price,
+                        RoomType = card.RoomType,
+                        RoomArea = card.RoomArea,
+                        Status = card.Status
+                    };
+                    txtPhong.Text = $"Phòng {_selectedRoom.RoomNumber} ({_selectedRoom.Price:N0}đ/đêm)";
+                    txtSoNguoi.Text = _selectedRoom.NumberPeople.ToString();
+                    txtPhongError.Visibility = Visibility.Collapsed;
+                    txtSoNguoiError.Visibility = Visibility.Collapsed;
+                }
+                else if (card.Status == 1 || card.Status == 2) // Đã đặt hoặc Đang sử dụng -> Hiển thị chi tiết khách đặt
+                {
+                    ShowBookedRoomDetails(card);
+                }
+                else if (card.Status == 3 || card.Status == 4) // Chờ dọn dẹp hoặc Đang dọn dẹp
+                {
+                    if (card.BillId.HasValue)
+                    {
+                        ShowBookedRoomDetails(card);
+                    }
+                    else
+                    {
+                        MessageBox.Show(
+                            $"Phòng {card.RoomNumber} ({card.RoomType}) hiện đang ở trạng thái 'Chờ dọn dẹp'.\n\n" +
+                            "• Khách trước đã trả phòng.\n" +
+                            "• Phòng đang chờ nhân viên buồng phòng hoàn tất vệ sinh để chuyển về 'Trống (Sẵn sàng)'.",
+                            $"Thông Tin Phòng {card.RoomNumber}",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+                    }
+                }
+            }
+        }
+
+        private void ShowBookedRoomDetails(RoomCardItem card)
+        {
+            string customer = !string.IsNullOrWhiteSpace(card.CustomerName) ? card.CustomerName : "---";
+            string phone = !string.IsNullOrWhiteSpace(card.CustomerPhone) ? card.CustomerPhone : "---";
+            string email = !string.IsNullOrWhiteSpace(card.CustomerEmail) ? card.CustomerEmail : "(Không có)";
+            string guests = card.BookingGuests.HasValue ? $"{card.BookingGuests.Value} người" : $"{card.NumberPeople} người";
+            string stayPeriod = card.StayDurationText;
+            string checkoutStatus = card.CheckoutStatusText;
+            string totalText = card.BillTotal.HasValue ? $"{card.BillTotal.Value:N0} VND" : "---";
+
+            string dueNotice = card.IsDueToday ? "\n⚠️ LƯU Ý ĐẶC BIỆT: Phòng này đến hạn trả phòng hôm nay! Vui lòng kiểm tra và hoàn tất thủ tục trả phòng." : "";
+
+            string detailMessage =
+                $"🏨 THÔNG TIN CHI TIẾT ĐẶT PHÒNG - PHÒNG {card.RoomNumber}\n" +
+                $"────────────────────────────────────────\n" +
+                $"• Khách hàng: {customer}\n" +
+                $"• Số điện thoại: {phone}\n" +
+                $"• Email: {email}\n" +
+                $"• Số khách lưu trú: {guests}\n" +
+                $"• Thời gian lưu trú: {stayPeriod}\n" +
+                $"• Trạng thái phòng: {card.StatusText}\n" +
+                $"• Tình trạng trả phòng: {checkoutStatus}\n" +
+                $"• Tổng tiền hóa đơn: {totalText}\n" +
+                dueNotice + "\n" +
+                $"────────────────────────────────────────\n" +
+                $"👉 Bạn có muốn chuyển sang mục 'Quản Lý Hóa Đơn' để xem chi tiết hoặc tính tiền phòng này không?";
+
+            var result = MessageBox.Show(detailMessage, $"Chi Tiết Khách Đặt Phòng {card.RoomNumber}", MessageBoxButton.YesNo, MessageBoxImage.Information);
+            if (result == MessageBoxResult.Yes)
+            {
+                var mainWindow = Application.Current.MainWindow as MainWindow;
+                if (mainWindow != null)
+                {
+                    mainWindow.NavigateToBills(card.BillId);
+                }
+            }
+        }
+
         private void BtnChonPhong_Click(object sender, RoutedEventArgs e)
         {
             RoomPick roomPickWindow = new RoomPick();
@@ -34,7 +286,7 @@ namespace Hotel_Management.Pages
                 _selectedRoom = roomPickWindow.SelectedRoom;
                 if (_selectedRoom != null)
                 {
-                    txtPhong.Text = $"Phòng {_selectedRoom.RoomNumber}";
+                    txtPhong.Text = $"Phòng {_selectedRoom.RoomNumber} ({_selectedRoom.Price:N0}đ/đêm)";
                     txtSoNguoi.Text = _selectedRoom.NumberPeople.ToString();
                     txtPhongError.Visibility = Visibility.Collapsed;
                     txtSoNguoiError.Visibility = Visibility.Collapsed;
@@ -115,9 +367,15 @@ namespace Hotel_Management.Pages
 
             if (dateNgayNhan.SelectedDate.HasValue && dateNgayTra.SelectedDate.HasValue)
             {
-                if (dateNgayNhan.SelectedDate.Value >= dateNgayTra.SelectedDate.Value)
+                if (dateNgayNhan.SelectedDate.Value.Date >= dateNgayTra.SelectedDate.Value.Date)
                 {
-                    dateNgayTraError.Text = "Ngày trả phải lớn hơn ngày nhận";
+                    dateNgayTraError.Text = "Ngày trả phải sau ngày nhận ít nhất 1 đêm";
+                    dateNgayTraError.Visibility = Visibility.Visible;
+                    isValid = false;
+                }
+                else if ((dateNgayTra.SelectedDate.Value.Date - dateNgayNhan.SelectedDate.Value.Date).Days > 365)
+                {
+                    dateNgayTraError.Text = "Thời gian đặt phòng tối đa là 365 ngày";
                     dateNgayTraError.Visibility = Visibility.Visible;
                     isValid = false;
                 }
@@ -125,7 +383,7 @@ namespace Hotel_Management.Pages
 
             if (!isValid) return;
 
-            int days = (dateNgayTra.SelectedDate.Value - dateNgayNhan.SelectedDate.Value).Days;
+            int days = (dateNgayTra.SelectedDate.Value.Date - dateNgayNhan.SelectedDate.Value.Date).Days;
             decimal total = days * _selectedRoom.Price;
 
             try
@@ -197,8 +455,7 @@ namespace Hotel_Management.Pages
             txtPhone.Text = "";
             txtSoNguoi.Text = "";
             txtPhong.Text = "Chưa chọn phòng";
-            dateNgayNhan.SelectedDate = null;
-            dateNgayTra.SelectedDate = null;
+            InitDefaultDates();
             _selectedRoom = null;
 
             txtPhongError.Visibility = Visibility.Collapsed;
@@ -208,6 +465,67 @@ namespace Hotel_Management.Pages
             dateNgayNhanError.Visibility = Visibility.Collapsed;
             dateNgayTraError.Visibility = Visibility.Collapsed;
             txtSoNguoiError.Visibility = Visibility.Collapsed;
+
+            LoadRoomStatusBoard();
+        }
+    }
+
+    public class RoomCardItem
+    {
+        public int RoomId { get; set; }
+        public string RoomNumber { get; set; }
+        public string RoomType { get; set; }
+        public decimal Price { get; set; }
+        public int NumberPeople { get; set; }
+        public int NumberBed { get; set; }
+        public string BedType { get; set; }
+        public float RoomArea { get; set; }
+        public int Quality { get; set; }
+        public int Status { get; set; }
+        public string StatusText { get; set; }
+        public string StatusColor { get; set; }
+        public string StatusBg { get; set; }
+        public string CustomerName { get; set; }
+        public string DisplaySubtitle { get; set; }
+
+        public int? BillId { get; set; }
+        public string CustomerPhone { get; set; }
+        public string CustomerEmail { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public int? BookingGuests { get; set; }
+        public decimal? BillTotal { get; set; }
+        public int? BillStatus { get; set; }
+
+        public bool IsDueToday => EndDate.HasValue && EndDate.Value.Date <= DateTime.Now.Date && (BillStatus == 3 || Status == 2);
+        public Visibility DueWarningVisibility => IsDueToday ? Visibility.Visible : Visibility.Collapsed;
+
+        public string StayDurationText
+        {
+            get
+            {
+                if (StartDate.HasValue && EndDate.HasValue)
+                {
+                    int nights = Math.Max(1, (EndDate.Value.Date - StartDate.Value.Date).Days);
+                    return $"{StartDate.Value:dd/MM/yyyy HH:mm} ➔ {EndDate.Value:dd/MM/yyyy HH:mm} ({nights} đêm)";
+                }
+                return "---";
+            }
+        }
+
+        public string CheckoutStatusText
+        {
+            get
+            {
+                return BillStatus switch
+                {
+                    0 => "Chưa nhận phòng (Đã đặt trước)",
+                    3 => "Chưa trả phòng (Khách đang lưu trú)",
+                    4 => "Đã trả phòng (Chờ thanh toán)",
+                    1 => "Đã thanh toán (Hoàn tất)",
+                    _ => "---"
+                };
+            }
         }
     }
 }
