@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# File chua chuoi ket noi va mat khau CSDL Aiven (khong day len Git de bao mat)
+riu.config

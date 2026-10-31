@@ -1,0 +1,7 @@
+<!-- File mau cau hinh ket noi CSDL MySQL Aiven -->
+<!-- Sao chep file nay thanh 'riu.config' va dien thong tin ket noi thuc te -->
+<connectionStrings>
+    <add name="MySqlConn"
+         connectionString="Server=YOUR_AIVEN_HOST; Port=YOUR_PORT; Database=hotel-management; Uid=YOUR_USER; Pwd=YOUR_PASSWORD; Charset=utf8mb4; SslMode=Required;"
+         providerName="MySql.Data.MySqlClient" />
+</connectionStrings>
