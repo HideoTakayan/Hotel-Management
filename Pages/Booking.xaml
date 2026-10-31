@@ -6,7 +6,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:Hotel_Management.Pages"
       mc:Ignorable="d" 
-      d:DesignHeight="850" d:DesignWidth="920" Title="Quản Lý Đặt Phòng" FontFamily="Times New Roman">
+      d:DesignHeight="850" d:DesignWidth="920" Title="Đặt phòng" FontFamily="Segoe UI">
 
     <Page.Resources>
         <Style x:Key="RoomCardButtonStyle" TargetType="Button">
@@ -36,14 +36,14 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <Label Grid.Row="0" Content="Quản Lý Đặt Phòng" 
+                <Label Grid.Row="0" Content="Đặt phòng" 
                        Style="{DynamicResource LabelStyle}" 
                        HorizontalAlignment="Left" VerticalAlignment="Center" 
                        Margin="40 0 0 0" Padding="10 5 0 5"
                        BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="4 0 0 0"/>
 
                 <!-- Form nhập thông tin đặt phòng chia 2 cột đồng bộ -->
-                <Border Grid.Row="1" Margin="30,8,30,8" Padding="25,18" Background="{DynamicResource PrimaryBackgroundColor}" CornerRadius="6" BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="1">
+                <Border Grid.Row="1" Margin="30,8,30,8" Padding="25,18" Background="{DynamicResource PrimaryBackgroundColor}" CornerRadius="6" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -52,7 +52,7 @@
 
                         <!-- Cột trái: Thông tin khách hàng -->
                         <StackPanel Grid.Column="0" Margin="0,0,20,0">
-                            <TextBlock Text="THÔNG TIN KHÁCH HÀNG" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource PrimaryBlueColor}" Margin="0,0,0,12"/>
+                            <TextBlock Text="Thông tin khách hàng" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryColor}" Margin="0,0,0,12"/>
 
                             <StackPanel Margin="0,0,0,10">
                                 <Grid>
@@ -105,7 +105,7 @@
 
                         <!-- Cột phải: Thông tin phòng & Thời gian lưu trú -->
                         <StackPanel Grid.Column="1" Margin="20,0,0,0">
-                            <TextBlock Text="THÔNG TIN PHÒNG &amp; LƯU TRÚ" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource PrimaryBlueColor}" Margin="0,0,0,12"/>
+                            <TextBlock Text="Phòng và thời gian lưu trú" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryColor}" Margin="0,0,0,12"/>
 
                             <StackPanel Margin="0,0,0,10">
                                 <Grid>
@@ -114,14 +114,11 @@
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="Chọn Phòng" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
-                                    <Button Grid.Column="1" x:Name="btnChonPhong" Content="Chọn Phòng" Width="115" Style="{DynamicResource PrimaryButtonStyle}" Click="BtnChonPhong_Click"/>
+                                    <TextBlock Grid.Column="0" Text="Phòng" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
+                                    <Button Grid.Column="1" x:Name="btnChonPhong" Content="Chọn phòng" Width="115" Style="{DynamicResource PrimaryButtonStyle}" Click="BtnChonPhong_Click"/>
                                     <Grid Grid.Column="2" Height="36" Margin="10,0,0,0">
-                                        <Rectangle Fill="{DynamicResource SecondaryBackgroundColor}" Stroke="{DynamicResource PrimaryBlueColor}" StrokeThickness="1.5" RadiusX="5" RadiusY="5"/>
-                                        <TextBlock x:Name="txtPhong" Text="Chưa chọn phòng" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="{DynamicResource TextSecondaryColor}" FontWeight="SemiBold" Margin="12,0,34,0"/>
-                                        <Border Width="24" Height="24" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,6,0" Background="{DynamicResource PrimaryBlueColor}" CornerRadius="4">
-                                            <iconPacks:PackIconBootstrapIcons Width="14" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center" Kind="HouseAdd" Foreground="White" />
-                                        </Border>
+                                        <Rectangle Fill="{DynamicResource SecondaryBackgroundColor}" Stroke="{DynamicResource SecondaryGrayColor}" StrokeThickness="1" RadiusX="5" RadiusY="5"/>
+                                        <TextBlock x:Name="txtPhong" Text="Chưa chọn phòng" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="{DynamicResource TextSecondaryColor}" FontWeight="SemiBold" Margin="12,0,12,0" TextTrimming="CharacterEllipsis"/>
                                     </Grid>
                                 </Grid>
                                 <TextBlock x:Name="txtPhongError" Text="Vui lòng chọn phòng" Margin="110,2,0,0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
@@ -150,24 +147,18 @@
                                 </Grid>
                                 <TextBlock x:Name="dateNgayTraError" Text="Vui lòng chọn ngày trả" Margin="110,2,0,0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
                             </StackPanel>
-
-                            <Border Margin="0,2,0,0" Padding="10,8" Background="{DynamicResource SecondaryBackgroundColor}" CornerRadius="5" BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="1">
-                                <StackPanel>
-                                    <TextBlock Text="ℹ️ Lưu ý: Quản trị viên có thể nhấp trực tiếp vào các phòng TRỐNG (🟢) ở sơ đồ bên dưới để đặt phòng nhanh!" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryBlueColor}" TextWrapping="Wrap"/>
-                                </StackPanel>
-                            </Border>
                         </StackPanel>
                     </Grid>
                 </Border>
 
                 <!-- Các nút tác vụ -->
                 <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Center" Margin="0,8,0,12">
-                    <Button x:Name="btnDatPhong" Content="Đặt Phòng" VerticalAlignment="Center" Width="130" Margin="0,0,12,0" Style="{DynamicResource PrimaryButtonStyle}" Click="BtnDatPhong_Click"/>
-                    <Button x:Name="btnRefresh" Content="Làm Mới" VerticalAlignment="Center" Width="130" Margin="0,0,0,0" Style="{DynamicResource SecondaryButtonStyle}" Click="BtnRefresh_Click"/>
+                    <Button x:Name="btnDatPhong" Content="Đặt phòng" VerticalAlignment="Center" Width="130" Margin="0,0,12,0" Style="{DynamicResource PrimaryButtonStyle}" Click="BtnDatPhong_Click"/>
+                    <Button x:Name="btnRefresh" Content="Làm mới" VerticalAlignment="Center" Width="130" Margin="0,0,0,0" Style="{DynamicResource SecondaryButtonStyle}" Click="BtnRefresh_Click"/>
                 </StackPanel>
 
                 <!-- Bảng sơ đồ trạng thái phòng trực quan (10 phòng khách sạn) -->
-                <Border Grid.Row="3" Margin="30,0,30,10" Padding="20,14" Background="{DynamicResource PrimaryBackgroundColor}" CornerRadius="6" BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="1">
+                <Border Grid.Row="3" Margin="30,0,30,10" Padding="20,14" Background="{DynamicResource PrimaryBackgroundColor}" CornerRadius="6" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -183,12 +174,12 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="🔔" FontSize="20" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <iconPacks:PackIconBootstrapIcons Grid.Column="0" Kind="BellFill" Width="18" Height="18" Foreground="#E74C3C" VerticalAlignment="Center" Margin="0,0,10,0"/>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                    <TextBlock x:Name="txtCheckoutNoticeTitle" Text="CẢNH BÁO: CÓ PHÒNG ĐẾN HẠN TRẢ PHÒNG HÔM NAY!" FontSize="13" FontWeight="Bold" Foreground="#E74C3C"/>
+                                    <TextBlock x:Name="txtCheckoutNoticeTitle" Text="Phòng đến hạn trả hôm nay" FontSize="13" FontWeight="SemiBold" Foreground="#E74C3C"/>
                                     <TextBlock x:Name="txtCheckoutNoticeDesc" Text="Các phòng cần kiểm tra trả phòng..." FontSize="12" Foreground="{DynamicResource TextSecondaryColor}" TextWrapping="Wrap" Margin="0,2,0,0"/>
                                 </StackPanel>
-                                <Button Grid.Column="2" x:Name="btnViewDueCheckouts" Content="Xử Lý Trả Phòng / Hóa Đơn" Style="{DynamicResource PrimaryButtonStyle}" Height="30" Padding="12,0" FontSize="12" VerticalAlignment="Center" Click="BtnViewDueCheckouts_Click"/>
+                                <Button Grid.Column="2" x:Name="btnViewDueCheckouts" Content="Xử lý trả phòng" Style="{DynamicResource PrimaryButtonStyle}" Height="30" Padding="12,0" FontSize="12" VerticalAlignment="Center" Click="BtnViewDueCheckouts_Click"/>
                             </Grid>
                         </Border>
 
@@ -201,7 +192,7 @@
 
                             <!-- Dòng 1: Tiêu đề và Các huy hiệu trạng thái -->
                             <Grid Grid.Row="0" Margin="0,0,0,6">
-                                <TextBlock Text="SƠ ĐỒ TRẠNG THÁI PHÒNG (10 PHÒNG)" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource PrimaryBlueColor}" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                <TextBlock Text="Sơ đồ phòng" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryColor}" VerticalAlignment="Center" HorizontalAlignment="Left"/>
 
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                     <Border Background="#1A2ECC71" BorderBrush="#2ECC71" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="0,0,6,0">
@@ -232,7 +223,7 @@
                             </Grid>
 
                             <!-- Dòng 2: Hướng dẫn nhấp chọn -->
-                            <TextBlock Grid.Row="1" Text="💡 Mẹo: Nhấp trực tiếp vào ô phòng Trống (🟢) để tự động chọn phòng vào form đặt phòng phía trên." FontSize="12" FontStyle="Italic" Foreground="{DynamicResource TextSecondaryColor}"/>
+                            <TextBlock Grid.Row="1" Text="Nhấp vào phòng trống để tự động chọn vào biểu mẫu đặt phòng phía trên." FontSize="12" Foreground="{DynamicResource PrimaryGrayColor}"/>
                         </Grid>
 
                         <!-- Danh sách 10 phòng -->
@@ -244,8 +235,8 @@
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Button Style="{StaticResource RoomCardButtonStyle}" Click="RoomCard_Click" Margin="6,6" Tag="{Binding}">
-                                        <Border Width="158" Height="96" CornerRadius="6" Background="{Binding StatusBg}" BorderBrush="{Binding StatusColor}" BorderThickness="1.5" Padding="10,8">
+                                    <Button Style="{StaticResource RoomCardButtonStyle}" Click="RoomCard_Click" Margin="5,6" Tag="{Binding}">
+                                        <Border Width="164" Height="100" CornerRadius="6" Background="{Binding StatusBg}" BorderBrush="{Binding StatusColor}" BorderThickness="1.5" Padding="10,8">
                                             <Grid>
                                                 <Grid.RowDefinitions>
                                                     <RowDefinition Height="Auto"/>
@@ -255,20 +246,24 @@
 
                                                 <!-- Dòng 1: Số phòng + Huy hiệu trạng thái & Cảnh báo trả phòng -->
                                                 <Grid Grid.Row="0">
-                                                    <TextBlock Text="{Binding RoomNumber, StringFormat='Phòng {0}'}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryColor}" VerticalAlignment="Center"/>
-                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                                        <Border Background="#E74C3C" CornerRadius="3" Padding="4,1" Margin="0,0,4,0" Visibility="{Binding DueWarningVisibility}" ToolTip="Đến hạn trả phòng hôm nay!">
-                                                            <TextBlock Text="⚠️ Trả phòng" FontSize="9.5" FontWeight="Bold" Foreground="White"/>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="{Binding RoomNumber, StringFormat='Phòng {0}'}" FontSize="13.5" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryColor}" VerticalAlignment="Center"/>
+                                                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                        <Border Background="#E74C3C" CornerRadius="3" Padding="3.5,1" Margin="0,0,3,0" Visibility="{Binding DueWarningVisibility}" ToolTip="Đến hạn trả phòng hôm nay!">
+                                                            <TextBlock Text="Hạn trả" FontSize="9" FontWeight="Bold" Foreground="White"/>
                                                         </Border>
-                                                        <Border Background="{Binding StatusColor}" CornerRadius="3" Padding="5,2">
-                                                            <TextBlock Text="{Binding StatusText}" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                                                        <Border Background="{Binding StatusColor}" CornerRadius="3" Padding="5,1.5">
+                                                            <TextBlock Text="{Binding StatusText}" FontSize="9.5" FontWeight="Bold" Foreground="White"/>
                                                         </Border>
                                                     </StackPanel>
                                                 </Grid>
 
                                                 <!-- Dòng 2: Loại phòng & Giá -->
                                                 <StackPanel Grid.Row="1" Margin="0,4,0,0">
-                                                    <TextBlock Text="{Binding RoomType}" FontSize="12" Foreground="{DynamicResource TextSecondaryColor}" TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{Binding RoomType}" FontSize="11.5" Foreground="{DynamicResource TextSecondaryColor}" TextTrimming="CharacterEllipsis"/>
                                                     <TextBlock Text="{Binding Price, StringFormat='{}{0:N0} đ/đêm'}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryBlueColor}"/>
                                                 </StackPanel>
 

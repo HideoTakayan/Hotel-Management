@@ -409,11 +409,11 @@ namespace Hotel_Management.Pages
                     if (cbStaff != null) cbStaff.IsEnabled = true;
                     if (txtServiceStaffHint != null)
                     {
-                        txtServiceStaffHint.Text = "🚚 Dịch vụ phục vụ tại phòng: Hệ thống sẽ tự động tạo nhiệm vụ cho nhân viên mang đồ đến phòng.";
+                        txtServiceStaffHint.Text = "Phục vụ tại phòng: Hệ thống tự động tạo nhiệm vụ giao hàng cho nhân viên ca trực.";
                         txtServiceStaffHint.Foreground = (System.Windows.Media.Brush)FindResource("TextSecondaryColor");
                         txtServiceStaffHint.Visibility = Visibility.Visible;
                     }
-                    if (btnOrderService != null) btnOrderService.Content = "Xác nhận & Giao việc";
+                    if (btnOrderService != null) btnOrderService.Content = "Xác nhận và giao việc";
                 }
                 else
                 {
@@ -421,11 +421,11 @@ namespace Hotel_Management.Pages
                     if (cbStaff != null) cbStaff.IsEnabled = false;
                     if (txtServiceStaffHint != null)
                     {
-                        txtServiceStaffHint.Text = "✨ Dịch vụ trải nghiệm & giải trí Onsen: Tự động ghi vào hóa đơn phòng, khách tự chơi / trải nghiệm (không cần nhân viên giao).";
+                        txtServiceStaffHint.Text = "Dịch vụ tại chỗ: Tự động ghi vào hóa đơn phòng, không tạo nhiệm vụ giao hàng.";
                         txtServiceStaffHint.Foreground = (System.Windows.Media.Brush)FindResource("PrimaryBlueColor");
                         txtServiceStaffHint.Visibility = Visibility.Visible;
                     }
-                    if (btnOrderService != null) btnOrderService.Content = "Ghi Vào Hóa Đơn";
+                    if (btnOrderService != null) btnOrderService.Content = "Ghi vào hóa đơn";
                 }
             }
             else

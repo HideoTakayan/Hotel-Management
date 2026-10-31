@@ -15,7 +15,7 @@ namespace Hotel_Management.Pages
             var mainWindow = Application.Current.MainWindow as MainWindow;
             if (mainWindow != null && mainWindow.CurrentRole == 0)
             {
-                lblTitle.Content = "Quản Lý Tất Cả Nhiệm Vụ";
+                lblTitle.Content = "Quản lý nhiệm vụ";
                 AdminAssignPanel.Visibility = Visibility.Visible;
                 LoadAssignFormControls();
             }

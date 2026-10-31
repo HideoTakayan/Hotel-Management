@@ -5,7 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:Hotel_Management.Pages"
       mc:Ignorable="d" 
-      d:DesignHeight="566" d:DesignWidth="920" Title="Quản Lý Người Dùng" FontFamily="Times New Roman">
+      d:DesignHeight="566" d:DesignWidth="920" Title="Quản Lý Người Dùng" FontFamily="Segoe UI">
     <Border CornerRadius="5" Background="{DynamicResource SecondaryBackgroundColor}">
         <Grid>
             <Grid.RowDefinitions>
@@ -15,7 +15,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="0" Content="Quản Lý Người Dùng" 
+            <Label Grid.Row="0" Content="Quản lý người dùng" 
                            Style="{DynamicResource LabelStyle}" 
                            HorizontalAlignment="Left" VerticalAlignment="Center" 
                            Margin="40 0 0 0" Padding="10 5 0 5"
@@ -108,10 +108,10 @@
             </Grid>
 
             <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,6,0,8" HorizontalAlignment="Center">
-                <Button x:Name="btnAddUser" Content="Thêm Mới" Width="120" Margin="0,0,10,0" Style="{DynamicResource PrimaryButtonStyle}" Click="BtnAddUser_Click"/>
-                <Button x:Name="btnUpdateUser" Content="Cập Nhật" Width="120" Margin="0,0,10,0" Style="{DynamicResource PrimaryButtonStyle}" Click="BtnUpdateUser_Click"/>
+                <Button x:Name="btnAddUser" Content="Thêm người dùng" Width="120" Margin="0,0,10,0" Style="{DynamicResource PrimaryButtonStyle}" Click="BtnAddUser_Click"/>
+                <Button x:Name="btnUpdateUser" Content="Cập nhật" Width="120" Margin="0,0,10,0" Style="{DynamicResource PrimaryButtonStyle}" Click="BtnUpdateUser_Click"/>
                 <Button x:Name="btnDelUser" Content="Xóa" Width="120" Margin="0,0,10,0" Style="{DynamicResource SecondaryButtonStyle}" Click="BtnDelUser_Click"/>
-                <Button x:Name="btnRefresh" Content="Làm Mới" Width="120" Margin="0,0,0,0" Style="{DynamicResource SecondaryButtonStyle}" Click="btnRefresh_Click" />
+                <Button x:Name="btnRefresh" Content="Làm mới" Width="120" Margin="0,0,0,0" Style="{DynamicResource SecondaryButtonStyle}" Click="btnRefresh_Click" />
             </StackPanel>
 
             <DataGrid Grid.Row="3" x:Name="UsersDataGrid" Margin="20,0,20,16" SelectionChanged="UsersDataGrid_SelectionChanged" Style="{DynamicResource DataGridStyle}">

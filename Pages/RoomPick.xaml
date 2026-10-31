@@ -5,12 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Hotel_Management.Pages"
         mc:Ignorable="d"
-        Title="Chọn Phòng" Height="500" Width="880"
+        Title="Chọn phòng" Height="500" Width="880"
         WindowStartupLocation="CenterScreen" WindowStyle="None"
         Background="Transparent" AllowsTransparency="True"
-        ResizeMode="NoResize" WindowState="Normal" FontFamily="Times New Roman"
+        ResizeMode="NoResize" WindowState="Normal" FontFamily="Segoe UI"
         Icon="/Assets/icon.ico" MouseLeftButtonDown="Window_MouseLeftButtonDown">
-    <Border Background="{DynamicResource SecondaryBackgroundColor}" BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="2">
+    <Border Background="{DynamicResource SecondaryBackgroundColor}" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1">
         <Border.Style>
             <Style TargetType="Border">
                 <Setter Property="CornerRadius" Value="8"/>
@@ -48,7 +48,7 @@
                 </Grid.RowDefinitions>
 
                 <Grid Grid.Row="0">
-                    <Label Content="Danh Sách Phòng Khách Sạn" 
+                    <Label Content="Chọn phòng" 
                            Style="{DynamicResource LabelStyle}" 
                            HorizontalAlignment="Left" VerticalAlignment="Center" 
                            Margin="40 0 0 0" Padding="10 5 0 5"
@@ -83,8 +83,8 @@
                 </DataGrid>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="2" Margin="0,5,0,20">
-                    <Button x:Name="btnPickRoom" Content="Chọn Phòng" Width="120" Margin="0,0,10,0" Style="{DynamicResource PrimaryButtonStyle}" Click="btnPickRoom_Click"/>
-                    <Button x:Name="btnUndo" Content="Bỏ Chọn" Width="120" Margin="0,0,10,0" Style="{DynamicResource SecondaryButtonStyle}" Click="btnUndo_Click"/>
+                    <Button x:Name="btnPickRoom" Content="Chọn phòng" Width="120" Margin="0,0,10,0" Style="{DynamicResource PrimaryButtonStyle}" Click="btnPickRoom_Click"/>
+                    <Button x:Name="btnUndo" Content="Bỏ chọn" Width="120" Margin="0,0,10,0" Style="{DynamicResource SecondaryButtonStyle}" Click="btnUndo_Click"/>
                     <Button x:Name="btnCloseWindow" Content="Đóng" Width="120" Margin="0,0,0,0" Style="{DynamicResource SecondaryButtonStyle}" Click="btnCloseWindow_Click"/>
                 </StackPanel>
             </Grid>

@@ -6,7 +6,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:Hotel_Management.Pages"
       mc:Ignorable="d" 
-      d:DesignHeight="566" d:DesignWidth="920" Title="Thống Kê &amp; Báo Cáo" FontFamily="Times New Roman">
+      d:DesignHeight="566" d:DesignWidth="920" Title="Thống kê và báo cáo" FontFamily="Segoe UI">
 
     <Border CornerRadius="5" Background="{DynamicResource SecondaryBackgroundColor}">
         <Grid>
@@ -17,7 +17,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="0" Content="Thống Kê &amp; Báo Cáo" 
+            <Label Grid.Row="0" Content="Thống kê và báo cáo" 
                    Style="{DynamicResource LabelStyle}" 
                    HorizontalAlignment="Left" VerticalAlignment="Center" 
                    Margin="40 0 0 0" Padding="10 5 0 5"
@@ -25,9 +25,9 @@
 
             <Border Grid.Row="1" CornerRadius="5" Background="{DynamicResource PrimaryBackgroundColor}" Margin="20,0,20,10">
                 <StackPanel Orientation="Horizontal" Margin="20,10,0,10">
-                    <TextBlock Text="Chọn tháng" Width="100" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="15"/>
+                    <TextBlock Text="Tháng" Width="100" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="15"/>
                     <DatePicker x:Name="dateThoiGian" Width="200" Style="{DynamicResource DatePickerStyle}" SelectedDateChanged="DateThoiGian_SelectedDateChanged" />
-                    <Button x:Name="btnRefresh" Content="Xem Thống Kê" Margin="20,0,0,0" Width="130" Style="{DynamicResource PrimaryButtonStyle}" Click="btnRefresh_Click"/>
+                    <Button x:Name="btnRefresh" Content="Xem thống kê" Margin="20,0,0,0" Width="130" Style="{DynamicResource PrimaryButtonStyle}" Click="btnRefresh_Click"/>
                 </StackPanel>
             </Border>
 
@@ -40,9 +40,9 @@
                 </Grid.ColumnDefinitions>
                 
                 <!-- Thẻ 1: Lượt đặt phòng -->
-                <Border Grid.Column="0" CornerRadius="6" Background="{DynamicResource PrimaryBackgroundColor}" BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="1" Margin="0,0,8,0" Padding="12,12">
+                <Border Grid.Column="0" CornerRadius="6" Background="{DynamicResource PrimaryBackgroundColor}" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1" Margin="0,0,8,0" Padding="12,12">
                     <StackPanel Orientation="Vertical">
-                        <TextBlock Foreground="{DynamicResource TextSecondaryColor}" FontSize="13" FontWeight="Bold" Text="Lượt Đặt Phòng"/>
+                        <TextBlock Foreground="{DynamicResource TextSecondaryColor}" FontSize="13" FontWeight="Bold" Text="Lượt đặt phòng"/>
                         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                             <iconPacks:PackIconBootstrapIcons Width="24" Height="24" Kind="Buildings" Foreground="{DynamicResource PrimaryBlueColor}" VerticalAlignment="Center"/>
                             <StackPanel Margin="8,0,0,0">
@@ -54,9 +54,9 @@
                 </Border>
                 
                 <!-- Thẻ 2: Doanh thu phòng -->
-                <Border Grid.Column="1" CornerRadius="6" Background="{DynamicResource PrimaryBackgroundColor}" BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="1" Margin="4,0,4,0" Padding="12,12">
+                <Border Grid.Column="1" CornerRadius="6" Background="{DynamicResource PrimaryBackgroundColor}" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1" Margin="4,0,4,0" Padding="12,12">
                     <StackPanel Orientation="Vertical">
-                        <TextBlock Foreground="{DynamicResource TextSecondaryColor}" FontSize="13" FontWeight="Bold" Text="Tiền Phòng"/>
+                        <TextBlock Foreground="{DynamicResource TextSecondaryColor}" FontSize="13" FontWeight="Bold" Text="Tiền phòng"/>
                         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                             <iconPacks:PackIconBootstrapIcons Width="24" Height="24" Kind="DoorOpenFill" Foreground="{DynamicResource PrimaryBlueColor}" VerticalAlignment="Center"/>
                             <StackPanel Margin="8,0,0,0">
@@ -68,9 +68,9 @@
                 </Border>
 
                 <!-- Thẻ 3: Doanh thu dịch vụ -->
-                <Border Grid.Column="2" CornerRadius="6" Background="{DynamicResource PrimaryBackgroundColor}" BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="1" Margin="4,0,4,0" Padding="12,12">
+                <Border Grid.Column="2" CornerRadius="6" Background="{DynamicResource PrimaryBackgroundColor}" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1" Margin="4,0,4,0" Padding="12,12">
                     <StackPanel Orientation="Vertical">
-                        <TextBlock Foreground="{DynamicResource TextSecondaryColor}" FontSize="13" FontWeight="Bold" Text="Tiền Dịch Vụ"/>
+                        <TextBlock Foreground="{DynamicResource TextSecondaryColor}" FontSize="13" FontWeight="Bold" Text="Tiền dịch vụ"/>
                         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                             <iconPacks:PackIconBootstrapIcons Width="24" Height="24" Kind="CupHotFill" Foreground="{DynamicResource PrimaryBlueColor}" VerticalAlignment="Center"/>
                             <StackPanel Margin="8,0,0,0">
@@ -82,9 +82,9 @@
                 </Border>
 
                 <!-- Thẻ 4: Tổng doanh thu -->
-                <Border Grid.Column="3" CornerRadius="6" Background="{DynamicResource PrimaryBackgroundColor}" BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="1" Margin="8,0,0,0" Padding="12,12">
+                <Border Grid.Column="3" CornerRadius="6" Background="{DynamicResource PrimaryBackgroundColor}" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1" Margin="8,0,0,0" Padding="12,12">
                     <StackPanel Orientation="Vertical">
-                        <TextBlock Foreground="{DynamicResource TextSecondaryColor}" FontSize="13" FontWeight="Bold" Text="Tổng Doanh Thu"/>
+                        <TextBlock Foreground="{DynamicResource TextSecondaryColor}" FontSize="13" FontWeight="Bold" Text="Tổng doanh thu"/>
                         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                             <iconPacks:PackIconBootstrapIcons Width="24" Height="24" Kind="CashCoin" Foreground="{DynamicResource SuccessNotification}" VerticalAlignment="Center"/>
                             <StackPanel Margin="8,0,0,0">
@@ -104,46 +104,58 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Cột trái: Top dịch vụ bán chạy -->
-                <Border Grid.Column="0" CornerRadius="6" Background="{DynamicResource PrimaryBackgroundColor}" BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="1" Margin="0,0,10,0">
+                <Border Grid.Column="0" CornerRadius="6" Background="{DynamicResource PrimaryBackgroundColor}" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1" Margin="0,0,10,0">
                     <Grid Margin="15">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" Text="Top Dịch Vụ Đem Lại Doanh Thu Cao Nhất" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource PrimaryBlueColor}" Margin="0,0,0,10"/>
+                        <TextBlock Grid.Row="0" Text="Dịch vụ có doanh thu cao nhất" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryColor}" Margin="0,0,0,10"/>
                         <DataGrid Grid.Row="1" x:Name="dgTopServices" AutoGenerateColumns="False" IsReadOnly="True" Style="{DynamicResource DataGridStyle}">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Tên Dịch Vụ" Binding="{Binding ServiceName}" Width="1.8*"/>
+                                <DataGridTextColumn Header="Tên dịch vụ" Binding="{Binding ServiceName}" Width="1.8*"/>
                                 <DataGridTextColumn Header="ĐVT" Binding="{Binding Unit}" Width="0.7*"/>
-                                <DataGridTextColumn Header="Số Lượng" Binding="{Binding Quantity}" Width="0.7*"/>
-                                <DataGridTextColumn Header="Doanh Thu (VND)" Binding="{Binding TotalRevenue, StringFormat={}{0:N0}}" Width="1.2*"/>
+                                <DataGridTextColumn Header="Số lượng" Binding="{Binding Quantity}" Width="0.7*"/>
+                                <DataGridTextColumn Header="Doanh thu (VND)" Binding="{Binding TotalRevenue, StringFormat={}{0:N0}}" Width="1.2*"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </Grid>
                 </Border>
 
                 <!-- Cột phải: Tình trạng phòng hiện tại -->
-                <Border Grid.Column="1" CornerRadius="6" Background="{DynamicResource PrimaryBackgroundColor}" BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="1" Margin="10,0,0,0">
+                <Border Grid.Column="1" CornerRadius="6" Background="{DynamicResource PrimaryBackgroundColor}" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1" Margin="10,0,0,0">
                     <StackPanel Margin="18" VerticalAlignment="Top">
-                        <TextBlock Text="Tình Trạng Phòng Hiện Tại" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource PrimaryBlueColor}" Margin="0,0,0,18"/>
+                        <TextBlock Text="Tình trạng phòng hiện tại" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryColor}" Margin="0,0,0,18"/>
                         
                         <Grid Margin="0,0,0,14">
-                            <TextBlock Text="🟢 Phòng sẵn sàng (Trống):" FontSize="14" Foreground="{DynamicResource TextSecondaryColor}"/>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Ellipse Width="8" Height="8" Fill="{DynamicResource SuccessNotification}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Phòng sẵn sàng (Trống):" FontSize="13.5" Foreground="{DynamicResource TextSecondaryColor}"/>
+                            </StackPanel>
                             <TextBlock x:Name="txtPhongTrong" Text="0 phòng" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource SuccessNotification}" HorizontalAlignment="Right"/>
                         </Grid>
                         
                         <Grid Margin="0,0,0,14">
-                            <TextBlock Text="🔵 Phòng đang sử dụng:" FontSize="14" Foreground="{DynamicResource TextSecondaryColor}"/>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Ellipse Width="8" Height="8" Fill="{DynamicResource PrimaryBlueColor}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Phòng đang sử dụng:" FontSize="13.5" Foreground="{DynamicResource TextSecondaryColor}"/>
+                            </StackPanel>
                             <TextBlock x:Name="txtPhongDangDung" Text="0 phòng" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource PrimaryBlueColor}" HorizontalAlignment="Right"/>
                         </Grid>
 
                         <Grid Margin="0,0,0,14">
-                            <TextBlock Text="🟡 Phòng đã đặt trước:" FontSize="14" Foreground="{DynamicResource TextSecondaryColor}"/>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Ellipse Width="8" Height="8" Fill="{DynamicResource WarningNotification}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Phòng đã đặt trước:" FontSize="13.5" Foreground="{DynamicResource TextSecondaryColor}"/>
+                            </StackPanel>
                             <TextBlock x:Name="txtPhongDaDat" Text="0 phòng" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource WarningNotification}" HorizontalAlignment="Right"/>
                         </Grid>
 
                         <Grid Margin="0,0,0,5">
-                            <TextBlock Text="🔴 Phòng chờ / đang dọn:" FontSize="14" Foreground="{DynamicResource TextSecondaryColor}"/>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Ellipse Width="8" Height="8" Fill="{DynamicResource ErrorNotification}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Phòng chờ / đang dọn:" FontSize="13.5" Foreground="{DynamicResource TextSecondaryColor}"/>
+                            </StackPanel>
                             <TextBlock x:Name="txtPhongDonDep" Text="0 phòng" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ErrorNotification}" HorizontalAlignment="Right"/>
                         </Grid>
                     </StackPanel>

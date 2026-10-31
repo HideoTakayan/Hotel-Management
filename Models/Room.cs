@@ -60,11 +60,11 @@ namespace Hotel_Management.Models
             {
                 return Quality switch
                 {
-                    1 => "1 ★",
-                    2 => "2 ★",
-                    3 => "3 ★",
-                    4 => "4 ★",
-                    5 => "5 ★",
+                    1 => "1 sao",
+                    2 => "2 sao",
+                    3 => "3 sao",
+                    4 => "4 sao",
+                    5 => "5 sao",
                     _ => "Không xác định"
                 };
             }

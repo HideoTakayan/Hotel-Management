@@ -57,11 +57,20 @@ namespace Hotel_Management.Pages
                             SELECT b1.*
                             FROM Bills b1
                             INNER JOIN (
-                                SELECT RoomId, MAX(BillId) AS MaxBillId
+                                SELECT RoomId, 
+                                       CAST(SUBSTRING_INDEX(
+                                           GROUP_CONCAT(BillId ORDER BY 
+                                               CASE 
+                                                   WHEN Status = 3 THEN 1
+                                                   WHEN Status = 4 THEN 2
+                                                   WHEN Status = 0 THEN 3
+                                                   ELSE 4
+                                               END ASC, BillId DESC), ',', 1
+                                       ) AS UNSIGNED) AS PreferredBillId
                                 FROM Bills
                                 WHERE Status IN (0, 3, 4)
                                 GROUP BY RoomId
-                            ) latest ON b1.BillId = latest.MaxBillId
+                            ) latest ON b1.BillId = latest.PreferredBillId
                         ) b ON r.RoomId = b.RoomId
                         ORDER BY r.RoomNumber ASC";
 
@@ -160,8 +169,8 @@ namespace Hotel_Management.Pages
                 {
                     borderCheckoutNotice.Visibility = Visibility.Visible;
                     string roomNames = string.Join(", ", dueRooms.ConvertAll(r => $"Phòng {r.RoomNumber} ({r.CustomerName})"));
-                    txtCheckoutNoticeTitle.Text = $"🔔 CẢNH BÁO: CÓ {dueRooms.Count} PHÒNG ĐẾN HẠN TRẢ PHÒNG HÔM NAY ({DateTime.Now:dd/MM/yyyy})!";
-                    txtCheckoutNoticeDesc.Text = $"Các phòng cần kiểm tra trả phòng / thanh toán: {roomNames}.";
+                    txtCheckoutNoticeTitle.Text = $"{dueRooms.Count} phòng đến hạn trả hôm nay ({DateTime.Now:dd/MM/yyyy})";
+                    txtCheckoutNoticeDesc.Text = $"Danh sách phòng: {roomNames}.";
                 }
                 else
                 {
@@ -250,10 +259,10 @@ namespace Hotel_Management.Pages
             string checkoutStatus = card.CheckoutStatusText;
             string totalText = card.BillTotal.HasValue ? $"{card.BillTotal.Value:N0} VND" : "---";
 
-            string dueNotice = card.IsDueToday ? "\n⚠️ LƯU Ý ĐẶC BIỆT: Phòng này đến hạn trả phòng hôm nay! Vui lòng kiểm tra và hoàn tất thủ tục trả phòng." : "";
+            string dueNotice = card.IsDueToday ? "\nLưu ý: Phòng này đến hạn trả phòng hôm nay. Vui lòng kiểm tra và hoàn tất thủ tục trả phòng." : "";
 
             string detailMessage =
-                $"🏨 THÔNG TIN CHI TIẾT ĐẶT PHÒNG - PHÒNG {card.RoomNumber}\n" +
+                $"THÔNG TIN CHI TIẾT ĐẶT PHÒNG - PHÒNG {card.RoomNumber}\n" +
                 $"────────────────────────────────────────\n" +
                 $"• Khách hàng: {customer}\n" +
                 $"• Số điện thoại: {phone}\n" +
@@ -265,7 +274,7 @@ namespace Hotel_Management.Pages
                 $"• Tổng tiền hóa đơn: {totalText}\n" +
                 dueNotice + "\n" +
                 $"────────────────────────────────────────\n" +
-                $"👉 Bạn có muốn chuyển sang mục 'Quản Lý Hóa Đơn' để xem chi tiết hoặc tính tiền phòng này không?";
+                $"Bạn có muốn chuyển sang mục 'Quản Lý Hóa Đơn' để xem chi tiết hoặc thanh toán phòng này không?";
 
             var result = MessageBox.Show(detailMessage, $"Chi Tiết Khách Đặt Phòng {card.RoomNumber}", MessageBoxButton.YesNo, MessageBoxImage.Information);
             if (result == MessageBoxResult.Yes)
@@ -507,7 +516,7 @@ namespace Hotel_Management.Pages
                 if (StartDate.HasValue && EndDate.HasValue)
                 {
                     int nights = Math.Max(1, (EndDate.Value.Date - StartDate.Value.Date).Days);
-                    return $"{StartDate.Value:dd/MM/yyyy HH:mm} ➔ {EndDate.Value:dd/MM/yyyy HH:mm} ({nights} đêm)";
+                    return $"{StartDate.Value:dd/MM/yyyy HH:mm} - {EndDate.Value:dd/MM/yyyy HH:mm} ({nights} đêm)";
                 }
                 return "---";
             }

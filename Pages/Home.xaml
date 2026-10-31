@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:Hotel_Management.Pages"
       mc:Ignorable="d" 
       d:DesignHeight="650" d:DesignWidth="920"
-      Title="Home" FontFamily="Times New Roman">
+      Title="Giới thiệu - Kinkaku-ji Onsen" FontFamily="Segoe UI">
 
     <Border CornerRadius="5" Background="{DynamicResource SecondaryBackgroundColor}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
@@ -32,24 +32,24 @@
                            Foreground="{DynamicResource PrimaryBlueColor}"/>
                 </StackPanel>
                 
-                <!-- Hero Section (Banner) -->
+                <!-- Hero Section (Banner với hình ảnh Onsen) -->
                 <Border Grid.Row="1" Margin="40,0,40,14" Height="190" CornerRadius="6" ClipToBounds="True">
                     <Grid>
                         <Image Source="/Assets/1.jpg" Stretch="UniformToFill"/>
                         <Border Background="#77000000"/> <!-- Dark overlay for text readability -->
                         
                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                            <TextBlock Text="金 閣 寺 温 泉" FontSize="32" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,4" FontFamily="Segoe UI, Meiryo, 'Times New Roman'">
+                            <TextBlock Text="金 閣 寺 温 泉" FontSize="32" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,4" FontFamily="Meiryo, Segoe UI">
                                 <TextBlock.Effect>
                                     <DropShadowEffect BlurRadius="10" ShadowDepth="2" Color="Black" Opacity="0.5"/>
                                 </TextBlock.Effect>
                             </TextBlock>
-                            <TextBlock Text="K I N K A K U - J I   O N S E N   &amp;   R Y O K A N" FontSize="18" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" FontFamily="Segoe UI, 'Times New Roman'">
+                            <TextBlock Text="K I N K A K U - J I   O N S E N   &amp;   R Y O K A N" FontSize="18" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center">
                                 <TextBlock.Effect>
                                     <DropShadowEffect BlurRadius="8" ShadowDepth="1" Color="Black" Opacity="0.5"/>
                                 </TextBlock.Effect>
                             </TextBlock>
-                            <TextBlock Text="Khu Nghỉ Dưỡng Suối Khoáng Nóng &amp; Lữ Quán Truyền Thống Chuẩn Nhật Bản" FontSize="13" FontStyle="Italic" Foreground="#E0E0E0" HorizontalAlignment="Center" Margin="0,4,0,0" FontFamily="Segoe UI, 'Times New Roman'"/>
+                            <TextBlock Text="Khu Nghỉ Dưỡng Suối Khoáng Nóng &amp; Lữ Quán Truyền Thống Chuẩn Nhật Bản" FontSize="13" FontStyle="Italic" Foreground="#E0E0E0" HorizontalAlignment="Center" Margin="0,4,0,0"/>
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -63,47 +63,55 @@
 
                     <!-- Left Text Column -->
                     <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,28,0">
-                        <TextBlock Text="Nghệ thuật nghỉ dưỡng khoáng nóng đích thực (Toji Onsen)" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryBlueColor}" Margin="0,0,0,6" FontFamily="Segoe UI, 'Times New Roman'"/>
+                        <TextBlock Text="Nghệ thuật nghỉ dưỡng khoáng nóng đích thực (Toji Onsen)" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryBlueColor}" Margin="0,0,0,6"/>
                         <Rectangle Fill="{DynamicResource PrimaryBlueColor}" Height="2" Width="50" HorizontalAlignment="Left" Margin="0,0,0,8" Opacity="0.7"/>
                         
                         <TextBlock TextWrapping="Wrap" FontSize="13.5" Foreground="{DynamicResource TextSecondaryColor}" LineHeight="22" TextAlignment="Justify" Margin="0,0,0,8"
                                    Text="Trong văn hóa Nhật Bản, Onsen không chỉ là ngâm tắm suối khoáng nóng mà còn là liệu pháp thanh tẩy thân - tâm - trí. Tại Kinkaku-ji Onsen &amp; Ryokan, nguồn khoáng nóng tự nhiên giàu khoáng chất Bicarbonate và Natri ở nhiệt độ 42°C – 48°C (Bijin-no-yu - Suối nguồn sắc đẹp) giúp thư giãn cơ khớp, tuần hoàn khí huyết và tái tạo năng lượng."/>
                         <TextBlock TextWrapping="Wrap" FontSize="13.5" Foreground="{DynamicResource TextSecondaryColor}" LineHeight="22" TextAlignment="Justify"
-                                   Text="Mỗi phòng nghỉ Washitsu đều được lát chiếu cói Tatami thơm mùi cỏ bấc, nệm Futon êm ái, cửa trượt giấy Shoji và bồn gỗ Bách Mộc (Hinoki). Kết hợp cùng tinh thần hiếu khách Omotenashi, ẩm thực Kaiseki Ryori thượng hạng và xông đá muối Ganbanyoku, Kinkaku-ji mang trọn vẹn linh hồn Kyoto đến kỳ nghỉ của quý khách."/>
+                                   Text="Mỗi phòng nghỉ Washitsu đều được lát chiếu cói Tatami thơm mùi cỏ bấc, nệm Futon êm ái, cửa trượt giấy Shoji và bồn gỗ Bách Mộc (Hinoki). Kết hợp cùng tinh thần hiếu khách Omotenashi, ẩm thực Kaiseki Ryori thượng hạng, xông đá muối Ganbanyoku và khu giải trí truyền thống, Kinkaku-ji mang trọn vẹn linh hồn Kyoto đến kỳ nghỉ của quý khách."/>
                     </StackPanel>
 
                     <!-- Right Image Column -->
-                    <Border Grid.Column="1" CornerRadius="6" ClipToBounds="True" BorderBrush="{DynamicResource PrimaryGrayColor}" BorderThickness="1" Height="215">
+                    <Border Grid.Column="1" CornerRadius="6" ClipToBounds="True" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1" Height="215">
                         <Image Source="/Assets/2.jpg" Stretch="UniformToFill"/>
                     </Border>
                 </Grid>
 
-                <!-- 3 Pillars of Onsen & Ryokan -->
+                <!-- 4 Trụ Cột Trải Nghiệm Onsen & Ryokan -->
                 <Grid Grid.Row="3" Margin="40,0,40,0" VerticalAlignment="Bottom">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <Border Grid.Column="0" Margin="0,0,8,0" Padding="12,10" Background="{DynamicResource PrimaryBackgroundColor}" CornerRadius="6" BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="1">
+                    <Border Grid.Column="0" Margin="0,0,6,0" Padding="12,10" Background="{DynamicResource PrimaryBackgroundColor}" CornerRadius="6" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1">
                         <StackPanel>
-                            <TextBlock Text="♨️ Khoáng Nóng &amp; Trị Liệu" FontSize="13.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryBlueColor}" Margin="0,0,0,4"/>
-                            <TextBlock Text="Hệ thống bể khoáng Public Onsen, bể riêng Kashikiri Hinoki, xông đá muối Himalaya Ganbanyoku, bùn khoáng và bấm huyệt Shiatsu." FontSize="12" Foreground="{DynamicResource TextSecondaryColor}" TextWrapping="Wrap" LineHeight="17"/>
+                            <TextBlock Text="Khoáng Nóng &amp; Trị Liệu" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryBlueColor}" Margin="0,0,0,4"/>
+                            <TextBlock Text="Hệ thống bể khoáng Public Onsen, bể riêng Kashikiri Hinoki, xông đá muối Himalaya Ganbanyoku, bùn khoáng và bấm huyệt Shiatsu." FontSize="11.5" Foreground="{DynamicResource TextSecondaryColor}" TextWrapping="Wrap" LineHeight="16"/>
                         </StackPanel>
                     </Border>
 
-                    <Border Grid.Column="1" Margin="4,0,4,0" Padding="12,10" Background="{DynamicResource PrimaryBackgroundColor}" CornerRadius="6" BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="1">
+                    <Border Grid.Column="1" Margin="3,0,3,0" Padding="12,10" Background="{DynamicResource PrimaryBackgroundColor}" CornerRadius="6" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1">
                         <StackPanel>
-                            <TextBlock Text="🏯 Phòng Nghỉ Ryokan (Washitsu)" FontSize="13.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryBlueColor}" Margin="0,0,0,4"/>
-                            <TextBlock Text="2 tầng (101–105 &amp; 201–205) từ tiêu chuẩn đến Kazoku Suite: chiếu Tatami, nệm Futon truyền thống hoặc giường cao cấp, diện tích từ 25m² – 55m²." FontSize="12" Foreground="{DynamicResource TextSecondaryColor}" TextWrapping="Wrap" LineHeight="17"/>
+                            <TextBlock Text="Phòng Nghỉ Ryokan (Washitsu)" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryBlueColor}" Margin="0,0,0,4"/>
+                            <TextBlock Text="10 phòng 2 tầng (101–105 &amp; 201–205): chiếu Tatami, nệm Futon truyền thống, bồn gỗ Hinoki, diện tích 25m² – 55m²." FontSize="11.5" Foreground="{DynamicResource TextSecondaryColor}" TextWrapping="Wrap" LineHeight="16"/>
                         </StackPanel>
                     </Border>
 
-                    <Border Grid.Column="2" Margin="8,0,0,0" Padding="12,10" Background="{DynamicResource PrimaryBackgroundColor}" CornerRadius="6" BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="1">
+                    <Border Grid.Column="2" Margin="3,0,3,0" Padding="12,10" Background="{DynamicResource PrimaryBackgroundColor}" CornerRadius="6" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1">
                         <StackPanel>
-                            <TextBlock Text="🍱 Ẩm Thực Kaiseki &amp; Trà Đạo" FontSize="13.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryBlueColor}" Margin="0,0,0,4"/>
-                            <TextBlock Text="Thực đơn tối Kaiseki Ryori 9 món, Buffet Nhật Bản, trứng trường thọ Onsen Tamago, trà đạo Uji Matcha &amp; Wagashi và rượu Sake Daiginjo." FontSize="12" Foreground="{DynamicResource TextSecondaryColor}" TextWrapping="Wrap" LineHeight="17"/>
+                            <TextBlock Text="Ẩm Thực Kaiseki &amp; Trà Đạo" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryBlueColor}" Margin="0,0,0,4"/>
+                            <TextBlock Text="Thực đơn tối Kaiseki 9 món, Buffet sáng Nhật Bản, trứng trường thọ Onsen Tamago, trà đạo Uji Matcha và rượu Sake Daiginjo." FontSize="11.5" Foreground="{DynamicResource TextSecondaryColor}" TextWrapping="Wrap" LineHeight="16"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="3" Margin="6,0,0,0" Padding="12,10" Background="{DynamicResource PrimaryBackgroundColor}" CornerRadius="6" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock Text="Giải Trí Onsen Truyền Thống" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryBlueColor}" Margin="0,0,0,4"/>
+                            <TextBlock Text="Bóng bàn Onsen Takkyu trong áo Yukata, Bida giải trí, Bắn súng hội chợ Shateki, Cờ tướng Nhật Shogi và Máy gắp thú Arcade." FontSize="11.5" Foreground="{DynamicResource TextSecondaryColor}" TextWrapping="Wrap" LineHeight="16"/>
                         </StackPanel>
                     </Border>
                 </Grid>

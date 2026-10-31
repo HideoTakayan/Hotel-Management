@@ -6,7 +6,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:Hotel_Management.Pages" 
       mc:Ignorable="d" 
-      d:DesignHeight="566" d:DesignWidth="920" Title="Quản Lý Phòng" FontFamily="Times New Roman">
+      d:DesignHeight="566" d:DesignWidth="920" Title="Quản Lý Phòng" FontFamily="Segoe UI">
     
     <Border CornerRadius="5" Background="{DynamicResource SecondaryBackgroundColor}">
         <Grid>
@@ -17,7 +17,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="0" Content="Quản Lý Phòng" 
+            <Label Grid.Row="0" Content="Quản lý phòng" 
                 Style="{DynamicResource LabelStyle}" 
                 HorizontalAlignment="Left" VerticalAlignment="Center" 
                 Margin="40 0 0 0" Padding="10 5 0 5"
@@ -70,7 +70,7 @@
                             <TextBox Grid.Column="3" x:Name="txtNumberBed" Width="Auto" Style="{DynamicResource TextBoxStyle}" Tag="Số đệm"/>
                         </Grid>
                         <StackPanel Orientation="Horizontal" Margin="110,2,0,0">
-                            <TextBlock x:Name="txtNumberPeopleError" Text="Số người phải lớn hơn 0   " Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
+                            <TextBlock x:Name="txtNumberPeopleError" Text="Số người phải lớn hơn 0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
                             <TextBlock x:Name="txtNumberBedError" Text="Số đệm/giường phải lớn hơn 0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
                         </StackPanel>
                     </StackPanel>
@@ -82,11 +82,11 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" Text="Chất lượng" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
                             <ComboBox Grid.Column="1" x:Name="comboboxQuality" Width="Auto" Style="{DynamicResource ComboBoxStyle}" Tag="Chọn chất lượng">
-                                <ComboBoxItem Tag="1">1 ★</ComboBoxItem>
-                                <ComboBoxItem Tag="2">2 ★</ComboBoxItem>
-                                <ComboBoxItem Tag="3">3 ★</ComboBoxItem>
-                                <ComboBoxItem Tag="4">4 ★</ComboBoxItem>
-                                <ComboBoxItem Tag="5">5 ★</ComboBoxItem>
+                                <ComboBoxItem Tag="1">1 sao (Tiêu chuẩn)</ComboBoxItem>
+                                <ComboBoxItem Tag="2">2 sao (Tiêu chuẩn)</ComboBoxItem>
+                                <ComboBoxItem Tag="3">3 sao (Khá)</ComboBoxItem>
+                                <ComboBoxItem Tag="4">4 sao (Cao cấp)</ComboBoxItem>
+                                <ComboBoxItem Tag="5">5 sao (Thương gia / VIP)</ComboBoxItem>
                             </ComboBox>
                         </Grid>
                         <TextBlock x:Name="txtQualityError" Text="Vui lòng chọn chất lượng" Margin="110,2,0,0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
@@ -168,10 +168,10 @@
             </Grid>
 
             <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,6,0,8" HorizontalAlignment="Center">
-                <Button x:Name="btnAddRoom" Content="Thêm Mới" Width="120" Margin="0,0,10,0" Style="{DynamicResource PrimaryButtonStyle}" Click="BtnAddRoom_Click"/>
-                <Button x:Name="btnUpdateRoom" Content="Cập Nhật" Width="120" Margin="0,0,10,0" Style="{DynamicResource PrimaryButtonStyle}" Click="BtnUpdateRoom_Click"/>
+                <Button x:Name="btnAddRoom" Content="Thêm phòng" Width="120" Margin="0,0,10,0" Style="{DynamicResource PrimaryButtonStyle}" Click="BtnAddRoom_Click"/>
+                <Button x:Name="btnUpdateRoom" Content="Cập nhật" Width="120" Margin="0,0,10,0" Style="{DynamicResource PrimaryButtonStyle}" Click="BtnUpdateRoom_Click"/>
                 <Button x:Name="btnDelRoom" Content="Xóa" Width="120" Margin="0,0,10,0" Style="{DynamicResource SecondaryButtonStyle}" Click="BtnDelRoom_Click"/>
-                <Button x:Name="btnRefresh" Content="Làm Mới" Width="120" Margin="0,0,0,0" Style="{DynamicResource SecondaryButtonStyle}" Click="BtnRefresh_Click"/>
+                <Button x:Name="btnRefresh" Content="Làm mới" Width="120" Margin="0,0,0,0" Style="{DynamicResource SecondaryButtonStyle}" Click="BtnRefresh_Click"/>
             </StackPanel>
 
             <DataGrid Grid.Row="3" x:Name="RoomsDataGrid" Margin="20,0,20,16" SelectionChanged="RoomsDataGrid_SelectionChanged" Style="{DynamicResource DataGridStyle}">

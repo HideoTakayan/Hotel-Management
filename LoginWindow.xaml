@@ -6,7 +6,7 @@
         WindowStartupLocation="CenterScreen" WindowStyle="None"
         Background="Transparent" AllowsTransparency="True"
         ResizeMode="NoResize"
-        FontFamily="Times New Roman"
+        FontFamily="Segoe UI"
         Icon="/Assets/icon.ico"
         MouseLeftButtonDown="Window_MouseLeftButtonDown">
     <Border CornerRadius="8" Background="{DynamicResource PrimaryBackgroundColor}">
@@ -19,9 +19,9 @@
             <!-- Left Side: Branding / Background -->
             <Border Grid.Column="0" CornerRadius="8,0,0,8" Background="{DynamicResource SecondaryBackgroundColor}">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <Image Source="/Assets/logo.png" Width="260" Height="260" Margin="0,0,0,20"/>
-                    <TextBlock Text="KINKAKU-JI ONSEN" FontSize="32" FontWeight="Bold" Foreground="{DynamicResource PrimaryBlueColor}" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Khách sạn suối nước nóng chuẩn Nhật Bản" FontSize="18" FontStyle="Italic" Foreground="{DynamicResource PrimaryGrayColor}" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                    <Image Source="/Assets/logo.png" Width="180" Height="180" Margin="0,0,0,16"/>
+                    <TextBlock Text="KINKAKU-JI ONSEN" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource PrimaryBlueColor}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Hệ thống quản lý khách sạn suối nước nóng" FontSize="13.5" Foreground="{DynamicResource PrimaryGrayColor}" HorizontalAlignment="Center" Margin="0,6,0,0"/>
                 </StackPanel>
             </Border>
 
@@ -37,25 +37,25 @@
                 </StackPanel>
 
                 <StackPanel VerticalAlignment="Center" Margin="50,0,50,0">
-                    <TextBlock Text="Đăng Nhập" FontSize="34" FontWeight="Bold" Foreground="{DynamicResource PrimaryBlueColor}" HorizontalAlignment="Center" Margin="0,0,0,10"/>
-                    <TextBlock Text="Vui lòng nhập thông tin tài khoản" FontSize="16" Foreground="{DynamicResource TextSecondaryColor}" HorizontalAlignment="Center" Margin="0,0,0,35"/>
+                    <TextBlock Text="Đăng nhập" FontSize="26" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryColor}" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                    <TextBlock Text="Vui lòng nhập tài khoản để vào hệ thống" FontSize="13.5" Foreground="{DynamicResource PrimaryGrayColor}" HorizontalAlignment="Center" Margin="0,0,0,28"/>
 
                     <!-- Username -->
-                    <TextBlock Text="Tên đăng nhập" Foreground="{DynamicResource TextSecondaryColor}" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,8"/>
-                    <Border CornerRadius="6" Background="{DynamicResource SecondaryBackgroundColor}" BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="1.5" Height="45" Margin="0,0,0,22">
+                    <TextBlock Text="Tên đăng nhập" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                    <Border CornerRadius="6" Background="{DynamicResource SecondaryBackgroundColor}" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1" Height="42" Margin="0,0,0,18">
                         <Grid>
-                            <iconPacks:PackIconBootstrapIcons Kind="PersonFill" Foreground="{DynamicResource PrimaryBlueColor}" VerticalAlignment="Center" Margin="15,0,0,0"/>
-                            <TextBox x:Name="txtUsername" Width="Auto" Height="Auto" Background="Transparent" BorderThickness="0" Padding="0" Margin="44,0,12,0" FontSize="16" Style="{DynamicResource TextBoxStyle}" Tag="Nhập tên đăng nhập..."/>
+                            <iconPacks:PackIconBootstrapIcons Kind="PersonFill" Foreground="{DynamicResource PrimaryGrayColor}" VerticalAlignment="Center" Margin="14,0,0,0"/>
+                            <TextBox x:Name="txtUsername" Width="Auto" Height="Auto" Background="Transparent" BorderThickness="0" Padding="0" Margin="42,0,12,0" FontSize="14.5" Style="{DynamicResource TextBoxStyle}" Tag="Nhập tên đăng nhập..."/>
                         </Grid>
                     </Border>
 
                     <!-- Password -->
-                    <TextBlock Text="Mật khẩu" Foreground="{DynamicResource TextSecondaryColor}" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,8"/>
-                    <Border CornerRadius="6" Background="{DynamicResource SecondaryBackgroundColor}" BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="1.5" Height="45" Margin="0,0,0,30">
+                    <TextBlock Text="Mật khẩu" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                    <Border CornerRadius="6" Background="{DynamicResource SecondaryBackgroundColor}" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1" Height="42" Margin="0,0,0,24">
                         <Grid>
-                            <iconPacks:PackIconBootstrapIcons Kind="LockFill" Foreground="{DynamicResource PrimaryBlueColor}" VerticalAlignment="Center" Margin="15,0,0,0"/>
-                            <PasswordBox x:Name="txtPassword" Width="Auto" Height="Auto" Background="Transparent" BorderThickness="0" Padding="0" Margin="44,0,42,0" FontSize="16" Style="{DynamicResource PasswordBoxStyle}"/>
-                            <TextBox x:Name="txtPasswordVisible" Width="Auto" Height="Auto" Background="Transparent" BorderThickness="0" Padding="0" Margin="44,0,42,0" FontSize="16" Style="{DynamicResource TextBoxStyle}" Tag="Nhập mật khẩu..." Visibility="Collapsed"/>
+                            <iconPacks:PackIconBootstrapIcons Kind="LockFill" Foreground="{DynamicResource PrimaryGrayColor}" VerticalAlignment="Center" Margin="14,0,0,0"/>
+                            <PasswordBox x:Name="txtPassword" Width="Auto" Height="Auto" Background="Transparent" BorderThickness="0" Padding="0" Margin="42,0,42,0" FontSize="14.5" Style="{DynamicResource PasswordBoxStyle}"/>
+                            <TextBox x:Name="txtPasswordVisible" Width="Auto" Height="Auto" Background="Transparent" BorderThickness="0" Padding="0" Margin="42,0,42,0" FontSize="14.5" Style="{DynamicResource TextBoxStyle}" Tag="Nhập mật khẩu..." Visibility="Collapsed"/>
                             <Button x:Name="btnTogglePassword" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0" Width="28" Height="28" Cursor="Hand" Focusable="False" Click="btnTogglePassword_Click" ToolTip="Hiện / Ẩn mật khẩu">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
@@ -70,10 +70,10 @@
                     </Border>
 
                     <!-- Error Message -->
-                    <TextBlock x:Name="txtError" Foreground="{DynamicResource ErrorNotification}" FontSize="14" HorizontalAlignment="Center" Margin="0,0,0,15" Visibility="Collapsed" TextWrapping="Wrap" TextAlignment="Center"/>
+                    <TextBlock x:Name="txtError" Foreground="{DynamicResource ErrorNotification}" FontSize="13" HorizontalAlignment="Center" Margin="0,0,0,14" Visibility="Collapsed" TextWrapping="Wrap" TextAlignment="Center"/>
 
                     <!-- Login Button -->
-                    <Button x:Name="btnLogin" Content="ĐĂNG NHẬP" Height="48" Style="{DynamicResource PrimaryButtonStyle}" IsDefault="True" Click="btnLogin_Click" FontSize="17" FontWeight="Bold"/>
+                    <Button x:Name="btnLogin" Content="Đăng nhập" Height="42" Style="{DynamicResource PrimaryButtonStyle}" IsDefault="True" Click="btnLogin_Click" FontSize="15" FontWeight="SemiBold"/>
                 </StackPanel>
             </Grid>
         </Grid>

@@ -5,7 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       mc:Ignorable="d"
       xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-      d:DesignHeight="566" d:DesignWidth="920" Title="Quản Lý Lịch Làm Việc" FontFamily="Times New Roman">
+      d:DesignHeight="566" d:DesignWidth="920" Title="Quản Lý Lịch Làm Việc" FontFamily="Segoe UI">
 
     <Border CornerRadius="5" Background="{DynamicResource SecondaryBackgroundColor}">
         <Grid>
@@ -16,7 +16,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="0" Content="Quản Lý Lịch Làm Việc" 
+            <Label Grid.Row="0" Content="Lịch làm việc" 
                 Style="{DynamicResource LabelStyle}" 
                 HorizontalAlignment="Left" VerticalAlignment="Center" 
                 Margin="40 0 0 0" Padding="10 5 0 5"
@@ -74,20 +74,20 @@
             </Grid>
                 
             <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,6,0,8" HorizontalAlignment="Center">
-                <Button x:Name="btnAddShift" Content="Thêm Ca" Width="120" Margin="0,0,10,0" Style="{DynamicResource PrimaryButtonStyle}" Click="btnAddShift_Click"/>
-                <Button x:Name="btnUpdateShift" Content="Cập Nhật" Width="120" Margin="0,0,10,0" Style="{DynamicResource PrimaryButtonStyle}" Click="btnUpdateShift_Click"/>
-                <Button x:Name="btnDelShift" Content="Xóa Ca" Width="120" Margin="0,0,10,0" Style="{DynamicResource SecondaryButtonStyle}" Click="btnDelShift_Click"/>
-                <Button x:Name="btnRefresh" Content="Làm Mới" Width="120" Margin="0,0,0,0" Style="{DynamicResource SecondaryButtonStyle}" Click="btnRefresh_Click"/>
+                <Button x:Name="btnAddShift" Content="Thêm ca" Width="120" Margin="0,0,10,0" Style="{DynamicResource PrimaryButtonStyle}" Click="btnAddShift_Click"/>
+                <Button x:Name="btnUpdateShift" Content="Cập nhật" Width="120" Margin="0,0,10,0" Style="{DynamicResource PrimaryButtonStyle}" Click="btnUpdateShift_Click"/>
+                <Button x:Name="btnDelShift" Content="Xóa ca" Width="120" Margin="0,0,10,0" Style="{DynamicResource SecondaryButtonStyle}" Click="btnDelShift_Click"/>
+                <Button x:Name="btnRefresh" Content="Làm mới" Width="120" Margin="0,0,0,0" Style="{DynamicResource SecondaryButtonStyle}" Click="btnRefresh_Click"/>
             </StackPanel>
 
             <DataGrid Grid.Row="3" x:Name="dgShifts" Margin="20,0,20,16" SelectionChanged="dgShifts_SelectionChanged" Style="{DynamicResource DataGridStyle}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="ID" Binding="{Binding ShiftId}" Width="0.45*" MinWidth="45" />
-                    <DataGridTextColumn Header="Ngày Làm" Binding="{Binding WorkDate, StringFormat=dd/MM/yyyy}" Width="*"/>
-                    <DataGridTextColumn Header="Ca Trực" Binding="{Binding ShiftName}" Width="*"/>
-                    <DataGridTextColumn Header="Thời Gian" Binding="{Binding TimeRange}" Width="*"/>
-                    <DataGridTextColumn Header="Nhân Viên 1" Binding="{Binding Employee1_Name}" Width="1.5*"/>
-                    <DataGridTextColumn Header="Nhân Viên 2" Binding="{Binding Employee2_Name}" Width="1.5*"/>
+                    <DataGridTextColumn Header="Ngày làm" Binding="{Binding WorkDate, StringFormat=dd/MM/yyyy}" Width="*"/>
+                    <DataGridTextColumn Header="Ca trực" Binding="{Binding ShiftName}" Width="*"/>
+                    <DataGridTextColumn Header="Thời gian" Binding="{Binding TimeRange}" Width="*"/>
+                    <DataGridTextColumn Header="Nhân viên 1" Binding="{Binding Employee1_Name}" Width="1.5*"/>
+                    <DataGridTextColumn Header="Nhân viên 2" Binding="{Binding Employee2_Name}" Width="1.5*"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

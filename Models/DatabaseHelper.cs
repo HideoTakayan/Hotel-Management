@@ -37,7 +37,7 @@ namespace Hotel_Management.Models
                 }
             }
 
-            int emp1 = 1, emp2 = 1;
+            int emp1 = -1, emp2 = -1;
             // Ưu tiên phân công nhân viên phục vụ/lễ tân (Role = 1) cho ca trực
             string queryStaff = "SELECT Id FROM Users WHERE Role = 1 ORDER BY Id ASC LIMIT 2";
             using (var cmdStaff = new MySqlCommand(queryStaff, conn, trans))
@@ -45,11 +45,11 @@ namespace Hotel_Management.Models
             {
                 if (reader.Read()) emp1 = reader.GetInt32("Id");
                 if (reader.Read()) emp2 = reader.GetInt32("Id");
-                else emp2 = emp1;
+                else if (emp1 != -1) emp2 = emp1;
             }
 
-            // Fallback nếu chưa có nhân viên nào trong bảng Users
-            if (emp1 == 1 && emp2 == 1)
+            // Fallback nếu chưa có nhân viên nào có Role = 1, lấy bất kỳ user nào trong bảng Users
+            if (emp1 == -1)
             {
                 string queryUsers = "SELECT Id FROM Users ORDER BY Role DESC, Id ASC LIMIT 2";
                 using (var cmdUser = new MySqlCommand(queryUsers, conn, trans))
@@ -57,9 +57,12 @@ namespace Hotel_Management.Models
                 {
                     if (reader.Read()) emp1 = reader.GetInt32("Id");
                     if (reader.Read()) emp2 = reader.GetInt32("Id");
-                    else emp2 = emp1;
+                    else if (emp1 != -1) emp2 = emp1;
                 }
             }
+
+            // Trường hợp hy hữu CSDL trống hoàn toàn bảng Users
+            if (emp1 == -1) { emp1 = 1; emp2 = 1; }
 
             string insertShift = @"INSERT INTO Shifts (WorkDate, ShiftType, Employee1_Id, Employee2_Id) 
                                    VALUES (CURDATE(), @ShiftType, @Emp1, @Emp2)";
@@ -214,19 +217,21 @@ namespace Hotel_Management.Models
                     ("Thêm bộ nệm Futon & Chiếu cói Tatami dự phòng cho khách", 250000m, "Bộ")
                 };
 
-                string checkQuery = "SELECT COUNT(*) FROM Services WHERE ServiceName = @Name";
-                string insertQuery = "INSERT INTO Services (ServiceName, Price, Unit) VALUES (@Name, @Price, @Unit)";
+                var existingNames = new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                string loadQuery = "SELECT ServiceName FROM Services";
+                using (var cmdLoad = new MySqlCommand(loadQuery, conn))
+                using (var reader = cmdLoad.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        existingNames.Add(reader.GetString("ServiceName"));
+                    }
+                }
 
+                string insertQuery = "INSERT INTO Services (ServiceName, Price, Unit) VALUES (@Name, @Price, @Unit)";
                 foreach (var svc in defaultServices)
                 {
-                    bool exists = false;
-                    using (var cmdCheck = new MySqlCommand(checkQuery, conn))
-                    {
-                        cmdCheck.Parameters.Add("@Name", MySqlDbType.VarChar, 100).Value = svc.Name;
-                        exists = Convert.ToInt32(cmdCheck.ExecuteScalar()) > 0;
-                    }
-
-                    if (!exists)
+                    if (!existingNames.Contains(svc.Name))
                     {
                         using (var cmdInsert = new MySqlCommand(insertQuery, conn))
                         {
@@ -235,6 +240,7 @@ namespace Hotel_Management.Models
                             cmdInsert.Parameters.Add("@Unit", MySqlDbType.VarChar, 20).Value = svc.Unit;
                             cmdInsert.ExecuteNonQuery();
                         }
+                        existingNames.Add(svc.Name);
                     }
                 }
             }

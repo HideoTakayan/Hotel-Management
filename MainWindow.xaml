@@ -11,7 +11,7 @@
         WindowStartupLocation="CenterScreen" WindowStyle="None"
         Background="Transparent" AllowsTransparency="True"
         ResizeMode="NoResize" WindowState="Normal"
-        FontFamily="Times New Roman"
+        FontFamily="Segoe UI"
         MouseLeftButtonDown="Window_MouseLeftButtonDown"
         PreviewMouseWheel="Window_PreviewMouseWheel"
         PreviewKeyDown="Window_PreviewKeyDown"
@@ -86,19 +86,19 @@
 
                     <!-- Menu Items -->
                     <StackPanel Grid.Row="2" Orientation="Vertical" VerticalAlignment="Top">
-                        <RadioButton x:Name="rdHome" IsChecked="True" Content="Trang Chủ" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource home}" Margin="0 2 0 2" Click="rdHome_Click" />
+                        <RadioButton x:Name="rdHome" IsChecked="True" Content="Trang chủ" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource home}" Margin="0 2 0 2" Click="rdHome_Click" />
                         <RadioButton x:Name="rdRooms" Content="Phòng" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource room}" Margin="0 2 0 2" Click="rdRooms_Click" />
-                        <RadioButton x:Name="rdBooking" Content="Đặt Phòng" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource booking}" Margin="0 2 0 2" Click="rdBooking_Click"  />
-                        <RadioButton x:Name="rdShifts" Content="Lịch Làm Việc" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource calendar}" Margin="0 2 0 2" Click="rdShifts_Click" />
-                        <RadioButton x:Name="rdTasks" Content="Nhiệm Vụ Của Tôi" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource checklist}" Margin="0 2 0 2" Click="rdTasks_Click" />
-                        <RadioButton x:Name="rdBills" Content="Hóa Đơn" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource notes}" Margin="0 2 0 2" Click="rdBills_Click"/>
-                        <RadioButton x:Name="rdServices" Content="Dịch Vụ" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource list}" Margin="0 2 0 2" Click="rdServices_Click"/>
-                        <RadioButton x:Name="rdUsers" Content="Người Dùng" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource users}" Margin="0 2 0 2" Click="rdUsers_Click"/>
-                        <RadioButton x:Name="rdStats" Content="Thống Kê" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource stats}" Margin="0 2 0 2" Click="rdStats_Click" />
+                        <RadioButton x:Name="rdBooking" Content="Đặt phòng" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource booking}" Margin="0 2 0 2" Click="rdBooking_Click"  />
+                        <RadioButton x:Name="rdShifts" Content="Lịch làm việc" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource calendar}" Margin="0 2 0 2" Click="rdShifts_Click" />
+                        <RadioButton x:Name="rdTasks" Content="Nhiệm vụ" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource checklist}" Margin="0 2 0 2" Click="rdTasks_Click" />
+                        <RadioButton x:Name="rdBills" Content="Hóa đơn" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource notes}" Margin="0 2 0 2" Click="rdBills_Click"/>
+                        <RadioButton x:Name="rdServices" Content="Dịch vụ" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource list}" Margin="0 2 0 2" Click="rdServices_Click"/>
+                        <RadioButton x:Name="rdUsers" Content="Người dùng" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource users}" Margin="0 2 0 2" Click="rdUsers_Click"/>
+                        <RadioButton x:Name="rdStats" Content="Thống kê" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource stats}" Margin="0 2 0 2" Click="rdStats_Click" />
                     </StackPanel>
 
                     <StackPanel Orientation="Vertical" Grid.Row="2" VerticalAlignment="Bottom" Margin="0,0,0,0">
-                        <RadioButton x:Name="rdLogout" Content="Đăng Xuất" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource logout}" Margin="0 0 0 6" Click="rdLogout_Click"/>
+                        <RadioButton x:Name="rdLogout" Content="Đăng xuất" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource logout}" Margin="0 0 0 6" Click="rdLogout_Click"/>
                         <StackPanel x:Name="btnProfile" MouseLeftButtonDown="btnProfile_Click" Background="Transparent" Orientation="Horizontal" Width="200" HorizontalAlignment="Left" Margin="0,0,0,15" Cursor="Hand" ToolTip="Hồ sơ cá nhân &amp; Đổi mật khẩu">
                             <Grid Width="60">
                                 <Ellipse Width="34" Height="34" Fill="{DynamicResource PrimaryBlueColor}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -110,7 +110,7 @@
                             </Grid>
                             <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="4,0,0,0">
                                 <TextBlock x:Name="txtUsername" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14" FontWeight="SemiBold" HorizontalAlignment="Left" TextTrimming="CharacterEllipsis" MaxWidth="130"/>
-                                <TextBlock Text="Đổi mật khẩu/Hồ sơ" Foreground="{DynamicResource PrimaryBlueColor}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Left" TextDecorations="Underline"/>
+                                <TextBlock x:Name="txtRole" Text="Nhân viên" Foreground="{DynamicResource PrimaryGrayColor}" FontSize="11.5" HorizontalAlignment="Left"/>
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
@@ -121,7 +121,7 @@
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="38"/>
-                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="7"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
@@ -159,17 +159,13 @@
                 </StackPanel>
                 <!--Button: Close | Restore | Minimize -->
 
-                <Border Grid.Row="1" Margin="10,4,10,4" CornerRadius="5" Background="{DynamicResource PrimaryBlueColor}">
-                    <Grid Margin="0,0,10,0">
-                        <TextBlock Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0">
-                            <Run Text="Hệ thống quản lý Khách sạn Suối Nước Nóng Kinkaku-ji - "/>
-                            <Run Text="v1.0" FontWeight="Bold"/>
-                        </TextBlock>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <TextBlock Text="Kinkaku-ji Onsen &amp; Ryokan" Foreground="White" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold" Margin="10,0,15,0"/>
-                        </StackPanel>
-                    </Grid>
-                </Border>
+                <!-- Tên ứng dụng ở thanh tiêu đề -->
+                <TextBlock Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="16,2,0,0" FontSize="12" Foreground="{DynamicResource PrimaryGrayColor}">
+                    <Run Text="Kinkaku-ji Onsen" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryColor}"/>
+                    <Run Text="· Quản lý khách sạn"/>
+                </TextBlock>
+
+                <Border Grid.Row="1" Margin="10,0,10,6" Height="1" VerticalAlignment="Top" Background="{DynamicResource SecondaryGrayColor}"/>
 
                 <Border x:Name="borderPageHost" Grid.Row="2" Margin="10,0,10,10" SizeChanged="borderPageHost_SizeChanged">
                     <!-- Mặc định co giãn tự nhiên 100% theo vùng hiển thị; chỉ bật thanh cuộn khi phóng to (Zoom) vượt quá khung -->

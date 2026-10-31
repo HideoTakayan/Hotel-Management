@@ -56,6 +56,7 @@ namespace Hotel_Management
         {
             // Role 0: Quản lý (Admin kiêm Lễ tân) - Toàn quyền quản trị, đặt phòng, thu ngân, giao việc
             // Role 1: Nhân viên - Chỉ xem lịch làm việc, nhận việc dọn dẹp và báo cáo hoàn thành
+            txtRole.Text = CurrentRole == 0 ? "Quản lý" : "Nhân viên";
             if (CurrentRole == 1)
             {
                 rdRooms.Visibility = Visibility.Collapsed;
@@ -98,6 +99,27 @@ namespace Hotel_Management
             placeHolder.Visibility = Visibility.Collapsed;
             var billsPage = new Pages.Bills(selectedBillId);
             PagesNavigation.Navigate(billsPage);
+        }
+
+        public void NavigateToBooking()
+        {
+            rdBooking.IsChecked = true;
+            placeHolder.Visibility = Visibility.Collapsed;
+            PagesNavigation.Navigate(new Uri("Pages/Booking.xaml", UriKind.RelativeOrAbsolute));
+        }
+
+        public void NavigateToRooms()
+        {
+            rdRooms.IsChecked = true;
+            placeHolder.Visibility = Visibility.Collapsed;
+            PagesNavigation.Navigate(new Uri("Pages/Rooms.xaml", UriKind.RelativeOrAbsolute));
+        }
+
+        public void NavigateToTasks()
+        {
+            rdTasks.IsChecked = true;
+            placeHolder.Visibility = Visibility.Collapsed;
+            PagesNavigation.Navigate(new Uri("Pages/MyTasks.xaml", UriKind.RelativeOrAbsolute));
         }
 
         public void SetFullName(string fullName)
