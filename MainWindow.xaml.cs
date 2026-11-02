@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Hotel_Management.Helpers;
+using Hotel_Management.Models;
 
 namespace Hotel_Management
 {
@@ -43,13 +44,27 @@ namespace Hotel_Management
             if (CurrentRole == 1)
             {
                 rdTasks.IsChecked = true;
-                PagesNavigation.Navigate(new Uri("Pages/MyTasks.xaml", UriKind.RelativeOrAbsolute));
+                NavigateToPage("Pages/MyTasks.xaml");
             }
             else
             {
                 rdHome.IsChecked = true;
-                PagesNavigation.Navigate(new Uri("Pages/Home.xaml", UriKind.RelativeOrAbsolute));
+                NavigateToPage("Pages/Home.xaml");
             }
+
+            // Đồng bộ dữ liệu hệ thống trong luồng phụ khi khởi động
+            System.Threading.Tasks.Task.Run(() =>
+            {
+                try
+                {
+                    using (var conn = DatabaseHelper.GetConnection())
+                    {
+                        conn.Open();
+                        DatabaseHelper.SyncAllDataToCurrentDate(conn, force: false);
+                    }
+                }
+                catch { }
+            });
         }
 
         private void ApplyRolePermissions()
@@ -97,29 +112,25 @@ namespace Hotel_Management
         {
             rdBills.IsChecked = true;
             placeHolder.Visibility = Visibility.Collapsed;
-            var billsPage = new Pages.Bills(selectedBillId);
-            PagesNavigation.Navigate(billsPage);
+            PagesNavigation.Navigate(new Pages.Bills(selectedBillId));
         }
 
         public void NavigateToBooking()
         {
             rdBooking.IsChecked = true;
-            placeHolder.Visibility = Visibility.Collapsed;
-            PagesNavigation.Navigate(new Uri("Pages/Booking.xaml", UriKind.RelativeOrAbsolute));
+            NavigateToPage("Pages/Booking.xaml");
         }
 
         public void NavigateToRooms()
         {
             rdRooms.IsChecked = true;
-            placeHolder.Visibility = Visibility.Collapsed;
-            PagesNavigation.Navigate(new Uri("Pages/Rooms.xaml", UriKind.RelativeOrAbsolute));
+            NavigateToPage("Pages/Rooms.xaml");
         }
 
         public void NavigateToTasks()
         {
             rdTasks.IsChecked = true;
-            placeHolder.Visibility = Visibility.Collapsed;
-            PagesNavigation.Navigate(new Uri("Pages/MyTasks.xaml", UriKind.RelativeOrAbsolute));
+            NavigateToPage("Pages/MyTasks.xaml");
         }
 
         public void SetFullName(string fullName)

@@ -37,7 +37,6 @@ namespace Hotel_Management.Pages
                 using (var conn = DatabaseHelper.GetConnection())
                 {
                     conn.Open();
-                    DatabaseHelper.SyncAllDataToCurrentDate(conn);
                     string query = "SELECT RoomId, RoomNumber, NumberPeople, NumberBed, Quality, BedType, Price, RoomType, RoomArea, Status FROM Rooms";
                     using (var cmd = new MySqlCommand(query, conn))
                     using (var reader = cmd.ExecuteReader())

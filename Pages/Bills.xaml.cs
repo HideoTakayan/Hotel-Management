@@ -20,7 +20,6 @@ namespace Hotel_Management.Pages
             _targetBillId = targetBillId;
             InitializeComponent();
             CheckPermissions();
-            this.Loaded += (s, e) => LoadData();
             LoadData();
         }
 
@@ -47,7 +46,6 @@ namespace Hotel_Management.Pages
                 using (var conn = DatabaseHelper.GetConnection())
                 {
                     conn.Open();
-                    DatabaseHelper.SyncAllDataToCurrentDate(conn);
                     string query = @"SELECT b.BillId, b.RoomId, r.RoomNumber, b.CreatedAt, b.FullName, b.Email, b.Phone, 
                                             b.StartDate, b.EndDate, b.NumberPeople, b.Total, b.Status 
                                      FROM Bills b
@@ -169,7 +167,6 @@ namespace Hotel_Management.Pages
                 SetComboBoxStatusByTag(bill.Status);
 
                 bool isFinal = (bill.Status == 1 || bill.Status == 2);
-                txtSelectBillPrompt.Visibility = Visibility.Collapsed;
                 if (isStaff)
                 {
                     comboboxTrangThai.IsEnabled = false;
@@ -199,7 +196,6 @@ namespace Hotel_Management.Pages
 
                 comboboxTrangThai.SelectedIndex = -1;
                 txtStatusLockedHint.Visibility = Visibility.Collapsed;
-                txtSelectBillPrompt.Visibility = Visibility.Visible;
 
                 comboboxTrangThai.IsEnabled = false;
                 btnUpdateBill.IsEnabled = false;
@@ -583,7 +579,6 @@ namespace Hotel_Management.Pages
             cbFilterStatus.SelectedIndex = 0;
             BillsDataGrid.SelectedItem = null;
             txtStatusLockedHint.Visibility = Visibility.Collapsed;
-            txtSelectBillPrompt.Visibility = Visibility.Visible;
             comboboxTrangThai.IsEnabled = false;
             btnUpdateBill.IsEnabled = false;
             LoadData();

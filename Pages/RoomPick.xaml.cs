@@ -28,7 +28,6 @@ namespace Hotel_Management.Pages
                 using (var conn = DatabaseHelper.GetConnection())
                 {
                     conn.Open();
-                    DatabaseHelper.SyncAllDataToCurrentDate(conn);
                     // Lấy tất cả các phòng để hiển thị toàn bộ hiện trạng
                     string query = "SELECT RoomId, RoomNumber, NumberPeople, NumberBed, Quality, BedType, Price, RoomType, RoomArea, Status FROM Rooms ORDER BY RoomNumber ASC";
                     using (var cmd = new MySqlCommand(query, conn))

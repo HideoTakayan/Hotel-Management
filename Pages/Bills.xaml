@@ -85,12 +85,12 @@
                             </Grid.RowDefinitions>
                             <TextBlock Grid.Row="0" Text="Dịch vụ đã sử dụng tại phòng:" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryColor}" Margin="0,0,0,4"/>
                             
-                            <DataGrid Grid.Row="1" x:Name="dgBillServices" Height="95" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column" Style="{DynamicResource DataGridStyle}" VerticalScrollBarVisibility="Auto">
+                            <DataGrid Grid.Row="1" x:Name="dgBillServices" Height="95" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column" Style="{DynamicResource DataGridStyle}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Dịch vụ" Binding="{Binding ServiceName}" Width="1.4*"/>
-                                    <DataGridTextColumn Header="SL" Binding="{Binding Quantity}" Width="0.55*"/>
-                                    <DataGridTextColumn Header="Đơn giá" Binding="{Binding Price, StringFormat={}{0:N0}}" Width="0.95*"/>
-                                    <DataGridTextColumn Header="Thành tiền" Binding="{Binding Total, StringFormat={}{0:N0}}" Width="1*"/>
+                                    <DataGridTextColumn Header="Dịch vụ" Binding="{Binding ServiceName}" Width="*" MinWidth="120"/>
+                                    <DataGridTextColumn Header="SL" Binding="{Binding Quantity}" Width="38"/>
+                                    <DataGridTextColumn Header="Đơn giá" Binding="{Binding Price, StringFormat={}{0:N0}}" Width="76"/>
+                                    <DataGridTextColumn Header="Thành tiền" Binding="{Binding Total, StringFormat={}{0:N0}}" Width="84"/>
                                 </DataGrid.Columns>
                             </DataGrid>
 
@@ -135,8 +135,6 @@
                             </ComboBox>
                             <TextBlock Grid.Column="2" x:Name="txtStatusLockedHint" Text="Hóa đơn đã hoàn tất (Đã thanh toán / Đã hủy), không thể chỉnh sửa." 
                                        Foreground="{DynamicResource WarningNotification}" VerticalAlignment="Center" Margin="15,0,0,0" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" Visibility="Collapsed"/>
-                            <TextBlock Grid.Column="2" x:Name="txtSelectBillPrompt" Text="Chọn một hóa đơn trong danh sách để xem dịch vụ và cập nhật trạng thái." 
-                                       Foreground="{DynamicResource PrimaryGrayColor}" VerticalAlignment="Center" Margin="15,0,0,0" FontSize="13" FontStyle="Italic" Visibility="Visible"/>
                         </Grid>
                     </Border>
                 </Grid>
@@ -149,15 +147,15 @@
                 <Button x:Name="btnRefresh" Content="Làm mới" VerticalAlignment="Center" Width="120" Margin="0,0,0,0" Style="{DynamicResource SecondaryButtonStyle}" Click="BtnRefresh_Click"/>
             </StackPanel>
 
-            <DataGrid Grid.Row="3" x:Name="BillsDataGrid" Margin="20,0,20,16" SelectionChanged="BillsDataGrid_SelectionChanged" Style="{DynamicResource DataGridStyle}">
+            <DataGrid Grid.Row="3" x:Name="BillsDataGrid" Margin="20,0,20,16" SelectionChanged="BillsDataGrid_SelectionChanged" Style="{DynamicResource DataGridStyle}" HorizontalScrollBarVisibility="Disabled">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding BillId}" Width="0.45*" MinWidth="42"/>
-                    <DataGridTextColumn Header="Ngày tạo" Binding="{Binding CreatedAt, StringFormat=dd/MM/yyyy HH:mm}" Width="1.25*" MinWidth="125"/>
-                    <DataGridTextColumn Header="Họ và tên" Binding="{Binding FullName}" Width="1.4*" MinWidth="135"/>
-                    <DataGridTextColumn Header="Số điện thoại" Binding="{Binding Phone}" Width="1.05*" MinWidth="105"/>
-                    <DataGridTextColumn Header="Phòng số" Binding="{Binding Room.RoomNumber}" Width="0.75*" MinWidth="75"/>
-                    <DataGridTextColumn Header="Tổng tiền (VND)" Binding="{Binding Total, StringFormat={}{0:N0}}" Width="1.15*" MinWidth="110"/>
-                    <DataGridTextColumn Header="Trạng thái" Binding="{Binding StatusName}" Width="1.25*" MinWidth="125"/>
+                    <DataGridTextColumn Header="ID" Binding="{Binding BillId}" Width="45"/>
+                    <DataGridTextColumn Header="Ngày tạo" Binding="{Binding CreatedAt, StringFormat=dd/MM/yyyy HH:mm}" Width="125"/>
+                    <DataGridTextColumn Header="Họ và tên" Binding="{Binding FullName}" Width="*" MinWidth="140"/>
+                    <DataGridTextColumn Header="Số điện thoại" Binding="{Binding Phone}" Width="105"/>
+                    <DataGridTextColumn Header="Phòng" Binding="{Binding Room.RoomNumber}" Width="65"/>
+                    <DataGridTextColumn Header="Tổng tiền (VND)" Binding="{Binding Total, StringFormat={}{0:N0}}" Width="115"/>
+                    <DataGridTextColumn Header="Trạng thái" Binding="{Binding StatusName}" Width="125"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

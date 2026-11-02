@@ -43,10 +43,6 @@
                             <TextBlock Grid.Column="2" Text="Số lượng" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14" Margin="14,0,8,0"/>
                             <TextBox Grid.Column="3" x:Name="txtQuantity" Width="Auto" Text="1" Style="{DynamicResource TextBoxStyle}" Tag="SL"/>
                         </Grid>
-                        <!-- Cảnh báo khi chưa có phòng Check-in -->
-                        <TextBlock x:Name="txtNoRoomsNotice" 
-                                   Text="Lưu ý: Hiện chưa có phòng nào đang lưu trú (Check-in). Vào mục 'Hóa đơn' chuyển khách sang Check-in để gọi dịch vụ." 
-                                   TextWrapping="Wrap" Foreground="{DynamicResource WarningNotification}" FontSize="12" Margin="110,-2,0,8" Visibility="Collapsed"/>
                         <Grid Margin="0,0,0,8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="110"/>
@@ -57,7 +53,7 @@
                         </Grid>
 
                         <!-- Dòng chọn nhân viên phục vụ / giao đồ (Tự động ẩn/hiện theo tính chất dịch vụ) -->
-                        <Grid x:Name="gridStaffSelect" Margin="0,0,0,8">
+                        <Grid x:Name="gridStaffSelect" Margin="0,0,0,10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="110"/>
                                 <ColumnDefinition Width="*"/>
@@ -65,11 +61,6 @@
                             <TextBlock Grid.Column="0" Text="Nhân viên giao" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
                             <ComboBox Grid.Column="1" x:Name="cbStaff" Width="Auto" Style="{DynamicResource ComboBoxStyle}" DisplayMemberPath="FullName" SelectedValuePath="Id" Tag="Chọn nhân viên phục vụ"/>
                         </Grid>
-                        
-                        <!-- Gợi ý tính chất dịch vụ: Trải nghiệm & Giải trí vs Phục vụ tại phòng -->
-                        <TextBlock x:Name="txtServiceStaffHint" 
-                                   Text="Dịch vụ tại chỗ: Tự động ghi vào hóa đơn, không tạo nhiệm vụ giao hàng." 
-                                   TextWrapping="Wrap" Foreground="{DynamicResource PrimaryBlueColor}" FontSize="12" Margin="110,-4,0,8" Visibility="Collapsed"/>
 
                         <Button x:Name="btnOrderService" Content="Xác nhận và giao việc" Width="190" Height="36" Margin="110,0,0,0" HorizontalAlignment="Left" Style="{DynamicResource PrimaryButtonStyle}" Click="btnOrderService_Click"/>
                     </StackPanel>
@@ -124,13 +115,13 @@
                 </Border>
             </Grid>
 
-            <DataGrid Grid.Row="2" x:Name="ServicesDataGrid" Margin="20,0,20,16" SelectionChanged="ServicesDataGrid_SelectionChanged" Style="{DynamicResource DataGridStyle}">
+            <DataGrid Grid.Row="2" x:Name="ServicesDataGrid" Margin="20,0,20,16" SelectionChanged="ServicesDataGrid_SelectionChanged" Style="{DynamicResource DataGridStyle}" HorizontalScrollBarVisibility="Disabled">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding ServiceId}" Width="0.45*" MinWidth="45" />
-                    <DataGridTextColumn Header="Tên dịch vụ" Binding="{Binding ServiceName}" Width="2.8*" MinWidth="220" />
-                    <DataGridTextColumn Header="Đơn giá (VND)" Binding="{Binding Price, StringFormat=N0}" Width="1.1*" MinWidth="110" />
-                    <DataGridTextColumn Header="Đơn vị tính" Binding="{Binding Unit}" Width="0.8*" MinWidth="85"/>
-                    <DataGridTextColumn Header="Phân loại" Binding="{Binding ServiceTypeDisplay}" Width="1.2*" MinWidth="125"/>
+                    <DataGridTextColumn Header="ID" Binding="{Binding ServiceId}" Width="50" />
+                    <DataGridTextColumn Header="Tên dịch vụ" Binding="{Binding ServiceName}" Width="*" />
+                    <DataGridTextColumn Header="Đơn giá (VND)" Binding="{Binding Price, StringFormat=N0}" Width="130" />
+                    <DataGridTextColumn Header="Đơn vị tính" Binding="{Binding Unit}" Width="95"/>
+                    <DataGridTextColumn Header="Phân loại" Binding="{Binding ServiceTypeDisplay}" Width="145"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

@@ -174,18 +174,18 @@
                 <Button x:Name="btnRefresh" Content="Làm mới" Width="120" Margin="0,0,0,0" Style="{DynamicResource SecondaryButtonStyle}" Click="BtnRefresh_Click"/>
             </StackPanel>
 
-            <DataGrid Grid.Row="3" x:Name="RoomsDataGrid" Margin="20,0,20,16" SelectionChanged="RoomsDataGrid_SelectionChanged" Style="{DynamicResource DataGridStyle}">
+            <DataGrid Grid.Row="3" x:Name="RoomsDataGrid" Margin="20,0,20,16" SelectionChanged="RoomsDataGrid_SelectionChanged" Style="{DynamicResource DataGridStyle}" HorizontalScrollBarVisibility="Disabled">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding RoomId}" Width="0.45*" MinWidth="36" />
-                    <DataGridTextColumn Header="Phòng" Binding="{Binding RoomNumber}" Width="0.7*" MinWidth="54" />
-                    <DataGridTextColumn Header="Số khách" Binding="{Binding NumberPeople}" Width="0.75*" MinWidth="60" />
-                    <DataGridTextColumn Header="Số đệm" Binding="{Binding NumberBed}" Width="0.7*" MinWidth="56" />
-                    <DataGridTextColumn Header="Chất lượng" Binding="{Binding QualityName}" Width="0.85*" MinWidth="70"/>
-                    <DataGridTextColumn Header="Đệm / Giường" Binding="{Binding BedType}" Width="1.4*" MinWidth="110" />
-                    <DataGridTextColumn Header="Loại phòng" Binding="{Binding RoomType}" Width="1.15*" MinWidth="90" />
-                    <DataGridTextColumn Header="Diện tích (m²)" Binding="{Binding RoomArea}" Width="0.95*" MinWidth="80"/>
-                    <DataGridTextColumn Header="Giá (VND)" Binding="{Binding Price, StringFormat=N0}" Width="1.05*" MinWidth="82" />
-                    <DataGridTextColumn Header="Trạng thái" Binding="{Binding StatusName}" Width="1.2*" MinWidth="92" />
+                    <DataGridTextColumn Header="ID" Binding="{Binding RoomId}" Width="40" />
+                    <DataGridTextColumn Header="Phòng" Binding="{Binding RoomNumber}" Width="58" />
+                    <DataGridTextColumn Header="Số khách" Binding="{Binding NumberPeople}" Width="66" />
+                    <DataGridTextColumn Header="Số đệm" Binding="{Binding NumberBed}" Width="62" />
+                    <DataGridTextColumn Header="Chất lượng" Binding="{Binding QualityName}" Width="76"/>
+                    <DataGridTextColumn Header="Đệm / Giường" Binding="{Binding BedType}" Width="128" />
+                    <DataGridTextColumn Header="Loại phòng" Binding="{Binding RoomType}" Width="105" />
+                    <DataGridTextColumn Header="Diện tích" Binding="{Binding RoomArea, StringFormat='{}{0} m²'}" Width="78"/>
+                    <DataGridTextColumn Header="Giá (VND)" Binding="{Binding Price, StringFormat=N0}" Width="98" />
+                    <DataGridTextColumn Header="Trạng thái" Binding="{Binding StatusName}" Width="*" MinWidth="110" />
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

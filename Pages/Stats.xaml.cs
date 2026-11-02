@@ -40,7 +40,6 @@ namespace Hotel_Management.Pages
                 using (var conn = DatabaseHelper.GetConnection())
                 {
                     conn.Open();
-                    DatabaseHelper.SyncAllDataToCurrentDate(conn);
 
                     // 1. Lấy tổng số hóa đơn đã hoàn tất hoặc trả phòng (Đã thanh toán 1 hoặc Chờ thanh toán 4) & tổng doanh thu trong tháng
                     string queryBills = @"SELECT COUNT(BillId) as SoLuong, COALESCE(SUM(Total), 0) as LoiNhuan 

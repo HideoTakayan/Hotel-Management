@@ -61,7 +61,6 @@
                             <TextBlock Grid.Column="0" Text="Mật khẩu" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
                             <PasswordBox Grid.Column="1" x:Name="txtPassword" Width="Auto" Style="{DynamicResource PasswordBoxStyle}"/>
                         </Grid>
-                        <TextBlock Text="(Khi Cập nhật: để trống nếu giữ nguyên mật khẩu cũ)" Margin="110,2,0,0" Foreground="{DynamicResource PrimaryGrayColor}" FontSize="11" FontStyle="Italic"/>
                         <TextBlock x:Name="txtPasswordError" Text="Mật khẩu không được để trống" Margin="110,2,0,0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
                     </StackPanel>
                 </StackPanel>
@@ -108,20 +107,20 @@
             </Grid>
 
             <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,6,0,8" HorizontalAlignment="Center">
-                <Button x:Name="btnAddUser" Content="Thêm người dùng" Width="120" Margin="0,0,10,0" Style="{DynamicResource PrimaryButtonStyle}" Click="BtnAddUser_Click"/>
+                <Button x:Name="btnAddUser" Content="Thêm người dùng" Width="158" Margin="0,0,10,0" Style="{DynamicResource PrimaryButtonStyle}" Click="BtnAddUser_Click"/>
                 <Button x:Name="btnUpdateUser" Content="Cập nhật" Width="120" Margin="0,0,10,0" Style="{DynamicResource PrimaryButtonStyle}" Click="BtnUpdateUser_Click"/>
                 <Button x:Name="btnDelUser" Content="Xóa" Width="120" Margin="0,0,10,0" Style="{DynamicResource SecondaryButtonStyle}" Click="BtnDelUser_Click"/>
                 <Button x:Name="btnRefresh" Content="Làm mới" Width="120" Margin="0,0,0,0" Style="{DynamicResource SecondaryButtonStyle}" Click="btnRefresh_Click" />
             </StackPanel>
 
-            <DataGrid Grid.Row="3" x:Name="UsersDataGrid" Margin="20,0,20,16" SelectionChanged="UsersDataGrid_SelectionChanged" Style="{DynamicResource DataGridStyle}">
+            <DataGrid Grid.Row="3" x:Name="UsersDataGrid" Margin="20,0,20,16" SelectionChanged="UsersDataGrid_SelectionChanged" Style="{DynamicResource DataGridStyle}" HorizontalScrollBarVisibility="Disabled">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="0.45*" MinWidth="45" />
-                    <DataGridTextColumn Header="Tên tài khoản" Binding="{Binding Username}" Width="1.1*" MinWidth="110" />
-                    <DataGridTextColumn Header="Họ và tên" Binding="{Binding FullName}" Width="1.3*" MinWidth="130" />
-                    <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="1.5*" MinWidth="150"/>
-                    <DataGridTextColumn Header="Số điện thoại" Binding="{Binding Phone}" Width="1.0*" MinWidth="105" />
-                    <DataGridTextColumn Header="Vai trò" Binding="{Binding RoleName}" Width="0.9*" MinWidth="95" />
+                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50" />
+                    <DataGridTextColumn Header="Tên tài khoản" Binding="{Binding Username}" Width="130" />
+                    <DataGridTextColumn Header="Họ và tên" Binding="{Binding FullName}" Width="160" />
+                    <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="*" />
+                    <DataGridTextColumn Header="Số điện thoại" Binding="{Binding Phone}" Width="120" />
+                    <DataGridTextColumn Header="Vai trò" Binding="{Binding RoleName}" Width="110" />
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

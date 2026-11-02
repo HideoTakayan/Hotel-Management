@@ -106,12 +106,10 @@ namespace Hotel_Management.Pages
 
                     if (roomList.Count == 0)
                     {
-                        txtNoRoomsNotice.Visibility = Visibility.Visible;
                         btnOrderService.IsEnabled = false;
                     }
                     else
                     {
-                        txtNoRoomsNotice.Visibility = Visibility.Collapsed;
                         btnOrderService.IsEnabled = true;
                         cbRooms.SelectedIndex = 0;
                     }
@@ -407,30 +405,14 @@ namespace Hotel_Management.Pages
                 {
                     if (gridStaffSelect != null) gridStaffSelect.Visibility = Visibility.Visible;
                     if (cbStaff != null) cbStaff.IsEnabled = true;
-                    if (txtServiceStaffHint != null)
-                    {
-                        txtServiceStaffHint.Text = "Phục vụ tại phòng: Hệ thống tự động tạo nhiệm vụ giao hàng cho nhân viên ca trực.";
-                        txtServiceStaffHint.Foreground = (System.Windows.Media.Brush)FindResource("TextSecondaryColor");
-                        txtServiceStaffHint.Visibility = Visibility.Visible;
-                    }
                     if (btnOrderService != null) btnOrderService.Content = "Xác nhận và giao việc";
                 }
                 else
                 {
                     if (gridStaffSelect != null) gridStaffSelect.Visibility = Visibility.Collapsed;
                     if (cbStaff != null) cbStaff.IsEnabled = false;
-                    if (txtServiceStaffHint != null)
-                    {
-                        txtServiceStaffHint.Text = "Dịch vụ tại chỗ: Tự động ghi vào hóa đơn phòng, không tạo nhiệm vụ giao hàng.";
-                        txtServiceStaffHint.Foreground = (System.Windows.Media.Brush)FindResource("PrimaryBlueColor");
-                        txtServiceStaffHint.Visibility = Visibility.Visible;
-                    }
                     if (btnOrderService != null) btnOrderService.Content = "Ghi vào hóa đơn";
                 }
-            }
-            else
-            {
-                if (txtServiceStaffHint != null) txtServiceStaffHint.Visibility = Visibility.Collapsed;
             }
         }
 

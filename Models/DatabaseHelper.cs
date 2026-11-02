@@ -91,16 +91,41 @@ namespace Hotel_Management.Models
             }
         }
 
+        private static DateTime _lastSyncTime = DateTime.MinValue;
+        private static int _isSyncing = 0;
+        private static bool _servicesEnsured = false;
+
         /// <summary>
         /// Đồng bộ toàn bộ dữ liệu hệ thống theo ngày thực tế (bắt đầu từ hôm nay CURDATE()):
         /// - Các nhiệm vụ trước ngày hiện tại (WorkDate < CURDATE()) tự động hoàn tất (TaskStatus = 3).
         /// - Các hóa đơn có ngày trả phòng trước hôm nay (EndDate < CURDATE()) tự động hoàn tất/thanh toán (Status = 1).
         /// - Đồng bộ trạng thái phòng thực tế (Đang ở nếu có khách check-in hôm nay, Đã đặt nếu có khách đặt trước, Trống nếu hết hạn).
+        /// Cơ chế Throttle 15 phút và Non-blocking Lock đảm bảo không bao giờ lock table hay làm đơ giao diện.
         /// </summary>
-        public static void SyncAllDataToCurrentDate(MySqlConnection conn)
+        public static void SyncAllDataToCurrentDate(MySqlConnection conn, bool force = false)
         {
+            if (!force && (DateTime.Now - _lastSyncTime).TotalMinutes < 15)
+            {
+                return;
+            }
+
+            // Đảm bảo không bao giờ có 2 luồng cùng thực hiện đồng bộ CSDL cùng lúc (tránh deadlock)
+            if (System.Threading.Interlocked.CompareExchange(ref _isSyncing, 1, 0) != 0)
+            {
+                return;
+            }
+
+            _lastSyncTime = DateTime.Now;
+
             try
             {
+                // Giảm thời gian chờ lock xuống tối đa 3 giây để không bao giờ treo ứng dụng
+                using (var cmdTimeout = new MySqlCommand("SET SESSION innodb_lock_wait_timeout = 3;", conn))
+                {
+                    cmdTimeout.CommandTimeout = 3;
+                    try { cmdTimeout.ExecuteNonQuery(); } catch { }
+                }
+
                 // 1. Đồng bộ Tasks: Các nhiệm vụ thuộc ca làm trước ngày hôm nay chưa hoàn thành -> Đánh dấu hoàn tất
                 string sqlSyncTasks = @"
                     UPDATE Tasks t
@@ -110,6 +135,7 @@ namespace Hotel_Management.Models
                     WHERE s.WorkDate < CURDATE() AND t.TaskStatus != 3";
                 using (var cmdTasks = new MySqlCommand(sqlSyncTasks, conn))
                 {
+                    cmdTasks.CommandTimeout = 5;
                     cmdTasks.ExecuteNonQuery();
                 }
 
@@ -120,6 +146,7 @@ namespace Hotel_Management.Models
                     WHERE EndDate < CURDATE() AND Status IN (0, 3, 4)";
                 using (var cmdBills = new MySqlCommand(sqlSyncBills, conn))
                 {
+                    cmdBills.CommandTimeout = 5;
                     cmdBills.ExecuteNonQuery();
                 }
 
@@ -135,6 +162,7 @@ namespace Hotel_Management.Models
                     WHERE b.Status = 3 AND b.StartDate <= CURDATE() AND b.EndDate >= CURDATE()";
                 using (var cmdOccupied = new MySqlCommand(sqlSyncOccupied, conn))
                 {
+                    cmdOccupied.CommandTimeout = 5;
                     cmdOccupied.ExecuteNonQuery();
                 }
 
@@ -146,6 +174,7 @@ namespace Hotel_Management.Models
                     WHERE b.Status = 0 AND b.EndDate >= CURDATE() AND r.Status != 2";
                 using (var cmdBooked = new MySqlCommand(sqlSyncBooked, conn))
                 {
+                    cmdBooked.CommandTimeout = 5;
                     cmdBooked.ExecuteNonQuery();
                 }
 
@@ -160,6 +189,7 @@ namespace Hotel_Management.Models
                     ) AND Status NOT IN (3, 4)";
                 using (var cmdAvailable = new MySqlCommand(sqlSyncAvailable, conn))
                 {
+                    cmdAvailable.CommandTimeout = 5;
                     cmdAvailable.ExecuteNonQuery();
                 }
 
@@ -170,15 +200,33 @@ namespace Hotel_Management.Models
             {
                 System.Diagnostics.Debug.WriteLine("Lỗi đồng bộ dữ liệu thời gian thực: " + ex.Message);
             }
+            finally
+            {
+                System.Threading.Interlocked.Exchange(ref _isSyncing, 0);
+            }
         }
 
         /// <summary>
-        /// Tự động cập nhật danh mục dịch vụ Onsen & Ryokan chuẩn Nhật Bản thực tế nếu chưa có trong CSDL
+        /// Tự động cập nhật danh mục dịch vụ Onsen & Ryokan chuẩn Nhật Bản thực tế nếu chưa có trong CSDL.
+        /// Chỉ chạy 1 lần trong phiên làm việc.
         /// </summary>
         public static void EnsureDefaultOnsenServices(MySqlConnection conn)
         {
+            if (_servicesEnsured) return;
             try
             {
+                // Kiểm tra nhanh: Nếu bảng Services đã có từ 15 dịch vụ trở lên thì bỏ qua ngay, không duyệt vòng lặp
+                using (var cmdCount = new MySqlCommand("SELECT COUNT(*) FROM Services", conn))
+                {
+                    cmdCount.CommandTimeout = 5;
+                    var countObj = cmdCount.ExecuteScalar();
+                    if (countObj != null && Convert.ToInt32(countObj) >= 15)
+                    {
+                        _servicesEnsured = true;
+                        return;
+                    }
+                }
+
                 var defaultServices = new (string Name, decimal Price, string Unit)[]
                 {
                     // Nhóm 1: Trải nghiệm & Tiện ích Onsen (Khách tự trải nghiệm, không cần nhân viên giao việc)
@@ -243,6 +291,7 @@ namespace Hotel_Management.Models
                         existingNames.Add(svc.Name);
                     }
                 }
+                _servicesEnsured = true;
             }
             catch (Exception ex)
             {

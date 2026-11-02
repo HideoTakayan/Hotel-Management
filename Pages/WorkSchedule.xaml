@@ -80,14 +80,14 @@
                 <Button x:Name="btnRefresh" Content="Làm mới" Width="120" Margin="0,0,0,0" Style="{DynamicResource SecondaryButtonStyle}" Click="btnRefresh_Click"/>
             </StackPanel>
 
-            <DataGrid Grid.Row="3" x:Name="dgShifts" Margin="20,0,20,16" SelectionChanged="dgShifts_SelectionChanged" Style="{DynamicResource DataGridStyle}">
+            <DataGrid Grid.Row="3" x:Name="dgShifts" Margin="20,0,20,16" SelectionChanged="dgShifts_SelectionChanged" Style="{DynamicResource DataGridStyle}" HorizontalScrollBarVisibility="Disabled">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding ShiftId}" Width="0.45*" MinWidth="45" />
-                    <DataGridTextColumn Header="Ngày làm" Binding="{Binding WorkDate, StringFormat=dd/MM/yyyy}" Width="*"/>
-                    <DataGridTextColumn Header="Ca trực" Binding="{Binding ShiftName}" Width="*"/>
-                    <DataGridTextColumn Header="Thời gian" Binding="{Binding TimeRange}" Width="*"/>
-                    <DataGridTextColumn Header="Nhân viên 1" Binding="{Binding Employee1_Name}" Width="1.5*"/>
-                    <DataGridTextColumn Header="Nhân viên 2" Binding="{Binding Employee2_Name}" Width="1.5*"/>
+                    <DataGridTextColumn Header="ID" Binding="{Binding ShiftId}" Width="50" />
+                    <DataGridTextColumn Header="Ngày làm" Binding="{Binding WorkDate, StringFormat=dd/MM/yyyy}" Width="110"/>
+                    <DataGridTextColumn Header="Ca trực" Binding="{Binding ShiftName}" Width="90"/>
+                    <DataGridTextColumn Header="Thời gian" Binding="{Binding TimeRange}" Width="140"/>
+                    <DataGridTextColumn Header="Nhân viên 1" Binding="{Binding Employee1_Name}" Width="*"/>
+                    <DataGridTextColumn Header="Nhân viên 2" Binding="{Binding Employee2_Name}" Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

@@ -38,12 +38,12 @@
             </Border>
 
             <!-- DataGrid -->
-            <DataGrid x:Name="dgServices" Grid.Row="2" Margin="20,0,20,12" AutoGenerateColumns="False" IsReadOnly="True" Style="{DynamicResource DataGridStyle}">
+            <DataGrid x:Name="dgServices" Grid.Row="2" Margin="20,0,20,12" AutoGenerateColumns="False" IsReadOnly="True" Style="{DynamicResource DataGridStyle}" HorizontalScrollBarVisibility="Disabled">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Tên dịch vụ" Binding="{Binding ServiceName}" Width="1.8*"/>
-                    <DataGridTextColumn Header="Đơn giá (VND)" Binding="{Binding Price, StringFormat={}{0:N0}}" Width="*"/>
-                    <DataGridTextColumn Header="Số lượng" Binding="{Binding Quantity}" Width="0.7*"/>
-                    <DataGridTextColumn Header="Thành tiền (VND)" Binding="{Binding Total, StringFormat={}{0:N0}}" Width="*"/>
+                    <DataGridTextColumn Header="Tên dịch vụ" Binding="{Binding ServiceName}" Width="*"/>
+                    <DataGridTextColumn Header="Đơn giá (VND)" Binding="{Binding Price, StringFormat={}{0:N0}}" Width="130"/>
+                    <DataGridTextColumn Header="Số lượng" Binding="{Binding Quantity}" Width="85"/>
+                    <DataGridTextColumn Header="Thành tiền (VND)" Binding="{Binding Total, StringFormat={}{0:N0}}" Width="140"/>
                 </DataGrid.Columns>
             </DataGrid>
 

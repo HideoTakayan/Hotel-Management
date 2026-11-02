@@ -41,7 +41,7 @@ namespace Hotel_Management.Pages
                     {
                         while (reader.Read())
                         {
-                            rooms.Add(new Room { RoomId = reader.GetInt32("RoomId"), RoomNumber = "Phòng " + reader.GetString("RoomNumber") });
+                            rooms.Add(new Room { RoomId = reader.GetInt32("RoomId"), RoomNumber = reader.GetString("RoomNumber") });
                         }
                     }
                     cbTaskRoom.ItemsSource = rooms;
@@ -118,7 +118,7 @@ namespace Hotel_Management.Pages
 
             string rawInputTaskName = txtTaskName.Text.Trim();
             string taskName = string.IsNullOrWhiteSpace(rawInputTaskName)
-                ? $"Dọn dẹp {selectedRoom.RoomNumber}"
+                ? $"Dọn dẹp phòng {selectedRoom.RoomNumber}"
                 : rawInputTaskName;
             bool isCleaning = IsCleaningTaskName(taskName);
 
@@ -140,7 +140,7 @@ namespace Hotel_Management.Pages
                                     if (Convert.ToInt32(checkCmd.ExecuteScalar()) > 0)
                                     {
                                         trans.Rollback();
-                                        MessageBox.Show($"{selectedRoom.RoomNumber} hiện đã có nhiệm vụ đang thực hiện!\nNếu muốn giao thêm việc phụ khác, vui lòng nhập rõ tên công việc vào ô 'Nhiệm vụ'.", "Cảnh báo trùng việc", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                        MessageBox.Show($"Phòng {selectedRoom.RoomNumber} hiện đã có nhiệm vụ đang thực hiện!\nNếu muốn giao thêm việc phụ khác, vui lòng nhập rõ tên công việc vào ô 'Nhiệm vụ'.", "Cảnh báo trùng việc", MessageBoxButton.OK, MessageBoxImage.Warning);
                                         return;
                                     }
                                 }
@@ -213,7 +213,6 @@ namespace Hotel_Management.Pages
                 using (MySqlConnection conn = DatabaseHelper.GetConnection())
                 {
                     conn.Open();
-                    DatabaseHelper.SyncAllDataToCurrentDate(conn);
                     string query = @"
                         SELECT t.TaskId, t.TaskName, s.WorkDate, s.ShiftType, r.RoomNumber, t.TaskStatus, t.AssignedTo, u.FullName as AssigneeName, t.CompletedAt
                         FROM Tasks t
@@ -254,7 +253,10 @@ namespace Hotel_Management.Pages
                             // Add helper columns
                             dt.Columns.Add("ShiftName", typeof(string));
                             dt.Columns.Add("StatusName", typeof(string));
+                            dt.Columns.Add("StatusBgColor", typeof(string));
+                            dt.Columns.Add("StatusFgColor", typeof(string));
                             dt.Columns.Add("PrimaryActionText", typeof(string));
+                            dt.Columns.Add("PrimaryActionBgColor", typeof(string));
                             dt.Columns.Add("ShowPrimaryAction", typeof(bool));
                             dt.Columns.Add("ShowRejectAction", typeof(bool));
                             dt.Columns.Add("ShowDeleteAction", typeof(bool));
@@ -296,13 +298,42 @@ namespace Hotel_Management.Pages
                                 var task = new Hotel_Management.Models.Task { TaskStatus = status };
                                 row["StatusName"] = task.StatusName;
 
+                                switch (status)
+                                {
+                                    case 0: // Chờ nhận việc
+                                        row["StatusBgColor"] = "#25E67E22";
+                                        row["StatusFgColor"] = "#E67E22";
+                                        break;
+                                    case 1: // Đang thực hiện
+                                        row["StatusBgColor"] = "#253498DB";
+                                        row["StatusFgColor"] = "#3498DB";
+                                        break;
+                                    case 2: // Chờ xác nhận
+                                        row["StatusBgColor"] = "#25F39C12";
+                                        row["StatusFgColor"] = "#F39C12";
+                                        break;
+                                    case 3: // Hoàn thành
+                                        row["StatusBgColor"] = "#252ECC71";
+                                        row["StatusFgColor"] = "#2ECC71";
+                                        break;
+                                    case 4: // Yêu cầu làm lại
+                                        row["StatusBgColor"] = "#25E74C3C";
+                                        row["StatusFgColor"] = "#E74C3C";
+                                        break;
+                                    default:
+                                        row["StatusBgColor"] = "#2595A5A6";
+                                        row["StatusFgColor"] = "#95A5A6";
+                                        break;
+                                }
+
                                 if (isAdmin)
                                 {
                                     // Quản lý (Admin) KHÔNG nhận việc hay báo cáo dọn phòng!
-                                    // Quản lý chỉ kiểm tra nghiệm thu: Duyệt đạt hoặc Yêu cầu làm lại khi nhân viên báo cáo xong (status == 2)
+                                    // Quản lý chỉ kiểm tra nghiệm thu: Duyệt hoặc Yêu cầu làm lại khi nhân viên báo cáo xong (status == 2)
                                     if (status == 2) // Chờ xác nhận
                                     {
-                                        row["PrimaryActionText"] = "Duyệt đạt";
+                                        row["PrimaryActionText"] = "Duyệt";
+                                        row["PrimaryActionBgColor"] = "#10B981"; // Xanh lá hoàn tất
                                         row["ShowPrimaryAction"] = true;
                                         row["ShowRejectAction"] = true;
                                     }
@@ -326,6 +357,7 @@ namespace Hotel_Management.Pages
                                         if (isUnassigned || isMine)
                                         {
                                             row["PrimaryActionText"] = "Nhận việc";
+                                            row["PrimaryActionBgColor"] = "#3B82F6"; // Xanh dương
                                             row["ShowPrimaryAction"] = true;
                                         }
                                         else
@@ -338,7 +370,8 @@ namespace Hotel_Management.Pages
                                     {
                                         if (isMine)
                                         {
-                                            row["PrimaryActionText"] = "Báo cáo xong";
+                                            row["PrimaryActionText"] = "Báo cáo";
+                                            row["PrimaryActionBgColor"] = "#10B981"; // Xanh lá
                                             row["ShowPrimaryAction"] = true;
                                         }
                                         else
@@ -350,7 +383,8 @@ namespace Hotel_Management.Pages
                                     {
                                         if (isMine)
                                         {
-                                            row["PrimaryActionText"] = "Làm lại & Báo cáo";
+                                            row["PrimaryActionText"] = "Báo cáo";
+                                            row["PrimaryActionBgColor"] = "#10B981";
                                             row["ShowPrimaryAction"] = true;
                                         }
                                         else

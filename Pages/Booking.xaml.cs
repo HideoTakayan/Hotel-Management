@@ -45,8 +45,6 @@ namespace Hotel_Management.Pages
                 using (var conn = DatabaseHelper.GetConnection())
                 {
                     conn.Open();
-                    // Đồng bộ dữ liệu theo ngày thực tế trước khi tải sơ đồ
-                    DatabaseHelper.SyncAllDataToCurrentDate(conn);
 
                     string query = @"
                         SELECT r.RoomId, r.RoomNumber, r.NumberPeople, r.NumberBed, r.BedType, r.Price, r.RoomType, r.RoomArea, r.Quality, r.Status,
@@ -259,7 +257,7 @@ namespace Hotel_Management.Pages
             string checkoutStatus = card.CheckoutStatusText;
             string totalText = card.BillTotal.HasValue ? $"{card.BillTotal.Value:N0} VND" : "---";
 
-            string dueNotice = card.IsDueToday ? "\nLưu ý: Phòng này đến hạn trả phòng hôm nay. Vui lòng kiểm tra và hoàn tất thủ tục trả phòng." : "";
+            string dueNotice = card.IsDueToday ? "\nPhòng đến hạn trả phòng hôm nay." : "";
 
             string detailMessage =
                 $"THÔNG TIN CHI TIẾT ĐẶT PHÒNG - PHÒNG {card.RoomNumber}\n" +

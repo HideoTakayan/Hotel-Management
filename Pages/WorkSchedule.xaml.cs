@@ -78,7 +78,6 @@ namespace Hotel_Management.Pages
                 using (MySqlConnection conn = DatabaseHelper.GetConnection())
                 {
                     conn.Open();
-                    DatabaseHelper.SyncAllDataToCurrentDate(conn);
                     string query = @"
                         SELECT s.ShiftId, s.WorkDate, s.ShiftType,
                                s.Employee1_Id, s.Employee2_Id,

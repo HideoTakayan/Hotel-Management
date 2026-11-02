@@ -185,45 +185,34 @@
 
                         <!-- Tiêu đề + Chú thích trạng thái -->
                         <Grid Grid.Row="1" Margin="0,0,0,12">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
+                            <TextBlock Text="Sơ đồ phòng" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryColor}" VerticalAlignment="Center" HorizontalAlignment="Left"/>
 
-                            <!-- Dòng 1: Tiêu đề và Các huy hiệu trạng thái -->
-                            <Grid Grid.Row="0" Margin="0,0,0,6">
-                                <TextBlock Text="Sơ đồ phòng" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryColor}" VerticalAlignment="Center" HorizontalAlignment="Left"/>
-
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                    <Border Background="#1A2ECC71" BorderBrush="#2ECC71" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="0,0,6,0">
-                                        <StackPanel Orientation="Horizontal">
-                                            <Ellipse Width="8" Height="8" Fill="#2ECC71" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                            <TextBlock Text="Trống (Sẵn sàng)" FontSize="11" Foreground="#2ECC71" FontWeight="SemiBold"/>
-                                        </StackPanel>
-                                    </Border>
-                                    <Border Background="#1A3498DB" BorderBrush="#3498DB" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="0,0,6,0">
-                                        <StackPanel Orientation="Horizontal">
-                                            <Ellipse Width="8" Height="8" Fill="#3498DB" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                            <TextBlock Text="Đang sử dụng" FontSize="11" Foreground="#3498DB" FontWeight="SemiBold"/>
-                                        </StackPanel>
-                                    </Border>
-                                    <Border Background="#1AF39C12" BorderBrush="#F39C12" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="0,0,6,0">
-                                        <StackPanel Orientation="Horizontal">
-                                            <Ellipse Width="8" Height="8" Fill="#F39C12" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                            <TextBlock Text="Đã đặt trước" FontSize="11" Foreground="#F39C12" FontWeight="SemiBold"/>
-                                        </StackPanel>
-                                    </Border>
-                                    <Border Background="#1AE74C3C" BorderBrush="#E74C3C" BorderThickness="1" CornerRadius="4" Padding="6,2">
-                                        <StackPanel Orientation="Horizontal">
-                                            <Ellipse Width="8" Height="8" Fill="#E74C3C" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                            <TextBlock Text="Chờ dọn dẹp" FontSize="11" Foreground="#E74C3C" FontWeight="SemiBold"/>
-                                        </StackPanel>
-                                    </Border>
-                                </StackPanel>
-                            </Grid>
-
-                            <!-- Dòng 2: Hướng dẫn nhấp chọn -->
-                            <TextBlock Grid.Row="1" Text="Nhấp vào phòng trống để tự động chọn vào biểu mẫu đặt phòng phía trên." FontSize="12" Foreground="{DynamicResource PrimaryGrayColor}"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <Border Background="#1A2ECC71" BorderBrush="#2ECC71" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="0,0,6,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Ellipse Width="8" Height="8" Fill="#2ECC71" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                        <TextBlock Text="Trống (Sẵn sàng)" FontSize="11" Foreground="#2ECC71" FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Background="#1A3498DB" BorderBrush="#3498DB" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="0,0,6,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Ellipse Width="8" Height="8" Fill="#3498DB" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                        <TextBlock Text="Đang sử dụng" FontSize="11" Foreground="#3498DB" FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Background="#1AF39C12" BorderBrush="#F39C12" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="0,0,6,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Ellipse Width="8" Height="8" Fill="#F39C12" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                        <TextBlock Text="Đã đặt trước" FontSize="11" Foreground="#F39C12" FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Background="#1AE74C3C" BorderBrush="#E74C3C" BorderThickness="1" CornerRadius="4" Padding="6,2">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Ellipse Width="8" Height="8" Fill="#E74C3C" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                        <TextBlock Text="Chờ dọn dẹp" FontSize="11" Foreground="#E74C3C" FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
                         </Grid>
 
                         <!-- Danh sách 10 phòng -->

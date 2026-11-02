@@ -50,22 +50,14 @@
                         </StackPanel>
                     </StackPanel>
 
-                    <!-- Cột phải: Đổi mật khẩu & Bảo mật -->
+                    <!-- Cột phải: Đổi mật khẩu -->
                     <StackPanel Grid.Column="1" Margin="20,0,0,0">
-                        <TextBlock Text="Đổi mật khẩu" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryColor}" Margin="0,0,0,15"/>
+                        <TextBlock Text="Bảo mật" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryColor}" Margin="0,0,0,15"/>
 
                         <StackPanel Margin="0,0,0,15">
-                            <TextBlock Text="Mật khẩu mới (Bỏ trống nếu không đổi)" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,6"/>
-                            <PasswordBox x:Name="txtPassword" Width="Auto" Style="{DynamicResource PasswordBoxStyle}"/>
+                            <TextBlock Text="Mật khẩu mới" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                            <PasswordBox x:Name="txtPassword" Width="Auto" Style="{DynamicResource PasswordBoxStyle}" Tag="Để trống nếu không đổi mật khẩu"/>
                         </StackPanel>
-
-                        <Border Margin="0,10,0,0" Padding="14" Background="{DynamicResource SecondaryBackgroundColor}" CornerRadius="5" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1">
-                            <StackPanel>
-                                <TextBlock Text="Lưu ý bảo mật:" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryColor}" Margin="0,0,0,6"/>
-                                <TextBlock Text="- Mật khẩu mới (nếu nhập) phải có ít nhất 4 ký tự và sẽ được mã hóa chuẩn BCrypt." FontSize="12" Foreground="{DynamicResource TextSecondaryColor}" Margin="0,0,0,4" TextWrapping="Wrap"/>
-                                <TextBlock Text="- Nếu bạn chỉ muốn cập nhật Họ tên, Email hoặc Số điện thoại, hãy để trống ô Mật khẩu mới." FontSize="12" Foreground="{DynamicResource TextSecondaryColor}" TextWrapping="Wrap"/>
-                            </StackPanel>
-                        </Border>
                     </StackPanel>
                 </Grid>
             </Border>

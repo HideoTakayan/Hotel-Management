@@ -23,7 +23,7 @@
                    Margin="40 0 0 0" Padding="10 5 0 5"
                    BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="4 0 0 0"/>
 
-            <Border Grid.Row="1" CornerRadius="5" Background="{DynamicResource PrimaryBackgroundColor}" Margin="20,0,20,10">
+            <Border Grid.Row="1" CornerRadius="5" Background="{DynamicResource PrimaryBackgroundColor}" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1" Margin="20,0,20,10">
                 <StackPanel Orientation="Horizontal" Margin="20,10,0,10">
                     <TextBlock Text="Tháng" Width="100" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="15"/>
                     <DatePicker x:Name="dateThoiGian" Width="200" Style="{DynamicResource DatePickerStyle}" SelectedDateChanged="DateThoiGian_SelectedDateChanged" />
@@ -111,12 +111,12 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <TextBlock Grid.Row="0" Text="Dịch vụ có doanh thu cao nhất" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryColor}" Margin="0,0,0,10"/>
-                        <DataGrid Grid.Row="1" x:Name="dgTopServices" AutoGenerateColumns="False" IsReadOnly="True" Style="{DynamicResource DataGridStyle}">
+                        <DataGrid Grid.Row="1" x:Name="dgTopServices" AutoGenerateColumns="False" IsReadOnly="True" Style="{DynamicResource DataGridStyle}" HorizontalScrollBarVisibility="Disabled">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Tên dịch vụ" Binding="{Binding ServiceName}" Width="1.8*"/>
-                                <DataGridTextColumn Header="ĐVT" Binding="{Binding Unit}" Width="0.7*"/>
-                                <DataGridTextColumn Header="Số lượng" Binding="{Binding Quantity}" Width="0.7*"/>
-                                <DataGridTextColumn Header="Doanh thu (VND)" Binding="{Binding TotalRevenue, StringFormat={}{0:N0}}" Width="1.2*"/>
+                                <DataGridTextColumn Header="Tên dịch vụ" Binding="{Binding ServiceName}" Width="*"/>
+                                <DataGridTextColumn Header="ĐVT" Binding="{Binding Unit}" Width="75"/>
+                                <DataGridTextColumn Header="Số lượng" Binding="{Binding Quantity}" Width="75"/>
+                                <DataGridTextColumn Header="Doanh thu (VND)" Binding="{Binding TotalRevenue, StringFormat={}{0:N0}}" Width="135"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </Grid>

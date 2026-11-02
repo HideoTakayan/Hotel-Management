@@ -7,6 +7,96 @@
       xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
       d:DesignHeight="566" d:DesignWidth="920" Title="Nhiệm Vụ Của Tôi" FontFamily="Segoe UI">
 
+    <Page.Resources>
+        <!-- Nút hành động chính trong DataGrid (Duyệt / Nhận việc / Báo cáo) -->
+        <Style x:Key="TaskActionPrimaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{Binding PrimaryActionBgColor}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.85"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.7"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Nút Làm lại (Amber Warning Outline) -->
+        <Style x:Key="TaskActionRejectButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#F59E0B"/>
+            <Setter Property="BorderBrush" Value="#F59E0B"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="Padding" Value="9,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#26F59E0B"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#40F59E0B"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Nút Hủy (Red Danger Outline) -->
+        <Style x:Key="TaskActionDeleteButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#EF4444"/>
+            <Setter Property="BorderBrush" Value="#EF4444"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="Padding" Value="9,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#26EF4444"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#40EF4444"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
+
     <Border CornerRadius="5" Background="{DynamicResource SecondaryBackgroundColor}">
         <Grid>
             <Grid.RowDefinitions>
@@ -61,25 +151,39 @@
                 </StackPanel>
             </Border>
             
-            <DataGrid Grid.Row="2" x:Name="dgTasks" Margin="20,0,20,20" Style="{DynamicResource DataGridStyle}" RowHeight="40">
+            <DataGrid Grid.Row="2" x:Name="dgTasks" Margin="20,0,20,20" Style="{DynamicResource DataGridStyle}" RowHeight="42" HorizontalScrollBarVisibility="Disabled">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Ngày làm" Binding="{Binding WorkDate, StringFormat=dd/MM/yyyy}" Width="0.9*" MinWidth="74"/>
-                    <DataGridTextColumn Header="Ca trực" Binding="{Binding ShiftName}" Width="0.72*" MinWidth="58"/>
-                    <DataGridTextColumn Header="Phòng" Binding="{Binding RoomNumber}" Width="0.58*" MinWidth="50"/>
-                    <DataGridTextColumn Header="Nhiệm vụ" Binding="{Binding TaskName}" Width="1.95*" MinWidth="125"/>
-                    <DataGridTextColumn Header="Người phụ trách" Binding="{Binding AssigneeName}" Width="1.25*" MinWidth="95"/>
-                    <DataGridTextColumn Header="Trạng thái" Binding="{Binding StatusName}" Width="1.05*" MinWidth="82"/>
-                    <DataGridTextColumn Header="Hoàn thành lúc" Binding="{Binding CompletedAtText}" Width="1.25*" MinWidth="95"/>
-                    
-                    <DataGridTemplateColumn Header="Thao tác" Width="1.95*" MinWidth="245">
+                    <DataGridTextColumn Header="Ngày làm" Binding="{Binding WorkDate, StringFormat=dd/MM/yyyy}" Width="84"/>
+                    <DataGridTextColumn Header="Ca trực" Binding="{Binding ShiftName}" Width="66"/>
+                    <DataGridTextColumn Header="Phòng" Binding="{Binding RoomNumber}" Width="56"/>
+                    <DataGridTemplateColumn Header="Nhiệm vụ" Width="*" MinWidth="150">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <!-- Nút Thao tác chính (Nhận việc / Báo cáo xong / Duyệt đạt) -->
-                                    <Button Content="{Binding PrimaryActionText}" MinWidth="76" Height="28" FontSize="12.5" Margin="2,0" Padding="8,0"
-                                            Click="btnUpdateTask_Click" Tag="{Binding TaskId}">
+                                <TextBlock Text="{Binding TaskName}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding TaskName}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Phụ trách" Binding="{Binding AssigneeName}" Width="125"/>
+                    <DataGridTemplateColumn Header="Trạng thái" Width="120">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Background="{Binding StatusBgColor}" CornerRadius="4" Padding="7,2.5" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding StatusName}" FontSize="12" FontWeight="SemiBold" Foreground="{Binding StatusFgColor}"/>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Hoàn thành" Binding="{Binding CompletedAtText}" Width="118"/>
+                    
+                    <DataGridTemplateColumn Header="Thao tác" Width="185">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="2,0,0,0">
+                                    <!-- Nút Thao tác chính (Duyệt / Nhận việc / Báo cáo) -->
+                                    <Button Content="{Binding PrimaryActionText}"
+                                            Click="btnUpdateTask_Click" Tag="{Binding TaskId}" Margin="0,0,6,0">
                                         <Button.Style>
-                                            <Style TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+                                            <Style TargetType="Button" BasedOn="{StaticResource TaskActionPrimaryButtonStyle}">
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding ShowPrimaryAction}" Value="False">
                                                         <Setter Property="Visibility" Value="Collapsed"/>
@@ -89,11 +193,11 @@
                                         </Button.Style>
                                     </Button>
 
-                                    <!-- Nút Yêu cầu làm lại (chỉ hiển thị cho Quản lý khi task Chờ xác nhận) -->
-                                    <Button Content="Yêu cầu làm lại" MinWidth="96" Height="28" FontSize="12.5" Margin="2,0" Padding="8,0"
-                                            Click="btnRejectTask_Click" Tag="{Binding TaskId}">
+                                    <!-- Nút Làm lại (chỉ hiển thị cho Quản lý khi task Chờ xác nhận) -->
+                                    <Button Content="Làm lại"
+                                            Click="btnRejectTask_Click" Tag="{Binding TaskId}" Margin="0,0,6,0">
                                         <Button.Style>
-                                            <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+                                            <Style TargetType="Button" BasedOn="{StaticResource TaskActionRejectButtonStyle}">
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding ShowRejectAction}" Value="False">
                                                         <Setter Property="Visibility" Value="Collapsed"/>
@@ -104,10 +208,10 @@
                                     </Button>
 
                                     <!-- Nút Hủy nhiệm vụ (chỉ hiển thị cho Quản lý khi task chưa hoàn thành) -->
-                                    <Button Content="Hủy" MinWidth="55" Height="28" FontSize="12.5" Margin="2,0" Padding="6,0"
+                                    <Button Content="Hủy"
                                             Click="btnDeleteTask_Click" Tag="{Binding TaskId}">
                                         <Button.Style>
-                                            <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+                                            <Style TargetType="Button" BasedOn="{StaticResource TaskActionDeleteButtonStyle}">
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding ShowDeleteAction}" Value="False">
                                                         <Setter Property="Visibility" Value="Collapsed"/>
