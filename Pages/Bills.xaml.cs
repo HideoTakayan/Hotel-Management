@@ -35,45 +35,52 @@ namespace Hotel_Management.Pages
         }
 
         private List<Bill> _allBills = new List<Bill>();
+        private decimal _currentServiceTotal = 0;
+        private decimal _currentRoomTotal = 0;
 
-        private void LoadData()
+        internal async void LoadData()
         {
             int? preservedSelectedId = _targetBillId ?? (BillsDataGrid?.SelectedItem as Bill)?.BillId;
 
             try
             {
-                var bills = new List<Bill>();
-                using (var conn = DatabaseHelper.GetConnection())
+                var bills = await System.Threading.Tasks.Task.Run(() =>
                 {
-                    conn.Open();
-                    string query = @"SELECT b.BillId, b.RoomId, r.RoomNumber, b.CreatedAt, b.FullName, b.Email, b.Phone, 
-                                            b.StartDate, b.EndDate, b.NumberPeople, b.Total, b.Status 
-                                     FROM Bills b
-                                     JOIN Rooms r ON b.RoomId = r.RoomId
-                                     ORDER BY b.CreatedAt DESC";
-                    using (var cmd = new MySqlCommand(query, conn))
-                    using (var reader = cmd.ExecuteReader())
+                    var list = new List<Bill>();
+                    using (var conn = DatabaseHelper.GetConnection())
                     {
-                        while (reader.Read())
+                        DatabaseHelper.OpenConnection(conn);
+                        string query = @"SELECT b.BillId, b.RoomId, r.RoomNumber, b.CreatedAt, b.FullName, b.Email, b.Phone, 
+                                                b.StartDate, b.EndDate, b.NumberPeople, b.Total, b.Status 
+                                         FROM Bills b
+                                         JOIN Rooms r ON b.RoomId = r.RoomId
+                                         ORDER BY b.CreatedAt DESC";
+                        using (var cmd = new MySqlCommand(query, conn))
+                        using (var reader = cmd.ExecuteReader())
                         {
-                            bills.Add(new Bill
+                            while (reader.Read())
                             {
-                                BillId = reader.GetInt32("BillId"),
-                                RoomId = reader.GetInt32("RoomId"),
-                                Room = new Room { RoomId = reader.GetInt32("RoomId"), RoomNumber = reader.GetString("RoomNumber") },
-                                CreatedAt = reader.GetDateTime("CreatedAt"),
-                                FullName = reader.GetString("FullName"),
-                                Email = reader.IsDBNull(reader.GetOrdinal("Email")) ? "" : reader.GetString("Email"),
-                                Phone = reader.GetString("Phone"),
-                                StartDate = reader.GetDateTime("StartDate"),
-                                EndDate = reader.GetDateTime("EndDate"),
-                                NumberPeople = reader.GetInt32("NumberPeople"),
-                                Total = reader.IsDBNull(reader.GetOrdinal("Total")) ? 0 : reader.GetDecimal("Total"),
-                                Status = reader.GetInt32("Status")
-                            });
+                                list.Add(new Bill
+                                {
+                                    BillId = reader.GetInt32("BillId"),
+                                    RoomId = reader.GetInt32("RoomId"),
+                                    Room = new Room { RoomId = reader.GetInt32("RoomId"), RoomNumber = reader.GetString("RoomNumber") },
+                                    CreatedAt = reader.GetDateTime("CreatedAt"),
+                                    FullName = reader.GetString("FullName"),
+                                    Email = reader.IsDBNull(reader.GetOrdinal("Email")) ? "" : reader.GetString("Email"),
+                                    Phone = reader.GetString("Phone"),
+                                    StartDate = reader.GetDateTime("StartDate"),
+                                    EndDate = reader.GetDateTime("EndDate"),
+                                    NumberPeople = reader.GetInt32("NumberPeople"),
+                                    Total = reader.IsDBNull(reader.GetOrdinal("Total")) ? 0 : reader.GetDecimal("Total"),
+                                    Status = reader.GetInt32("Status")
+                                });
+                            }
                         }
                     }
-                }
+                    return list;
+                });
+
                 _allBills = bills;
                 _targetBillId = preservedSelectedId;
                 ApplyFilter();
@@ -122,7 +129,6 @@ namespace Hotel_Management.Pages
                 var target = _allBills.Find(b => b.BillId == _targetBillId.Value);
                 if (target != null)
                 {
-                    // Nếu target đang bị bộ lọc ẩn đi, reset lại bộ lọc để người dùng nhìn thấy hóa đơn
                     if (!filtered.Contains(target))
                     {
                         if (cbFilterStatus != null) cbFilterStatus.SelectedIndex = 0;
@@ -190,9 +196,8 @@ namespace Hotel_Management.Pages
                 txtTienPhongDetail.Text = "0 VND";
                 txtTienDichVuDetail.Text = "0 VND";
                 txtTongTien.Text = "0 VND";
-                dgBillServices.ItemsSource = null;
-                dgBillServices.Visibility = Visibility.Collapsed;
-                txtNoServicesHint.Visibility = Visibility.Visible;
+                _currentServiceTotal = 0;
+                _currentRoomTotal = 0;
 
                 comboboxTrangThai.SelectedIndex = -1;
                 txtStatusLockedHint.Visibility = Visibility.Collapsed;
@@ -202,91 +207,60 @@ namespace Hotel_Management.Pages
             }
         }
 
-        private void LoadBillServices(Bill bill)
+        private async void LoadBillServices(Bill bill)
         {
             if (bill == null) return;
 
             try
             {
-                using (var conn = DatabaseHelper.GetConnection())
+                int targetBillId = bill.BillId;
+                decimal initialTotal = bill.Total ?? 0;
+
+                var result = await System.Threading.Tasks.Task.Run(() =>
                 {
-                    conn.Open();
-
-                    // Lấy Total mới nhất từ DB để đồng bộ thời gian thực nếu vừa có dịch vụ thêm
-                    decimal totalBill = bill.Total ?? 0;
-                    string queryBillTotal = "SELECT Total FROM Bills WHERE BillId = @BillId";
-                    using (var cmdTotal = new MySqlCommand(queryBillTotal, conn))
-                    {
-                        cmdTotal.Parameters.Add("@BillId", MySqlDbType.Int32).Value = bill.BillId;
-                        var res = cmdTotal.ExecuteScalar();
-                        if (res != null && res != DBNull.Value)
-                        {
-                            totalBill = Convert.ToDecimal(res);
-                            bill.Total = totalBill;
-                        }
-                    }
-
-                    string queryServices = @"
-                        SELECT s.ServiceName, 
-                               CASE WHEN bs.Quantity > 0 THEN (bs.Total / bs.Quantity) ELSE s.Price END AS Price, 
-                               bs.Quantity, 
-                               bs.Total
-                        FROM Bill_Services bs
-                        JOIN Services s ON bs.ServiceId = s.ServiceId
-                        WHERE bs.BillId = @BillId";
-
-                    var servicesList = new List<BillService>();
+                    decimal totalBill = initialTotal;
                     decimal tienDichVu = 0;
 
-                    using (var cmd = new MySqlCommand(queryServices, conn))
+                    using (var conn = DatabaseHelper.GetConnection())
                     {
-                        cmd.Parameters.Add("@BillId", MySqlDbType.Int32).Value = bill.BillId;
-                        using (var reader = cmd.ExecuteReader())
+                        DatabaseHelper.OpenConnection(conn);
+                        string queryBillTotal = "SELECT Total FROM Bills WHERE BillId = @BillId";
+                        using (var cmdTotal = new MySqlCommand(queryBillTotal, conn))
                         {
-                            while (reader.Read())
+                            cmdTotal.Parameters.Add("@BillId", MySqlDbType.Int32).Value = targetBillId;
+                            var res = cmdTotal.ExecuteScalar();
+                            if (res != null && res != DBNull.Value)
                             {
-                                decimal itemTotal = reader.GetDecimal("Total");
-                                tienDichVu += itemTotal;
-                                servicesList.Add(new BillService
-                                {
-                                    ServiceName = reader.GetString("ServiceName"),
-                                    Price = reader.GetDecimal("Price"),
-                                    Quantity = reader.GetInt32("Quantity"),
-                                    Total = itemTotal
-                                });
+                                totalBill = Convert.ToDecimal(res);
+                            }
+                        }
+
+                        string queryServices = "SELECT COALESCE(SUM(Total), 0) FROM Bill_Services WHERE BillId = @BillId";
+                        using (var cmd = new MySqlCommand(queryServices, conn))
+                        {
+                            cmd.Parameters.Add("@BillId", MySqlDbType.Int32).Value = targetBillId;
+                            var res = cmd.ExecuteScalar();
+                            if (res != null && res != DBNull.Value)
+                            {
+                                tienDichVu = Convert.ToDecimal(res);
                             }
                         }
                     }
+                    return (totalBill, tienDichVu);
+                });
 
-                    dgBillServices.ItemsSource = servicesList;
-                    if (servicesList.Count > 0)
-                    {
-                        txtNoServicesHint.Visibility = Visibility.Collapsed;
-                        dgBillServices.Visibility = Visibility.Visible;
-                    }
-                    else
-                    {
-                        txtNoServicesHint.Visibility = Visibility.Visible;
-                        dgBillServices.Visibility = Visibility.Collapsed;
-                    }
+                if (BillsDataGrid?.SelectedItem is Bill currentSelected && currentSelected.BillId == targetBillId)
+                {
+                    bill.Total = result.totalBill;
+                    _currentServiceTotal = result.tienDichVu;
+                    _currentRoomTotal = Math.Max(0, result.totalBill - result.tienDichVu);
 
-                    decimal tienPhong = Math.Max(0, totalBill - tienDichVu);
-                    txtTienPhongDetail.Text = $"{tienPhong:N0} VND";
-                    txtTienDichVuDetail.Text = $"{tienDichVu:N0} VND";
-                    txtTongTien.Text = $"{totalBill:N0} VND";
+                    txtTienPhongDetail.Text = $"{_currentRoomTotal:N0} VND";
+                    txtTienDichVuDetail.Text = $"{_currentServiceTotal:N0} VND";
+                    txtTongTien.Text = $"{result.totalBill:N0} VND";
                 }
             }
-            catch (MySqlException ex)
-            {
-                if (ex.Number == 1042 || ex.Number == 0)
-                    MessageBox.Show("Mất kết nối đến máy chủ CSDL. Vui lòng kiểm tra lại mạng!", "Lỗi Kết Nối", MessageBoxButton.OK, MessageBoxImage.Error);
-                else
-                    MessageBox.Show($"Lỗi tải dịch vụ hóa đơn: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Lỗi hệ thống: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            catch { }
         }
 
         private void SetComboBoxStatusByTag(int status)
@@ -322,13 +296,6 @@ namespace Hotel_Management.Pages
                 return;
             }
 
-            // Quy trình nghiệp vụ khách sạn thực tế:
-            // - Chưa thanh toán / Đặt trước (0) -> Chỉ được chuyển sang: Nhận phòng Check-in (3) hoặc Đã hủy (2).
-            //   (Khách chưa nhận phòng thì không thể nhảy cóc sang Chờ thanh toán (4) hay Đã thanh toán (1) làm giải phóng phòng).
-            // - Đang ở Check-in (3) -> Chỉ được chuyển sang: Trả phòng (Chờ thanh toán) (4) hoặc Đã thanh toán (1 - trả phòng & tất toán luôn).
-            //   (Khách đã vào ở và sử dụng phòng/dịch vụ thì không thể bấm 'Đã hủy' (2) để biến phòng đang ở thành phòng trống chưa dọn).
-            // - Chờ thanh toán (4) -> Chỉ được chuyển sang: Đã thanh toán (1).
-            // - Đã thanh toán (1), Đã hủy (2): Trạng thái kết thúc, đã khóa.
             bool isValidTransition = selectedBill.Status switch
             {
                 0 => newStatus == 3 || newStatus == 2,
@@ -350,18 +317,14 @@ namespace Hotel_Management.Pages
                 return;
             }
 
-            decimal tienDichVu = 0;
-            if (dgBillServices.ItemsSource is List<BillService> list)
-            {
-                foreach (var item in list) tienDichVu += item.Total;
-            }
+            decimal tienDichVu = _currentServiceTotal;
             decimal tongTien = selectedBill.Total ?? 0;
             decimal tienPhong = Math.Max(0, tongTien - tienDichVu);
 
             string statusText = ((ComboBoxItem)comboboxTrangThai.SelectedItem).Content.ToString();
             string confirmMsg = $"Xác nhận cập nhật hóa đơn ID {selectedBill.BillId} (Phòng {selectedBill.Room?.RoomNumber}) sang '{statusText}'?\n\n"
                               + $"• Tiền phòng: {tienPhong:N0} VND\n"
-                              + $"• Tiền dịch vụ ({(dgBillServices.ItemsSource as List<BillService>)?.Count ?? 0} món): {tienDichVu:N0} VND\n"
+                              + $"• Tiền dịch vụ: {tienDichVu:N0} VND\n"
                               + $"• TỔNG CỘNG HÓA ĐƠN: {tongTien:N0} VND";
 
             var result = MessageBox.Show(confirmMsg, "Xác Nhận Hóa Đơn", MessageBoxButton.YesNo, MessageBoxImage.Question);
@@ -371,12 +334,11 @@ namespace Hotel_Management.Pages
                 {
                     using (var conn = DatabaseHelper.GetConnection())
                     {
-                        conn.Open();
+                        DatabaseHelper.OpenConnection(conn);
                         using (var trans = conn.BeginTransaction())
                         {
                             try
                             {
-                                // Cập nhật Bill
                                 string updateBill = "UPDATE Bills SET Status = @Status WHERE BillId = @BillId";
                                 using (var cmd = new MySqlCommand(updateBill, conn, trans))
                                 {
@@ -385,7 +347,6 @@ namespace Hotel_Management.Pages
                                     cmd.ExecuteNonQuery();
                                 }
 
-                                // Lấy trạng thái phòng hiện tại để tránh tạo nhiều Task trùng lặp
                                 int currentRoomStatus = 0;
                                 string getRoomStatusQuery = "SELECT Status FROM Rooms WHERE RoomId = @RoomId";
                                 using (var cmdGetRoom = new MySqlCommand(getRoomStatusQuery, conn, trans))
@@ -398,24 +359,23 @@ namespace Hotel_Management.Pages
                                 int roomStatus = -1;
                                 bool createCleaningTask = false;
 
-                                if (newStatus == 3) // Check-in
+                                if (newStatus == 3)
                                 {
-                                    roomStatus = 2; // Đang sử dụng
+                                    roomStatus = 2;
                                 }
-                                else if (newStatus == 4 || newStatus == 1) // Check-out hoặc Đã thanh toán
+                                else if (newStatus == 4 || newStatus == 1)
                                 {
-                                    // Chỉ cập nhật và tạo dọn phòng nếu phòng đang ở trạng thái 'Đang sử dụng'
                                     if (currentRoomStatus == 2)
                                     {
-                                        roomStatus = 3; // Chờ dọn dẹp
+                                        roomStatus = 3;
                                         createCleaningTask = true;
                                     }
                                 }
-                                else if (newStatus == 2) // Hủy đặt phòng trước khi ở
+                                else if (newStatus == 2)
                                 {
                                     if (currentRoomStatus == 1)
                                     {
-                                        roomStatus = 0; // Giải phóng phòng về Trống
+                                        roomStatus = 0;
                                     }
                                 }
 
@@ -524,12 +484,11 @@ namespace Hotel_Management.Pages
                 {
                     using (var conn = DatabaseHelper.GetConnection())
                     {
-                        conn.Open();
+                        DatabaseHelper.OpenConnection(conn);
                         using (var trans = conn.BeginTransaction())
                         {
                             try
                             {
-                                // 1. Xóa các dịch vụ đã gọi của hóa đơn này (tránh lỗi khóa ngoại)
                                 string deleteBillServices = "DELETE FROM Bill_Services WHERE BillId = @BillId";
                                 using (var cmd = new MySqlCommand(deleteBillServices, conn, trans))
                                 {
@@ -537,12 +496,41 @@ namespace Hotel_Management.Pages
                                     cmd.ExecuteNonQuery();
                                 }
 
-                                // 2. Xóa hóa đơn
                                 string deleteBill = "DELETE FROM Bills WHERE BillId = @BillId";
                                 using (var cmd = new MySqlCommand(deleteBill, conn, trans))
                                 {
                                     cmd.Parameters.Add("@BillId", MySqlDbType.Int32).Value = selectedBill.BillId;
                                     cmd.ExecuteNonQuery();
+                                }
+
+                                if (selectedBill.Status == 0)
+                                {
+                                    string releaseRoom = "UPDATE Rooms SET Status = 0 WHERE RoomId = @RoomId AND Status = 1";
+                                    using (var cmdRelease = new MySqlCommand(releaseRoom, conn, trans))
+                                    {
+                                        cmdRelease.Parameters.Add("@RoomId", MySqlDbType.Int32).Value = selectedBill.RoomId;
+                                        cmdRelease.ExecuteNonQuery();
+                                    }
+                                }
+                                else if (selectedBill.Status == 3)
+                                {
+                                    string roomToCleaning = "UPDATE Rooms SET Status = 3 WHERE RoomId = @RoomId AND Status = 2";
+                                    using (var cmdRoomClean = new MySqlCommand(roomToCleaning, conn, trans))
+                                    {
+                                        cmdRoomClean.Parameters.Add("@RoomId", MySqlDbType.Int32).Value = selectedBill.RoomId;
+                                        cmdRoomClean.ExecuteNonQuery();
+                                    }
+
+                                    int shiftId = DatabaseHelper.GetOrCreateCurrentShiftId(conn, trans);
+                                    string insertTask = @"INSERT INTO Tasks (RoomId, ShiftId, TaskName, TaskStatus) 
+                                                          VALUES (@RoomId, @ShiftId, @TaskName, 0)";
+                                    using (var cmdTask = new MySqlCommand(insertTask, conn, trans))
+                                    {
+                                        cmdTask.Parameters.Add("@RoomId", MySqlDbType.Int32).Value = selectedBill.RoomId;
+                                        cmdTask.Parameters.Add("@ShiftId", MySqlDbType.Int32).Value = shiftId;
+                                        cmdTask.Parameters.Add("@TaskName", MySqlDbType.VarChar, 255).Value = $"Dọn dẹp phòng {selectedBill.Room?.RoomNumber ?? ""}";
+                                        cmdTask.ExecuteNonQuery();
+                                    }
                                 }
 
                                 trans.Commit();

@@ -15,14 +15,12 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Header -->
             <Label Grid.Row="0" Content="Hồ sơ cá nhân" 
                    Style="{DynamicResource LabelStyle}" 
                    HorizontalAlignment="Left" VerticalAlignment="Center" 
                    Margin="40 0 0 0" Padding="10 5 0 5"
                    BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="4 0 0 0"/> 
 
-            <!-- Form chia 2 cột đồng bộ với toàn hệ thống -->
             <Border Grid.Row="1" Margin="30,15,30,15" Padding="25,20" Background="{DynamicResource PrimaryBackgroundColor}" CornerRadius="6" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -30,7 +28,6 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Cột trái: Thông tin liên hệ -->
                     <StackPanel Grid.Column="0" Margin="0,0,20,0">
                         <TextBlock Text="Thông tin cá nhân" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryColor}" Margin="0,0,0,15"/>
 
@@ -50,7 +47,6 @@
                         </StackPanel>
                     </StackPanel>
 
-                    <!-- Cột phải: Đổi mật khẩu -->
                     <StackPanel Grid.Column="1" Margin="20,0,0,0">
                         <TextBlock Text="Bảo mật" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryColor}" Margin="0,0,0,15"/>
 

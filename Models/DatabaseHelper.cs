@@ -6,24 +6,81 @@ namespace Hotel_Management.Models
 {
     public static class DatabaseHelper
     {
-        public static string MySqlConnStr =>
-            ConfigurationManager.ConnectionStrings["MySqlConn"]?.ConnectionString
-            ?? throw new InvalidOperationException("Không tìm thấy cấu hình chuỗi kết nối 'MySqlConn' trong App.config!");
+        private static string _connStr;
+        public static string MySqlConnStr
+        {
+            get
+            {
+                if (_connStr == null)
+                {
+                    var raw = ConfigurationManager.ConnectionStrings["MySqlConn"]?.ConnectionString
+                        ?? throw new InvalidOperationException("Không tìm thấy cấu hình chuỗi kết nối 'MySqlConn' trong App.config!");
+
+                    var builder = new MySqlConnectionStringBuilder(raw);
+                    builder.MinimumPoolSize = 0;
+                    builder.MaximumPoolSize = 20;
+                    builder.ConnectionLifeTime = 30;
+                    builder.Keepalive = 10;
+                    if (builder.ConnectionTimeout == 0 || builder.ConnectionTimeout > 5)
+                        builder.ConnectionTimeout = 5;
+                    if (builder.DefaultCommandTimeout == 0 || builder.DefaultCommandTimeout > 10)
+                        builder.DefaultCommandTimeout = 10;
+
+                    _connStr = builder.ConnectionString;
+                }
+                return _connStr;
+            }
+        }
 
         public static MySqlConnection GetConnection()
         {
             return new MySqlConnection(MySqlConnStr);
         }
 
-        /// <summary>
-        /// Lấy ShiftId của ca trực hiện tại theo thời gian thực (CURDATE() & ShiftType).
-        /// Nếu hôm nay chưa có ca trực tương ứng, tự động khởi tạo ca trực mới cho ngày hôm nay.
-        /// </summary>
-        public static int GetOrCreateCurrentShiftId(MySqlConnection conn, MySqlTransaction trans = null)
+        public static void OpenConnection(MySqlConnection conn)
         {
-            // Ca Sáng: 07:00 - 15:00 (ShiftType = 0), Ca Tối: 15:00 - 23:00 (ShiftType = 1)
-            int shiftType = (DateTime.Now.Hour >= 15) ? 1 : 0;
+            if (conn.State == System.Data.ConnectionState.Open) return;
+            try
+            {
+                conn.Open();
+            }
+            catch
+            {
+                MySqlConnection.ClearPool(conn);
+                conn.Open();
+            }
+        }
 
+        public static async System.Threading.Tasks.Task OpenConnectionAsync(MySqlConnection conn)
+        {
+            if (conn.State == System.Data.ConnectionState.Open) return;
+            try
+            {
+                await conn.OpenAsync();
+            }
+            catch
+            {
+                MySqlConnection.ClearPool(conn);
+                await conn.OpenAsync();
+            }
+        }
+
+        public static MySqlConnection GetOpenConnection()
+        {
+            var conn = GetConnection();
+            OpenConnection(conn);
+            return conn;
+        }
+
+        public static async System.Threading.Tasks.Task<MySqlConnection> GetOpenConnectionAsync()
+        {
+            var conn = GetConnection();
+            await OpenConnectionAsync(conn);
+            return conn;
+        }
+
+        public static int EnsureShiftForType(MySqlConnection conn, int shiftType, MySqlTransaction trans = null)
+        {
             string queryShift = @"SELECT ShiftId FROM Shifts 
                                   WHERE WorkDate = CURDATE() AND ShiftType = @ShiftType 
                                   LIMIT 1";
@@ -37,32 +94,63 @@ namespace Hotel_Management.Models
                 }
             }
 
-            int emp1 = -1, emp2 = -1;
-            // Ưu tiên phân công nhân viên phục vụ/lễ tân (Role = 1) cho ca trực
-            string queryStaff = "SELECT Id FROM Users WHERE Role = 1 ORDER BY Id ASC LIMIT 2";
+            var staffList = new System.Collections.Generic.List<(int Id, string FullName)>();
+            string queryStaff = "SELECT Id, FullName FROM Users WHERE Role = 1 ORDER BY Id ASC";
             using (var cmdStaff = new MySqlCommand(queryStaff, conn, trans))
             using (var reader = cmdStaff.ExecuteReader())
             {
-                if (reader.Read()) emp1 = reader.GetInt32("Id");
-                if (reader.Read()) emp2 = reader.GetInt32("Id");
-                else if (emp1 != -1) emp2 = emp1;
-            }
-
-            // Fallback nếu chưa có nhân viên nào có Role = 1, lấy bất kỳ user nào trong bảng Users
-            if (emp1 == -1)
-            {
-                string queryUsers = "SELECT Id FROM Users ORDER BY Role DESC, Id ASC LIMIT 2";
-                using (var cmdUser = new MySqlCommand(queryUsers, conn, trans))
-                using (var reader = cmdUser.ExecuteReader())
+                while (reader.Read())
                 {
-                    if (reader.Read()) emp1 = reader.GetInt32("Id");
-                    if (reader.Read()) emp2 = reader.GetInt32("Id");
-                    else if (emp1 != -1) emp2 = emp1;
+                    staffList.Add((reader.GetInt32("Id"), reader.GetString("FullName")));
                 }
             }
 
-            // Trường hợp hy hữu CSDL trống hoàn toàn bảng Users
-            if (emp1 == -1) { emp1 = 1; emp2 = 1; }
+            if (staffList.Count == 0)
+            {
+                string queryUsers = "SELECT Id, FullName FROM Users ORDER BY Role DESC, Id ASC";
+                using (var cmdUser = new MySqlCommand(queryUsers, conn, trans))
+                using (var reader = cmdUser.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        staffList.Add((reader.GetInt32("Id"), reader.GetString("FullName")));
+                    }
+                }
+            }
+
+            int? empAn = null;
+            int? empBinh = null;
+            int? empLong = null;
+            int? empDuc = null;
+
+            foreach (var staff in staffList)
+            {
+                string name = staff.FullName ?? "";
+                if (empAn == null && name.IndexOf("An", StringComparison.OrdinalIgnoreCase) >= 0)
+                    empAn = staff.Id;
+                else if (empBinh == null && (name.IndexOf("Bình", StringComparison.OrdinalIgnoreCase) >= 0 || name.IndexOf("Binh", StringComparison.OrdinalIgnoreCase) >= 0))
+                    empBinh = staff.Id;
+                else if (empLong == null && name.IndexOf("Long", StringComparison.OrdinalIgnoreCase) >= 0)
+                    empLong = staff.Id;
+                else if (empDuc == null && (name.IndexOf("Đức", StringComparison.OrdinalIgnoreCase) >= 0 || name.IndexOf("Duc", StringComparison.OrdinalIgnoreCase) >= 0))
+                    empDuc = staff.Id;
+            }
+
+            int emp1 = -1, emp2 = -1;
+
+            if (shiftType == 0)
+            {
+                emp1 = empAn ?? (staffList.Count > 0 ? staffList[0].Id : 2);
+                emp2 = empBinh ?? (staffList.Count > 1 ? staffList[1].Id : (staffList.Count > 0 ? staffList[0].Id : 3));
+            }
+            else
+            {
+                emp1 = empLong ?? (staffList.Count > 2 ? staffList[2].Id : (staffList.Count > 0 ? staffList[0].Id : 4));
+                emp2 = empDuc ?? (staffList.Count > 3 ? staffList[3].Id : (staffList.Count > 1 ? staffList[1].Id : (staffList.Count > 0 ? staffList[0].Id : 5)));
+            }
+
+            if (emp1 == -1) emp1 = 1;
+            if (emp2 == -1) emp2 = emp1;
 
             string insertShift = @"INSERT INTO Shifts (WorkDate, ShiftType, Employee1_Id, Employee2_Id) 
                                    VALUES (CURDATE(), @ShiftType, @Emp1, @Emp2)";
@@ -76,18 +164,21 @@ namespace Hotel_Management.Models
             }
         }
 
-        /// <summary>
-        /// Đảm bảo ca trực hôm nay đã tồn tại trong CSDL để hiển thị đồng bộ thời gian thực
-        /// </summary>
-        public static void EnsureTodayShifts(MySqlConnection conn)
+        public static int GetOrCreateCurrentShiftId(MySqlConnection conn, MySqlTransaction trans = null)
+        {
+            int currentShiftType = (DateTime.Now.Hour >= 15) ? 1 : 0;
+            return EnsureShiftForType(conn, currentShiftType, trans);
+        }
+
+        public static void EnsureTodayShifts(MySqlConnection conn, MySqlTransaction trans = null)
         {
             try
             {
-                GetOrCreateCurrentShiftId(conn);
+                EnsureShiftForType(conn, 0, trans);
+                EnsureShiftForType(conn, 1, trans);
             }
             catch
             {
-                // Bỏ qua lỗi nếu đã được xử lý ở tầng ngoài
             }
         }
 
@@ -95,13 +186,6 @@ namespace Hotel_Management.Models
         private static int _isSyncing = 0;
         private static bool _servicesEnsured = false;
 
-        /// <summary>
-        /// Đồng bộ toàn bộ dữ liệu hệ thống theo ngày thực tế (bắt đầu từ hôm nay CURDATE()):
-        /// - Các nhiệm vụ trước ngày hiện tại (WorkDate < CURDATE()) tự động hoàn tất (TaskStatus = 3).
-        /// - Các hóa đơn có ngày trả phòng trước hôm nay (EndDate < CURDATE()) tự động hoàn tất/thanh toán (Status = 1).
-        /// - Đồng bộ trạng thái phòng thực tế (Đang ở nếu có khách check-in hôm nay, Đã đặt nếu có khách đặt trước, Trống nếu hết hạn).
-        /// Cơ chế Throttle 15 phút và Non-blocking Lock đảm bảo không bao giờ lock table hay làm đơ giao diện.
-        /// </summary>
         public static void SyncAllDataToCurrentDate(MySqlConnection conn, bool force = false)
         {
             if (!force && (DateTime.Now - _lastSyncTime).TotalMinutes < 15)
@@ -109,7 +193,6 @@ namespace Hotel_Management.Models
                 return;
             }
 
-            // Đảm bảo không bao giờ có 2 luồng cùng thực hiện đồng bộ CSDL cùng lúc (tránh deadlock)
             if (System.Threading.Interlocked.CompareExchange(ref _isSyncing, 1, 0) != 0)
             {
                 return;
@@ -119,14 +202,12 @@ namespace Hotel_Management.Models
 
             try
             {
-                // Giảm thời gian chờ lock xuống tối đa 3 giây để không bao giờ treo ứng dụng
                 using (var cmdTimeout = new MySqlCommand("SET SESSION innodb_lock_wait_timeout = 3;", conn))
                 {
                     cmdTimeout.CommandTimeout = 3;
                     try { cmdTimeout.ExecuteNonQuery(); } catch { }
                 }
 
-                // 1. Đồng bộ Tasks: Các nhiệm vụ thuộc ca làm trước ngày hôm nay chưa hoàn thành -> Đánh dấu hoàn tất
                 string sqlSyncTasks = @"
                     UPDATE Tasks t
                     JOIN Shifts s ON t.ShiftId = s.ShiftId
@@ -139,22 +220,28 @@ namespace Hotel_Management.Models
                     cmdTasks.ExecuteNonQuery();
                 }
 
-                // 2. Đồng bộ Bills: Các hóa đơn có ngày trả phòng trước ngày hôm nay (EndDate < CURDATE()) -> Đã thanh toán (Status = 1)
-                string sqlSyncBills = @"
+                string sqlSyncUnclaimed = @"
                     UPDATE Bills 
-                    SET Status = 1 
-                    WHERE EndDate < CURDATE() AND Status IN (0, 3, 4)";
-                using (var cmdBills = new MySqlCommand(sqlSyncBills, conn))
+                    SET Status = 2 
+                    WHERE EndDate < CURDATE() AND Status = 0";
+                using (var cmdUnclaimed = new MySqlCommand(sqlSyncUnclaimed, conn))
                 {
-                    cmdBills.CommandTimeout = 5;
-                    cmdBills.ExecuteNonQuery();
+                    cmdUnclaimed.CommandTimeout = 5;
+                    cmdUnclaimed.ExecuteNonQuery();
                 }
 
-                // 3. Đảm bảo ca trực hôm nay tồn tại trong hệ thống
+                string sqlSyncCompleted = @"
+                    UPDATE Bills 
+                    SET Status = 1 
+                    WHERE EndDate < CURDATE() AND Status IN (3, 4)";
+                using (var cmdCompleted = new MySqlCommand(sqlSyncCompleted, conn))
+                {
+                    cmdCompleted.CommandTimeout = 5;
+                    cmdCompleted.ExecuteNonQuery();
+                }
+
                 EnsureTodayShifts(conn);
 
-                // 4. Đồng bộ Trạng thái Phòng theo hóa đơn đang hoạt động của ngày hôm nay:
-                // - Đang ở (Status = 2): Phòng có hóa đơn Check-in (Status = 3) và đang trong thời gian lưu trú hôm nay
                 string sqlSyncOccupied = @"
                     UPDATE Rooms r
                     JOIN Bills b ON r.RoomId = b.RoomId
@@ -166,7 +253,6 @@ namespace Hotel_Management.Models
                     cmdOccupied.ExecuteNonQuery();
                 }
 
-                // - Đã đặt (Status = 1): Phòng có hóa đơn đặt trước (Status = 0) và chưa hết hạn lưu trú
                 string sqlSyncBooked = @"
                     UPDATE Rooms r
                     JOIN Bills b ON r.RoomId = b.RoomId
@@ -178,7 +264,6 @@ namespace Hotel_Management.Models
                     cmdBooked.ExecuteNonQuery();
                 }
 
-                // - Trống (Status = 0): Các phòng không có hóa đơn Check-in (3) hay Đặt trước (0) cho hôm nay
                 string sqlSyncAvailable = @"
                     UPDATE Rooms 
                     SET Status = 0 
@@ -193,7 +278,6 @@ namespace Hotel_Management.Models
                     cmdAvailable.ExecuteNonQuery();
                 }
 
-                // 5. Đảm bảo danh mục dịch vụ Onsen & Ryokan đầy đủ
                 EnsureDefaultOnsenServices(conn);
             }
             catch (Exception ex)
@@ -206,16 +290,11 @@ namespace Hotel_Management.Models
             }
         }
 
-        /// <summary>
-        /// Tự động cập nhật danh mục dịch vụ Onsen & Ryokan chuẩn Nhật Bản thực tế nếu chưa có trong CSDL.
-        /// Chỉ chạy 1 lần trong phiên làm việc.
-        /// </summary>
         public static void EnsureDefaultOnsenServices(MySqlConnection conn)
         {
             if (_servicesEnsured) return;
             try
             {
-                // Kiểm tra nhanh: Nếu bảng Services đã có từ 15 dịch vụ trở lên thì bỏ qua ngay, không duyệt vòng lặp
                 using (var cmdCount = new MySqlCommand("SELECT COUNT(*) FROM Services", conn))
                 {
                     cmdCount.CommandTimeout = 5;
@@ -229,7 +308,6 @@ namespace Hotel_Management.Models
 
                 var defaultServices = new (string Name, decimal Price, string Unit)[]
                 {
-                    // Nhóm 1: Trải nghiệm & Tiện ích Onsen (Khách tự trải nghiệm, không cần nhân viên giao việc)
                     ("Vé tắm khoáng nóng Public Onsen (Bể Rotenburo & Jacuzzi)", 350000m, "Lượt"),
                     ("Thuê bồn khoáng riêng tư gia đình (Private Kashikiri Hinoki)", 750000m, "Giờ"),
                     ("Xông hơi trị liệu đá muối Himalaya & Tuyết lạnh (Ganbanyoku)", 250000m, "Lượt"),
@@ -239,7 +317,6 @@ namespace Hotel_Management.Models
                     ("Trải nghiệm tắm rừng trị liệu thiên nhiên (Shinrin-yoku)", 200000m, "Lượt"),
                     ("Vé tham quan vườn thiền Karesansui & Trải nghiệm thiền trà Zen", 180000m, "Lượt"),
 
-                    // Nhóm 2: Trò chơi Giải trí Onsen & Ryokan (Văn hóa Ryokan Nhật Bản / Thám tử Conan)
                     ("Bóng bàn Onsen truyền thống (Onsen Takkyu - kèm vợt & bóng)", 80000m, "Giờ"),
                     ("Phòng Bida lỗ giải trí (Billiards Club - Bàn & Cơ cao cấp)", 120000m, "Giờ"),
                     ("Quầy bắn súng nút bấc trúng thưởng kiểu Nhật (Shateki Game)", 50000m, "Lượt"),
@@ -248,7 +325,6 @@ namespace Hotel_Management.Models
                     ("Phòng hát Karaoke Ryokan cách âm cao cấp (kèm micro & dàn loa)", 250000m, "Giờ"),
                     ("Trò chơi ném vòng trúng thưởng dân gian Onsen (Wanage Game)", 40000m, "Lượt"),
 
-                    // Nhóm 3: Ẩm thực & Phục vụ tại phòng (Cần nhân viên trực tiếp phục vụ / giao việc)
                     ("Thực đơn tối thượng hạng Kaiseki Ryori truyền thống (9 món)", 850000m, "Suất"),
                     ("Set Bò Wagyu A5 thượng hạng nướng đá nham thạch tại phòng", 950000m, "Suất"),
                     ("Buffet Ẩm thực Nhật Bản (Sushi, Sashimi cá hồi & Lẩu Shabu)", 550000m, "Suất"),

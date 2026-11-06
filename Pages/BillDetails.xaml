@@ -15,7 +15,6 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- Header -->
             <Label Grid.Row="0" Content="Chi tiết hóa đơn" 
                    Style="{DynamicResource LabelStyle}" 
                    HorizontalAlignment="Left" VerticalAlignment="Center" 
@@ -25,7 +24,6 @@
             <Button Grid.Row="0" Content="Quay lại" Width="110" HorizontalAlignment="Right" Margin="0,0,20,0"
                     Style="{DynamicResource SecondaryButtonStyle}" Click="BtnBack_Click"/>
 
-            <!-- Khung Thông tin Phòng & Khách hàng -->
             <Border Grid.Row="1" Margin="20,4,20,12" Padding="20,12" Background="{DynamicResource PrimaryBackgroundColor}" CornerRadius="6" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -37,7 +35,6 @@
                 </Grid>
             </Border>
 
-            <!-- DataGrid -->
             <DataGrid x:Name="dgServices" Grid.Row="2" Margin="20,0,20,12" AutoGenerateColumns="False" IsReadOnly="True" Style="{DynamicResource DataGridStyle}" HorizontalScrollBarVisibility="Disabled">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Tên dịch vụ" Binding="{Binding ServiceName}" Width="*"/>
@@ -47,7 +44,6 @@
                 </DataGrid.Columns>
             </DataGrid>
 
-            <!-- Khung Tổng kết chi phí -->
             <Border Grid.Row="3" Margin="20,0,20,20" Padding="20,14" Background="{DynamicResource PrimaryBackgroundColor}" CornerRadius="6" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1" HorizontalAlignment="Right" MinWidth="380">
                 <StackPanel>
                     <Grid Margin="0,0,0,8">

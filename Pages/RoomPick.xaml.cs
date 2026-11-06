@@ -20,37 +20,41 @@ namespace Hotel_Management.Pages
             LoadRooms();
         }
 
-        private void LoadRooms()
+        private async void LoadRooms()
         {
             try
             {
-                var rooms = new List<Room>();
-                using (var conn = DatabaseHelper.GetConnection())
+                var rooms = await System.Threading.Tasks.Task.Run(() =>
                 {
-                    conn.Open();
-                    // Lấy tất cả các phòng để hiển thị toàn bộ hiện trạng
-                    string query = "SELECT RoomId, RoomNumber, NumberPeople, NumberBed, Quality, BedType, Price, RoomType, RoomArea, Status FROM Rooms ORDER BY RoomNumber ASC";
-                    using (var cmd = new MySqlCommand(query, conn))
-                    using (var reader = cmd.ExecuteReader())
+                    var list = new List<Room>();
+                    using (var conn = DatabaseHelper.GetConnection())
                     {
-                        while (reader.Read())
+                        DatabaseHelper.OpenConnection(conn);
+                        string query = "SELECT RoomId, RoomNumber, NumberPeople, NumberBed, Quality, BedType, Price, RoomType, RoomArea, Status FROM Rooms ORDER BY RoomNumber ASC";
+                        using (var cmd = new MySqlCommand(query, conn))
+                        using (var reader = cmd.ExecuteReader())
                         {
-                            rooms.Add(new Room
+                            while (reader.Read())
                             {
-                                RoomId = reader.GetInt32("RoomId"),
-                                RoomNumber = reader.GetString("RoomNumber"),
-                                NumberPeople = reader.GetInt32("NumberPeople"),
-                                NumberBed = reader.GetInt32("NumberBed"),
-                                Quality = reader.GetInt32("Quality"),
-                                BedType = reader.GetString("BedType"),
-                                Price = reader.GetDecimal("Price"),
-                                RoomType = reader.GetString("RoomType"),
-                                RoomArea = Convert.ToSingle(reader["RoomArea"]),
-                                Status = reader.GetInt32("Status")
-                            });
+                                list.Add(new Room
+                                {
+                                    RoomId = reader.GetInt32("RoomId"),
+                                    RoomNumber = reader.GetString("RoomNumber"),
+                                    NumberPeople = reader.GetInt32("NumberPeople"),
+                                    NumberBed = reader.GetInt32("NumberBed"),
+                                    Quality = reader.GetInt32("Quality"),
+                                    BedType = reader.GetString("BedType"),
+                                    Price = reader.GetDecimal("Price"),
+                                    RoomType = reader.GetString("RoomType"),
+                                    RoomArea = Convert.ToSingle(reader["RoomArea"]),
+                                    Status = reader.GetInt32("Status")
+                                });
+                            }
                         }
                     }
-                }
+                    return list;
+                });
+
                 _allRooms = rooms;
                 ApplyFilter();
             }

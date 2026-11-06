@@ -27,7 +27,20 @@ namespace Hotel_Management.Pages
             dateNgayTra.SelectedDate = DateTime.Today.AddDays(1);
         }
 
-        private void CheckPermissions()
+                private void dateNgayNhan_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (dateNgayNhan.SelectedDate.HasValue)
+            {
+                var minCheckout = dateNgayNhan.SelectedDate.Value.AddDays(1);
+                dateNgayTra.DisplayDateStart = minCheckout;
+                if (!dateNgayTra.SelectedDate.HasValue || dateNgayTra.SelectedDate.Value <= dateNgayNhan.SelectedDate.Value)
+                {
+                    dateNgayTra.SelectedDate = minCheckout;
+                }
+            }
+        }
+
+private void CheckPermissions()
         {
             var mainWindow = Application.Current.MainWindow as MainWindow;
             if (mainWindow != null && mainWindow.CurrentRole == 1)
@@ -37,131 +50,135 @@ namespace Hotel_Management.Pages
             }
         }
 
-        public void LoadRoomStatusBoard()
+        public async void LoadRoomStatusBoard()
         {
             try
             {
-                var roomCards = new List<RoomCardItem>();
-                using (var conn = DatabaseHelper.GetConnection())
+                var roomCards = await System.Threading.Tasks.Task.Run(() =>
                 {
-                    conn.Open();
-
-                    string query = @"
-                        SELECT r.RoomId, r.RoomNumber, r.NumberPeople, r.NumberBed, r.BedType, r.Price, r.RoomType, r.RoomArea, r.Quality, r.Status,
-                               b.BillId, b.FullName AS CustomerName, b.Phone AS CustomerPhone, b.Email AS CustomerEmail,
-                               b.StartDate, b.EndDate, b.NumberPeople AS BookingGuests, b.Total AS BillTotal, b.Status AS BillStatus
-                        FROM Rooms r
-                        LEFT JOIN (
-                            SELECT b1.*
-                            FROM Bills b1
-                            INNER JOIN (
-                                SELECT RoomId, 
-                                       CAST(SUBSTRING_INDEX(
-                                           GROUP_CONCAT(BillId ORDER BY 
-                                               CASE 
-                                                   WHEN Status = 3 THEN 1
-                                                   WHEN Status = 4 THEN 2
-                                                   WHEN Status = 0 THEN 3
-                                                   ELSE 4
-                                               END ASC, BillId DESC), ',', 1
-                                       ) AS UNSIGNED) AS PreferredBillId
-                                FROM Bills
-                                WHERE Status IN (0, 3, 4)
-                                GROUP BY RoomId
-                            ) latest ON b1.BillId = latest.PreferredBillId
-                        ) b ON r.RoomId = b.RoomId
-                        ORDER BY r.RoomNumber ASC";
-
-                    using (var cmd = new MySqlCommand(query, conn))
-                    using (var reader = cmd.ExecuteReader())
+                    var cards = new List<RoomCardItem>();
+                    using (var conn = DatabaseHelper.GetConnection())
                     {
-                        while (reader.Read())
+                        DatabaseHelper.OpenConnection(conn);
+
+                        string query = @"
+                            SELECT r.RoomId, r.RoomNumber, r.NumberPeople, r.NumberBed, r.BedType, r.Price, r.RoomType, r.RoomArea, r.Quality, r.Status,
+                                   b.BillId, b.FullName AS CustomerName, b.Phone AS CustomerPhone, b.Email AS CustomerEmail,
+                                   b.StartDate, b.EndDate, b.NumberPeople AS BookingGuests, b.Total AS BillTotal, b.Status AS BillStatus
+                            FROM Rooms r
+                            LEFT JOIN (
+                                SELECT b1.*
+                                FROM Bills b1
+                                INNER JOIN (
+                                    SELECT RoomId, 
+                                           CAST(SUBSTRING_INDEX(
+                                               GROUP_CONCAT(BillId ORDER BY 
+                                                   CASE 
+                                                       WHEN Status = 3 THEN 1
+                                                       WHEN Status = 4 THEN 2
+                                                       WHEN Status = 0 THEN 3
+                                                       ELSE 4
+                                                   END ASC, BillId DESC), ',', 1
+                                           ) AS UNSIGNED) AS PreferredBillId
+                                    FROM Bills
+                                    WHERE Status IN (0, 3, 4)
+                                    GROUP BY RoomId
+                                ) latest ON b1.BillId = latest.PreferredBillId
+                            ) b ON r.RoomId = b.RoomId
+                            ORDER BY r.RoomNumber ASC";
+
+                        using (var cmd = new MySqlCommand(query, conn))
+                        using (var reader = cmd.ExecuteReader())
                         {
-                            int status = reader.GetInt32("Status");
-                            int numPeople = reader.GetInt32("NumberPeople");
-                            string customer = reader.IsDBNull(reader.GetOrdinal("CustomerName")) ? "" : reader.GetString("CustomerName");
-
-                            int? billId = reader.IsDBNull(reader.GetOrdinal("BillId")) ? (int?)null : reader.GetInt32("BillId");
-                            string customerPhone = reader.IsDBNull(reader.GetOrdinal("CustomerPhone")) ? "" : reader.GetString("CustomerPhone");
-                            string customerEmail = reader.IsDBNull(reader.GetOrdinal("CustomerEmail")) ? "" : reader.GetString("CustomerEmail");
-                            DateTime? startDate = reader.IsDBNull(reader.GetOrdinal("StartDate")) ? (DateTime?)null : reader.GetDateTime("StartDate");
-                            DateTime? endDate = reader.IsDBNull(reader.GetOrdinal("EndDate")) ? (DateTime?)null : reader.GetDateTime("EndDate");
-                            int? bookingGuests = reader.IsDBNull(reader.GetOrdinal("BookingGuests")) ? (int?)null : reader.GetInt32("BookingGuests");
-                            decimal? billTotal = reader.IsDBNull(reader.GetOrdinal("BillTotal")) ? (decimal?)null : reader.GetDecimal("BillTotal");
-                            int? billStatus = reader.IsDBNull(reader.GetOrdinal("BillStatus")) ? (int?)null : reader.GetInt32("BillStatus");
-
-                            string statusText;
-                            string statusColor;
-                            string statusBg;
-                            string displaySubtitle;
-
-                            switch (status)
+                            while (reader.Read())
                             {
-                                case 0: // Trống
-                                    statusText = "Trống";
-                                    statusColor = "#2ECC71";
-                                    statusBg = "#102ECC71";
-                                    displaySubtitle = $"Tối đa {numPeople} người";
-                                    break;
-                                case 1: // Đã đặt
-                                    statusText = "Đã đặt";
-                                    statusColor = "#F39C12";
-                                    statusBg = "#10F39C12";
-                                    displaySubtitle = !string.IsNullOrWhiteSpace(customer) ? $"Khách: {customer}" : "Đã giữ chỗ";
-                                    break;
-                                case 2: // Đang sử dụng
-                                    statusText = "Đang ở";
-                                    statusColor = "#3498DB";
-                                    statusBg = "#103498DB";
-                                    displaySubtitle = !string.IsNullOrWhiteSpace(customer) ? $"Khách: {customer}" : "Đang lưu trú";
-                                    break;
-                                case 3: // Chờ dọn dẹp
-                                case 4: // Đang dọn dẹp
-                                    statusText = "Chờ dọn";
-                                    statusColor = "#E74C3C";
-                                    statusBg = "#10E74C3C";
-                                    displaySubtitle = "Cần dọn dẹp phòng";
-                                    break;
-                                default:
-                                    statusText = "Khác";
-                                    statusColor = "#95A5A6";
-                                    statusBg = "#1095A5A6";
-                                    displaySubtitle = "";
-                                    break;
+                                int status = reader.GetInt32("Status");
+                                int numPeople = reader.GetInt32("NumberPeople");
+                                string customer = reader.IsDBNull(reader.GetOrdinal("CustomerName")) ? "" : reader.GetString("CustomerName");
+
+                                int? billId = reader.IsDBNull(reader.GetOrdinal("BillId")) ? (int?)null : reader.GetInt32("BillId");
+                                string customerPhone = reader.IsDBNull(reader.GetOrdinal("CustomerPhone")) ? "" : reader.GetString("CustomerPhone");
+                                string customerEmail = reader.IsDBNull(reader.GetOrdinal("CustomerEmail")) ? "" : reader.GetString("CustomerEmail");
+                                DateTime? startDate = reader.IsDBNull(reader.GetOrdinal("StartDate")) ? (DateTime?)null : reader.GetDateTime("StartDate");
+                                DateTime? endDate = reader.IsDBNull(reader.GetOrdinal("EndDate")) ? (DateTime?)null : reader.GetDateTime("EndDate");
+                                int? bookingGuests = reader.IsDBNull(reader.GetOrdinal("BookingGuests")) ? (int?)null : reader.GetInt32("BookingGuests");
+                                decimal? billTotal = reader.IsDBNull(reader.GetOrdinal("BillTotal")) ? (decimal?)null : reader.GetDecimal("BillTotal");
+                                int? billStatus = reader.IsDBNull(reader.GetOrdinal("BillStatus")) ? (int?)null : reader.GetInt32("BillStatus");
+
+                                string statusText;
+                                string statusColor;
+                                string statusBg;
+                                string displaySubtitle;
+
+                                switch (status)
+                                {
+                                    case 0:
+                                        statusText = "Trống";
+                                        statusColor = "#2ECC71";
+                                        statusBg = "#102ECC71";
+                                        displaySubtitle = $"Tối đa {numPeople} người";
+                                        break;
+                                    case 1:
+                                        statusText = "Đã đặt";
+                                        statusColor = "#F39C12";
+                                        statusBg = "#10F39C12";
+                                        displaySubtitle = !string.IsNullOrWhiteSpace(customer) ? $"Khách: {customer}" : "Đã giữ chỗ";
+                                        break;
+                                    case 2:
+                                        statusText = "Đang ở";
+                                        statusColor = "#3498DB";
+                                        statusBg = "#103498DB";
+                                        displaySubtitle = !string.IsNullOrWhiteSpace(customer) ? $"Khách: {customer}" : "Đang lưu trú";
+                                        break;
+                                    case 3:
+                                    case 4:
+                                        statusText = "Chờ dọn";
+                                        statusColor = "#E74C3C";
+                                        statusBg = "#10E74C3C";
+                                        displaySubtitle = "Cần dọn dẹp phòng";
+                                        break;
+                                    default:
+                                        statusText = "Khác";
+                                        statusColor = "#95A5A6";
+                                        statusBg = "#1095A5A6";
+                                        displaySubtitle = "";
+                                        break;
+                                }
+
+                                cards.Add(new RoomCardItem
+                                {
+                                    RoomId = reader.GetInt32("RoomId"),
+                                    RoomNumber = reader.GetString("RoomNumber"),
+                                    NumberPeople = numPeople,
+                                    NumberBed = reader.GetInt32("NumberBed"),
+                                    Quality = reader.GetInt32("Quality"),
+                                    BedType = reader.GetString("BedType"),
+                                    Price = reader.GetDecimal("Price"),
+                                    RoomType = reader.GetString("RoomType"),
+                                    RoomArea = Convert.ToSingle(reader["RoomArea"]),
+                                    Status = status,
+                                    StatusText = statusText,
+                                    StatusColor = statusColor,
+                                    StatusBg = statusBg,
+                                    CustomerName = customer,
+                                    DisplaySubtitle = displaySubtitle,
+                                    BillId = billId,
+                                    CustomerPhone = customerPhone,
+                                    CustomerEmail = customerEmail,
+                                    StartDate = startDate,
+                                    EndDate = endDate,
+                                    BookingGuests = bookingGuests,
+                                    BillTotal = billTotal,
+                                    BillStatus = billStatus
+                                });
                             }
-
-                            roomCards.Add(new RoomCardItem
-                            {
-                                RoomId = reader.GetInt32("RoomId"),
-                                RoomNumber = reader.GetString("RoomNumber"),
-                                NumberPeople = numPeople,
-                                NumberBed = reader.GetInt32("NumberBed"),
-                                Quality = reader.GetInt32("Quality"),
-                                BedType = reader.GetString("BedType"),
-                                Price = reader.GetDecimal("Price"),
-                                RoomType = reader.GetString("RoomType"),
-                                RoomArea = Convert.ToSingle(reader["RoomArea"]),
-                                Status = status,
-                                StatusText = statusText,
-                                StatusColor = statusColor,
-                                StatusBg = statusBg,
-                                CustomerName = customer,
-                                DisplaySubtitle = displaySubtitle,
-                                BillId = billId,
-                                CustomerPhone = customerPhone,
-                                CustomerEmail = customerEmail,
-                                StartDate = startDate,
-                                EndDate = endDate,
-                                BookingGuests = bookingGuests,
-                                BillTotal = billTotal,
-                                BillStatus = billStatus
-                            });
                         }
                     }
-                }
+                    return cards;
+                });
+
                 icRoomStatus.ItemsSource = roomCards;
 
-                // Cảnh báo quản trị viên về các phòng đến hạn trả phòng hôm nay
                 var dueRooms = roomCards.FindAll(r => r.IsDueToday);
                 if (dueRooms.Count > 0)
                 {
@@ -203,7 +220,7 @@ namespace Hotel_Management.Pages
         {
             if (sender is Button btn && btn.Tag is RoomCardItem card)
             {
-                if (card.Status == 0) // Trống (Sẵn sàng) -> Tự động chọn vào form đặt phòng
+                if (card.Status == 0)
                 {
                     _selectedRoom = new Room
                     {
@@ -223,11 +240,11 @@ namespace Hotel_Management.Pages
                     txtPhongError.Visibility = Visibility.Collapsed;
                     txtSoNguoiError.Visibility = Visibility.Collapsed;
                 }
-                else if (card.Status == 1 || card.Status == 2) // Đã đặt hoặc Đang sử dụng -> Hiển thị chi tiết khách đặt
+                else if (card.Status == 1 || card.Status == 2)
                 {
                     ShowBookedRoomDetails(card);
                 }
-                else if (card.Status == 3 || card.Status == 4) // Chờ dọn dẹp hoặc Đang dọn dẹp
+                else if (card.Status == 3 || card.Status == 4)
                 {
                     if (card.BillId.HasValue)
                     {
@@ -397,13 +414,12 @@ namespace Hotel_Management.Pages
             {
                 using (var conn = DatabaseHelper.GetConnection())
                 {
-                    conn.Open();
+                    DatabaseHelper.OpenConnection(conn);
                     using (var transaction = conn.BeginTransaction())
                     {
                         try
                         {
-                            // Giữ phòng trước: chỉ thành công nếu phòng vẫn đang Trống (tránh 2 người đặt trùng 1 phòng)
-                            string updateRoomQuery = "UPDATE Rooms SET Status = 1 WHERE RoomId = @RoomId AND Status = 0"; // 1: Đã đặt
+                            string updateRoomQuery = "UPDATE Rooms SET Status = 1 WHERE RoomId = @RoomId AND Status = 0";
                             using (var cmd = new MySqlCommand(updateRoomQuery, conn, transaction))
                             {
                                 cmd.Parameters.Add("@RoomId", MySqlDbType.Int32).Value = _selectedRoom.RoomId;
@@ -423,7 +439,7 @@ namespace Hotel_Management.Pages
                                 cmd.Parameters.Add("@EndDate", MySqlDbType.DateTime).Value = dateNgayTra.SelectedDate.Value;
                                 cmd.Parameters.Add("@NumberPeople", MySqlDbType.Int32).Value = soNguoi;
                                 cmd.Parameters.Add("@Total", MySqlDbType.Decimal).Value = total;
-                                cmd.Parameters.Add("@Status", MySqlDbType.Int32).Value = 0; // Chưa thanh toán
+                                cmd.Parameters.Add("@Status", MySqlDbType.Int32).Value = 0;
 
                                 cmd.ExecuteNonQuery();
                             }

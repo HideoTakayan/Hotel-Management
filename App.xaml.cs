@@ -4,9 +4,6 @@ using System.Windows;
 
 namespace Hotel_Management
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : Application
     {
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
@@ -15,7 +12,7 @@ namespace Hotel_Management
                             "Thông Báo Lỗi", 
                             MessageBoxButton.OK, 
                             MessageBoxImage.Warning);
-            e.Handled = true; // Ngăn không cho ứng dụng bị crash đột ngột
+            e.Handled = true;
         }
     }
 }

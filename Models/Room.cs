@@ -36,7 +36,7 @@ namespace Hotel_Management.Models
         public float RoomArea { get; set; }
 
         [Required]
-        public int Status { get; set; } = 0; // 0: Trống, 1: Đã đặt, 2: Đang sử dụng, 3: Chờ dọn dẹp, 4: Đang dọn dẹp
+        public int Status { get; set; } = 0;
 
         public string StatusName
         {

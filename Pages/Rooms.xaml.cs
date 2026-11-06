@@ -29,36 +29,41 @@ namespace Hotel_Management.Pages
 
         private List<Room> _allRooms = new List<Room>();
 
-        private void LoadData()
+        internal async void LoadData()
         {
             try
             {
-                var rooms = new List<Room>();
-                using (var conn = DatabaseHelper.GetConnection())
+                var rooms = await System.Threading.Tasks.Task.Run(() =>
                 {
-                    conn.Open();
-                    string query = "SELECT RoomId, RoomNumber, NumberPeople, NumberBed, Quality, BedType, Price, RoomType, RoomArea, Status FROM Rooms";
-                    using (var cmd = new MySqlCommand(query, conn))
-                    using (var reader = cmd.ExecuteReader())
+                    var list = new List<Room>();
+                    using (var conn = DatabaseHelper.GetConnection())
                     {
-                        while (reader.Read())
+                        DatabaseHelper.OpenConnection(conn);
+                        string query = "SELECT RoomId, RoomNumber, NumberPeople, NumberBed, Quality, BedType, Price, RoomType, RoomArea, Status FROM Rooms";
+                        using (var cmd = new MySqlCommand(query, conn))
+                        using (var reader = cmd.ExecuteReader())
                         {
-                            rooms.Add(new Room
+                            while (reader.Read())
                             {
-                                RoomId = reader.GetInt32("RoomId"),
-                                RoomNumber = reader.GetString("RoomNumber"),
-                                NumberPeople = reader.GetInt32("NumberPeople"),
-                                NumberBed = reader.GetInt32("NumberBed"),
-                                Quality = reader.GetInt32("Quality"),
-                                BedType = reader.GetString("BedType"),
-                                Price = reader.GetDecimal("Price"),
-                                RoomType = reader.GetString("RoomType"),
-                                RoomArea = Convert.ToSingle(reader["RoomArea"]),
-                                Status = reader.GetInt32("Status")
-                            });
+                                list.Add(new Room
+                                {
+                                    RoomId = reader.GetInt32("RoomId"),
+                                    RoomNumber = reader.GetString("RoomNumber"),
+                                    NumberPeople = reader.GetInt32("NumberPeople"),
+                                    NumberBed = reader.GetInt32("NumberBed"),
+                                    Quality = reader.GetInt32("Quality"),
+                                    BedType = reader.GetString("BedType"),
+                                    Price = reader.GetDecimal("Price"),
+                                    RoomType = reader.GetString("RoomType"),
+                                    RoomArea = Convert.ToSingle(reader["RoomArea"]),
+                                    Status = reader.GetInt32("Status")
+                                });
+                            }
                         }
                     }
-                }
+                    return list;
+                });
+
                 _allRooms = rooms;
                 ApplyFilter();
             }
@@ -243,7 +248,7 @@ namespace Hotel_Management.Pages
             {
                 using (var conn = DatabaseHelper.GetConnection())
                 {
-                    conn.Open();
+                    DatabaseHelper.OpenConnection(conn);
                     string query = @"INSERT INTO Rooms (RoomNumber, NumberPeople, NumberBed, Quality, BedType, Price, RoomType, RoomArea, Status) 
                                      VALUES (@RoomNumber, @NumberPeople, @NumberBed, @Quality, @BedType, @Price, @RoomType, @RoomArea, @Status)";
                     using (var cmd = new MySqlCommand(query, conn))
@@ -303,14 +308,12 @@ namespace Hotel_Management.Pages
             {
                 using (var conn = DatabaseHelper.GetConnection())
                 {
-                    conn.Open();
+                    DatabaseHelper.OpenConnection(conn);
 
-                    // Tự động đồng bộ trạng thái Hóa đơn nếu quản trị viên thay đổi trạng thái phòng
                     if (status != selectedRoom.Status)
                     {
-                        if (status == 2) // Quản trị viên chuyển phòng sang 'Đang ở'
+                        if (status == 2)
                         {
-                            // Nếu phòng có hóa đơn đặt trước (Status = 0), tự động chuyển đơn sang Check-in (Status = 3)
                             string syncBillSql = "UPDATE Bills SET Status = 3 WHERE RoomId = @RoomId AND Status = 0";
                             using (var syncBillCmd = new MySqlCommand(syncBillSql, conn))
                             {
@@ -318,9 +321,8 @@ namespace Hotel_Management.Pages
                                 syncBillCmd.ExecuteNonQuery();
                             }
                         }
-                        else if (status == 3 || status == 4) // Quản trị viên chuyển sang 'Chờ dọn dẹp' hoặc 'Đang dọn dẹp'
+                        else if (status == 3 || status == 4)
                         {
-                            // Nếu phòng đang Check-in (Status = 3), tự động chuyển đơn sang Check-out (Status = 4)
                             string syncBillSql = "UPDATE Bills SET Status = 4 WHERE RoomId = @RoomId AND Status = 3";
                             using (var syncBillCmd = new MySqlCommand(syncBillSql, conn))
                             {
@@ -328,9 +330,8 @@ namespace Hotel_Management.Pages
                                 syncBillCmd.ExecuteNonQuery();
                             }
                         }
-                        else if (status == 0) // Quản trị viên chuyển phòng về 'Trống (Sẵn sàng)'
+                        else if (status == 0)
                         {
-                            // Nếu có đơn đặt trước (0) thì hủy (2); nếu có đơn đang ở (3) hoặc check-out (4) thì thanh toán hoàn tất (1)
                             string syncBillSql = @"
                                 UPDATE Bills 
                                 SET Status = CASE WHEN Status = 0 THEN 2 ELSE 1 END 
@@ -364,7 +365,6 @@ namespace Hotel_Management.Pages
                         cmd.ExecuteNonQuery();
                     }
 
-                    // Nếu chuyển trạng thái sang Chờ dọn dẹp (3) hoặc Đang dọn dẹp (4), tự động tạo Task cho nhân viên dọn dẹp
                     if (status == 3 || status == 4)
                     {
                         string checkTaskQuery = "SELECT COUNT(*) FROM Tasks WHERE RoomId = @RoomId AND TaskStatus IN (0, 1, 2, 4)";
@@ -401,7 +401,6 @@ namespace Hotel_Management.Pages
                     }
                     else if (status == 0 && (selectedRoom.Status == 3 || selectedRoom.Status == 4))
                     {
-                        // Nếu Quản lý chuyển phòng từ Chờ/Đang dọn dẹp sang Trống (Sẵn sàng), tự động hoàn tất các Task dọn phòng đang treo của phòng đó
                         string completeTaskQuery = @"UPDATE Tasks SET TaskStatus = 3, CompletedAt = NOW() 
                                                      WHERE RoomId = @RoomId AND TaskStatus IN (0, 1, 2, 4)";
                         using (var completeTaskCmd = new MySqlCommand(completeTaskQuery, conn))
@@ -451,9 +450,8 @@ namespace Hotel_Management.Pages
                 {
                     using (var conn = DatabaseHelper.GetConnection())
                     {
-                        conn.Open();
+                        DatabaseHelper.OpenConnection(conn);
 
-                        // Kiểm tra xem phòng đã có hóa đơn hoặc nhiệm vụ liên kết chưa để chặn xóa (tránh ON DELETE CASCADE xóa mất lịch sử)
                         string checkQuery = @"SELECT 
                             (SELECT COUNT(*) FROM Bills WHERE RoomId = @RoomId) +
                             (SELECT COUNT(*) FROM Tasks WHERE RoomId = @RoomId) AS TotalRefs";

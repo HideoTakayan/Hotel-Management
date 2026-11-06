@@ -33,7 +33,6 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <!--Left Menu-->
             <Border Grid.Column="0" Background="{DynamicResource SecondaryBackgroundColor}">
                 <Border.Style>
                     <Style TargetType="Border">
@@ -52,7 +51,6 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Logo căn chuẩn trong cột 60px để khi đóng menu không bị lòi chữ -->
                     <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center" ToolTip="Kinkaku-ji Onsen &amp; Ryokan">
                         <Grid Width="60">
                             <Rectangle x:Name="Logo" Width="32" Height="32" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -64,7 +62,6 @@
                         <Label Content="Kinkaku-ji Onsen" Foreground="{DynamicResource PrimaryBlueColor}" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Padding="0" Margin="2,0,0,0"/>
                     </StackPanel>
 
-                    <!-- Menu Toggle Button -->
                     <ToggleButton x:Name="btnMenu" HorizontalAlignment="Right" BorderThickness="0" Background="Transparent" VerticalAlignment="Center" Style="{StaticResource MenuIconStyle}" Margin="0 0 15 0" ToolTip="Mở rộng / Thu gọn thanh điều hướng">
                         <ToggleButton.Triggers>
                             <EventTrigger RoutedEvent="ToggleButton.Unchecked">
@@ -84,7 +81,6 @@
                         </ToggleButton.Triggers>
                     </ToggleButton>
 
-                    <!-- Menu Items -->
                     <StackPanel Grid.Row="2" Orientation="Vertical" VerticalAlignment="Top">
                         <RadioButton x:Name="rdHome" IsChecked="True" Content="Trang chủ" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource home}" Margin="0 2 0 2" Click="rdHome_Click" />
                         <RadioButton x:Name="rdRooms" Content="Phòng" Style="{DynamicResource MenuRadioButtonStyle}" Tag="{DynamicResource room}" Margin="0 2 0 2" Click="rdRooms_Click" />
@@ -125,7 +121,6 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <!--Button: Close | Restore | Minimize | Theme | Zoom -->
                 <StackPanel Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,2,10,0" Height="30" Orientation="Horizontal" FlowDirection="RightToLeft">
                     <Button Style="{StaticResource IconButtonsStyle}" Content="{DynamicResource close}" Click="btnClose_Click" Tag="IsCloseButton" ToolTip="Đóng ứng dụng"/>
                     <Button Margin="5,0" Click="btnRestore_Click" ToolTip="Phóng to / Khôi phục cửa sổ">
@@ -145,7 +140,6 @@
                         <iconPacks:PackIconBootstrapIcons x:Name="iconTheme" Kind="MoonFill"/>
                     </Button>
 
-                    <!-- Cụm Điều Khiển Thu Phóng (Zoom) -->
                     <Border Background="{DynamicResource SecondaryBackgroundColor}" CornerRadius="12" Margin="10,2,5,2" Padding="4,0" BorderBrush="{DynamicResource PrimaryGrayColor}" BorderThickness="1" FlowDirection="LeftToRight" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Button x:Name="btnZoomOut" Content="−" Width="20" Height="22" FontSize="13" FontWeight="Bold" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextSecondaryColor}" Cursor="Hand" Click="btnZoomOut_Click" ToolTip="Thu nhỏ nội dung (Ctrl + Lăn chuột xuống / Ctrl + '-')"/>
@@ -157,18 +151,15 @@
                     </Border>
 
                 </StackPanel>
-                <!--Button: Close | Restore | Minimize -->
 
-                <!-- Tên ứng dụng ở thanh tiêu đề -->
                 <TextBlock Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="16,2,0,0" FontSize="12" Foreground="{DynamicResource PrimaryGrayColor}">
                     <Run Text="Kinkaku-ji Onsen" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryColor}"/>
-                    <Run Text="· Quản lý khách sạn"/>
+                    <Run Text="· Quản lý khách sạn suối nước nóng"/>
                 </TextBlock>
 
                 <Border Grid.Row="1" Margin="10,0,10,6" Height="1" VerticalAlignment="Top" Background="{DynamicResource SecondaryGrayColor}"/>
 
                 <Border x:Name="borderPageHost" Grid.Row="2" Margin="10,0,10,10" SizeChanged="borderPageHost_SizeChanged">
-                    <!-- Mặc định co giãn tự nhiên 100% theo vùng hiển thị; chỉ bật thanh cuộn khi phóng to (Zoom) vượt quá khung -->
                     <ScrollViewer x:Name="pageScroller" Focusable="False"
                                   VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Disabled">
                         <Frame x:Name="PagesNavigation" NavigationUIVisibility="Hidden"
@@ -176,8 +167,6 @@
                             <Frame.LayoutTransform>
                                 <ScaleTransform x:Name="pageScaleTransform" ScaleX="1.0" ScaleY="1.0"/>
                             </Frame.LayoutTransform>
-                            <!-- Page Content -->
-
                         </Frame>
                     </ScrollViewer>
                 </Border>

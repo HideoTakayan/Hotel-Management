@@ -26,7 +26,6 @@ namespace Hotel_Management.Models
                 if (string.IsNullOrWhiteSpace(ServiceName)) return false;
                 string lower = ServiceName.ToLower();
 
-                // Các dịch vụ tự trải nghiệm Onsen/khoáng nóng & Trò chơi giải trí: KHÔNG cần nhân viên giao tận phòng
                 if (lower.Contains("public onsen") ||
                     lower.Contains("tắm khoáng") ||
                     lower.Contains("ngâm bùn") ||
@@ -39,7 +38,6 @@ namespace Hotel_Management.Models
                     lower.Contains("thiền trà") ||
                     lower.Contains("yuzuyu") ||
                     lower.Contains("vé tham quan") ||
-                    // Trò chơi giải trí Onsen & Ryokan Nhật Bản (Bóng bàn Onsen, Bida, Bắn súng Shateki, Cờ Shogi, Arcade...)
                     lower.Contains("bóng bàn") ||
                     lower.Contains("takkyu") ||
                     lower.Contains("bida") ||
@@ -59,7 +57,6 @@ namespace Hotel_Management.Models
                     return false;
                 }
 
-                // Các dịch vụ ẩm thực, đồ uống, giặt là, nệm, thuê yukata, trị liệu...: Cần nhân viên phục vụ/giao phòng
                 return true;
             }
         }

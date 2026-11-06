@@ -67,11 +67,10 @@ namespace Hotel_Management
                 : MahApps.Metro.IconPacks.PackIconBootstrapIconsKind.SunFill;
         }
 
-        private void btnLogin_Click(object sender, RoutedEventArgs e)
+        private async void btnLogin_Click(object sender, RoutedEventArgs e)
         {
             txtError.Visibility = Visibility.Collapsed;
 
-            // 1. Kiểm tra dữ liệu đầu vào (Validation) theo Rule 4
             string username = txtUsername.Text.Trim();
             string password = _isPasswordVisible ? txtPasswordVisible.Text : txtPassword.Password;
 
@@ -82,70 +81,68 @@ namespace Hotel_Management
                 return;
             }
 
-            // 2. Kết nối CSDL và xử lý lỗi theo Rule 1, 2, 3
+            btnLogin.IsEnabled = false;
+
             try
             {
-                using (MySqlConnection conn = DatabaseHelper.GetConnection())
+                var authResult = await System.Threading.Tasks.Task.Run(() =>
                 {
-                    conn.Open();
-                    // Lưu ý: Tuyệt đối dùng Parameter để chống SQL Injection (Rule 2)
-                    string query = "SELECT Id, Username, FullName, Email, Role, Password FROM Users WHERE Username = @User LIMIT 1";
-
-                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    using (MySqlConnection conn = DatabaseHelper.GetConnection())
                     {
-                        cmd.Parameters.Add("@User", MySqlDbType.VarChar, 50).Value = username;
+                        DatabaseHelper.OpenConnection(conn);
+                        string query = "SELECT Id, Username, FullName, Email, Role, Password FROM Users WHERE Username = @User LIMIT 1";
 
-                        using (MySqlDataReader reader = cmd.ExecuteReader())
+                        using (MySqlCommand cmd = new MySqlCommand(query, conn))
                         {
-                            if (reader.Read())
+                            cmd.Parameters.Add("@User", MySqlDbType.VarChar, 50).Value = username;
+
+                            using (MySqlDataReader reader = cmd.ExecuteReader())
                             {
-                                string storedHash = reader.GetString("Password");
-                                bool isMatch = false;
+                                if (reader.Read())
+                                {
+                                    string storedHash = reader.GetString("Password");
+                                    bool isMatch = false;
 
-                                // Nếu là password thô từ cũ thì hash tạm, hoặc dùng thư viện so sánh
-                                if (storedHash.StartsWith("$2"))
-                                {
-                                    isMatch = BCrypt.Net.BCrypt.Verify(password, storedHash);
-                                }
-                                else
-                                {
-                                    // Chấp nhận password cũ chưa mã hóa để ko bị khóa tài khoản cũ
-                                    isMatch = (password == storedHash);
-                                }
+                                    if (storedHash.StartsWith("$2"))
+                                    {
+                                        isMatch = BCrypt.Net.BCrypt.Verify(password, storedHash);
+                                    }
+                                    else
+                                    {
+                                        isMatch = (password == storedHash);
+                                    }
 
-                                if (isMatch)
-                                {
-                                    int userId = reader.GetInt32("Id");
-                                    string loginName = reader.GetString("Username");
-                                    string fullName = reader.IsDBNull(reader.GetOrdinal("FullName")) ? "" : reader.GetString("FullName");
-                                    string email = reader.IsDBNull(reader.GetOrdinal("Email")) ? "" : reader.GetString("Email");
-                                    int role = reader.GetInt32("Role"); // 0 = Admin, 1 = Nhân viên
-
-                                    // Đăng nhập thành công -> Mở MainWindow và phân quyền
-                                    MainWindow main = new MainWindow(userId, loginName, fullName, email, role);
-                                    // Gán lại MainWindow của Application để các Page lấy được thông tin người dùng
-                                    Application.Current.MainWindow = main;
-                                    main.Show();
-                                    this.Close();
+                                    if (isMatch)
+                                    {
+                                        int userId = reader.GetInt32("Id");
+                                        string loginName = reader.GetString("Username");
+                                        string fullName = reader.IsDBNull(reader.GetOrdinal("FullName")) ? "" : reader.GetString("FullName");
+                                        string email = reader.IsDBNull(reader.GetOrdinal("Email")) ? "" : reader.GetString("Email");
+                                        int role = reader.GetInt32("Role");
+                                        return (success: true, userId, loginName, fullName, email, role);
+                                    }
                                 }
-                                else
-                                {
-                                    txtError.Text = "Sai tài khoản hoặc mật khẩu!";
-                                    txtError.Visibility = Visibility.Visible;
-                                }
-                            }
-                            else
-                            {
-                                txtError.Text = "Sai tài khoản hoặc mật khẩu!";
-                                txtError.Visibility = Visibility.Visible;
                             }
                         }
                     }
+                    return (success: false, userId: 0, loginName: "", fullName: "", email: "", role: 0);
+                });
+
+                if (authResult.success)
+                {
+                    MainWindow main = new MainWindow(authResult.userId, authResult.loginName, authResult.fullName, authResult.email, authResult.role);
+                    Application.Current.MainWindow = main;
+                    main.Show();
+                    this.Close();
+                }
+                else
+                {
+                    txtError.Text = "Sai tài khoản hoặc mật khẩu!";
+                    txtError.Visibility = Visibility.Visible;
                 }
             }
             catch (MySqlException ex)
             {
-                // Xử lý lỗi CSDL (Rule 3)
                 if (ex.Number == 1042 || ex.Number == 0)
                 {
                     MessageBox.Show("Mất kết nối đến máy chủ CSDL. Vui lòng kiểm tra lại mạng!", "Lỗi Kết Nối", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -158,6 +155,10 @@ namespace Hotel_Management
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi Hệ Thống: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                btnLogin.IsEnabled = true;
             }
         }
 

@@ -16,7 +16,6 @@
                 <ColumnDefinition Width="450"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Left Side: Branding / Background -->
             <Border Grid.Column="0" CornerRadius="8,0,0,8" Background="{DynamicResource SecondaryBackgroundColor}">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                     <Image Source="/Assets/logo.png" Width="180" Height="180" Margin="0,0,0,16"/>
@@ -25,9 +24,7 @@
                 </StackPanel>
             </Border>
 
-            <!-- Right Side: Login Form -->
             <Grid Grid.Column="1">
-                <!-- Window Controls -->
                 <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Orientation="Horizontal" FlowDirection="RightToLeft" Margin="0,10,12,0" Height="30">
                     <Button Style="{DynamicResource IconButtonsStyle}" Content="{DynamicResource close}" Tag="IsCloseButton" Click="btnClose_Click" ToolTip="Đóng ứng dụng"/>
                     <Button Style="{DynamicResource IconButtonsStyle}" Content="{DynamicResource minimize}" Margin="5,0" Click="btnMinimize_Click" ToolTip="Thu nhỏ cửa sổ"/>
@@ -40,7 +37,6 @@
                     <TextBlock Text="Đăng nhập" FontSize="26" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryColor}" HorizontalAlignment="Center" Margin="0,0,0,6"/>
                     <TextBlock Text="Vui lòng nhập tài khoản để vào hệ thống" FontSize="13.5" Foreground="{DynamicResource PrimaryGrayColor}" HorizontalAlignment="Center" Margin="0,0,0,28"/>
 
-                    <!-- Username -->
                     <TextBlock Text="Tên đăng nhập" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,6"/>
                     <Border CornerRadius="6" Background="{DynamicResource SecondaryBackgroundColor}" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1" Height="42" Margin="0,0,0,18">
                         <Grid>
@@ -49,7 +45,6 @@
                         </Grid>
                     </Border>
 
-                    <!-- Password -->
                     <TextBlock Text="Mật khẩu" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,6"/>
                     <Border CornerRadius="6" Background="{DynamicResource SecondaryBackgroundColor}" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1" Height="42" Margin="0,0,0,24">
                         <Grid>
@@ -69,10 +64,8 @@
                         </Grid>
                     </Border>
 
-                    <!-- Error Message -->
                     <TextBlock x:Name="txtError" Foreground="{DynamicResource ErrorNotification}" FontSize="13" HorizontalAlignment="Center" Margin="0,0,0,14" Visibility="Collapsed" TextWrapping="Wrap" TextAlignment="Center"/>
 
-                    <!-- Login Button -->
                     <Button x:Name="btnLogin" Content="Đăng nhập" Height="42" Style="{DynamicResource PrimaryButtonStyle}" IsDefault="True" Click="btnLogin_Click" FontSize="15" FontWeight="SemiBold"/>
                 </StackPanel>
             </Grid>

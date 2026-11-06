@@ -23,7 +23,6 @@
                 Margin="40 0 0 0" Padding="10 5 0 5"
                 BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="4 0 0 0"/>    
 
-            <!-- Thanh tìm kiếm và lọc phòng -->
             <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,20,0">
                 <TextBox x:Name="txtSearchRoom" Width="170" Height="36" Style="{DynamicResource TextBoxStyle}" Tag="Tìm số phòng (101-205)..." TextChanged="txtSearchRoom_TextChanged"/>
                 <ComboBox x:Name="cbFilterRoomStatus" Width="165" Height="36" Margin="10,0,0,0" Style="{DynamicResource ComboBoxStyle}" Tag="Lọc trạng thái" SelectionChanged="cbFilterRoomStatus_SelectionChanged">
@@ -36,14 +35,12 @@
                 </ComboBox>
             </StackPanel>
 
-            <!-- Form nhập thông tin phòng chia 2 cột co giãn linh hoạt -->
             <Grid Grid.Row="1" Margin="20,2,20,2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Cột trái: Thông tin cơ bản & Giá -->
                 <StackPanel Grid.Column="0" Margin="10,0,20,0">
                     <StackPanel Margin="0,0,0,6">
                         <Grid>
@@ -70,7 +67,7 @@
                             <TextBox Grid.Column="3" x:Name="txtNumberBed" Width="Auto" Style="{DynamicResource TextBoxStyle}" Tag="Số đệm"/>
                         </Grid>
                         <StackPanel Orientation="Horizontal" Margin="110,2,0,0">
-                            <TextBlock x:Name="txtNumberPeopleError" Text="Số người phải lớn hơn 0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
+                            <TextBlock x:Name="txtNumberPeopleError" Text="Số người phải lớn hơn 0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed" Margin="0,0,12,0"/>
                             <TextBlock x:Name="txtNumberBedError" Text="Số đệm/giường phải lớn hơn 0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
                         </StackPanel>
                     </StackPanel>
@@ -104,7 +101,6 @@
                     </StackPanel>
                 </StackPanel>
 
-                <!-- Cột phải: Loại phòng, Loại giường, Diện tích, Trạng thái -->
                 <StackPanel Grid.Column="1" Margin="20,0,10,0">
                     <StackPanel Margin="0,0,0,6">
                         <Grid>

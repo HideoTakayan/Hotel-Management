@@ -21,14 +21,12 @@
                            Margin="40 0 0 0" Padding="10 5 0 5"
                            BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="4 0 0 0"/>
 
-            <!-- Form nhập thông tin người dùng chia 2 cột đồng bộ -->
             <Grid Grid.Row="1" Margin="20,4,20,4">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Cột trái: Tài khoản, Họ tên, Mật khẩu -->
                 <StackPanel Grid.Column="0" Margin="10,0,20,0">
                     <StackPanel Margin="0,0,0,8">
                         <Grid>
@@ -61,11 +59,11 @@
                             <TextBlock Grid.Column="0" Text="Mật khẩu" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
                             <PasswordBox Grid.Column="1" x:Name="txtPassword" Width="Auto" Style="{DynamicResource PasswordBoxStyle}"/>
                         </Grid>
+                        <TextBlock x:Name="txtPasswordHint" Text="(Để trống nếu không muốn đổi mật khẩu khi cập nhật)" Foreground="{DynamicResource PrimaryGrayColor}" FontSize="11" FontStyle="Italic" Margin="110,2,0,0"/>
                         <TextBlock x:Name="txtPasswordError" Text="Mật khẩu không được để trống" Margin="110,2,0,0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
                     </StackPanel>
                 </StackPanel>
 
-                <!-- Cột phải: Email, Số điện thoại, Vai trò -->
                 <StackPanel Grid.Column="1" Margin="20,0,10,0">
                     <StackPanel Margin="0,0,0,8">
                         <Grid>

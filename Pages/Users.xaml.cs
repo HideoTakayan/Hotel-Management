@@ -27,32 +27,37 @@ namespace Hotel_Management.Pages
             }
         }
 
-        private void LoadData()
+        internal async void LoadData()
         {
             try
             {
-                var users = new List<User>();
-                using (var conn = DatabaseHelper.GetConnection())
+                var users = await System.Threading.Tasks.Task.Run(() =>
                 {
-                    conn.Open();
-                    string query = "SELECT Id, Username, FullName, Email, Phone, Role FROM Users";
-                    using (var cmd = new MySqlCommand(query, conn))
-                    using (var reader = cmd.ExecuteReader())
+                    var list = new List<User>();
+                    using (var conn = DatabaseHelper.GetConnection())
                     {
-                        while (reader.Read())
+                        DatabaseHelper.OpenConnection(conn);
+                        string query = "SELECT Id, Username, FullName, Email, Phone, Role FROM Users";
+                        using (var cmd = new MySqlCommand(query, conn))
+                        using (var reader = cmd.ExecuteReader())
                         {
-                            users.Add(new User
+                            while (reader.Read())
                             {
-                                Id = reader.GetInt32("Id"),
-                                Username = reader.GetString("Username"),
-                                FullName = reader.GetString("FullName"),
-                                Email = reader.GetString("Email"),
-                                Phone = reader.IsDBNull(reader.GetOrdinal("Phone")) ? null : reader.GetString("Phone"),
-                                Role = reader.GetInt32("Role")
-                            });
+                                list.Add(new User
+                                {
+                                    Id = reader.GetInt32("Id"),
+                                    Username = reader.GetString("Username"),
+                                    FullName = reader.GetString("FullName"),
+                                    Email = reader.GetString("Email"),
+                                    Phone = reader.IsDBNull(reader.GetOrdinal("Phone")) ? null : reader.GetString("Phone"),
+                                    Role = reader.GetInt32("Role")
+                                });
+                            }
                         }
                     }
-                }
+                    return list;
+                });
+
                 UsersDataGrid.ItemsSource = users;
             }
             catch (MySqlException ex)
@@ -111,7 +116,6 @@ namespace Hotel_Management.Pages
             }
             else txtPasswordError.Visibility = Visibility.Collapsed;
 
-            // Số điện thoại không bắt buộc - chỉ validate định dạng nếu có nhập
             string phoneText = txtPhone.Text.Trim();
             if (!string.IsNullOrWhiteSpace(phoneText) && (phoneText.Length < 9 || phoneText.Length > 12 || !System.Linq.Enumerable.All(phoneText, char.IsDigit)))
             {
@@ -145,7 +149,7 @@ namespace Hotel_Management.Pages
             {
                 using (var conn = DatabaseHelper.GetConnection())
                 {
-                    conn.Open();
+                    DatabaseHelper.OpenConnection(conn);
                     string query = @"INSERT INTO Users (Username, Password, FullName, Email, Phone, Role) 
                                      VALUES (@Username, @Password, @FullName, @Email, @Phone, @Role)";
                     using (var cmd = new MySqlCommand(query, conn))
@@ -207,7 +211,7 @@ namespace Hotel_Management.Pages
             {
                 using (var conn = DatabaseHelper.GetConnection())
                 {
-                    conn.Open();
+                    DatabaseHelper.OpenConnection(conn);
                     string query;
                     bool updatePassword = !string.IsNullOrWhiteSpace(txtPassword.Password);
 
@@ -290,9 +294,8 @@ namespace Hotel_Management.Pages
                 {
                     using (var conn = DatabaseHelper.GetConnection())
                     {
-                        conn.Open();
+                        DatabaseHelper.OpenConnection(conn);
 
-                        // Kiểm tra xem nhân viên đã có nhiệm vụ hoặc ca làm việc chưa để chặn xóa
                         string checkQuery = @"SELECT 
                             (SELECT COUNT(*) FROM Tasks WHERE AssignedTo = @Id) +
                             (SELECT COUNT(*) FROM Shifts WHERE Employee1_Id = @Id OR Employee2_Id = @Id) AS TotalRefs";
@@ -354,7 +357,7 @@ namespace Hotel_Management.Pages
                 txtFullName.Text = user.FullName;
                 txtEmail.Text = user.Email;
                 txtPhone.Text = user.Phone;
-                txtPassword.Password = ""; // Clear password for security
+                txtPassword.Password = "";
 
                 foreach (ComboBoxItem item in comboboxRole.Items)
                 {

@@ -34,12 +34,10 @@ namespace Hotel_Management
             CurrentRole = role;
             ApplyRolePermissions();
 
-            // Đồng bộ icon theme với theme đang dùng (trường hợp đăng xuất/đăng nhập lại)
             var themeSource = Application.Current.Resources.MergedDictionaries[0].Source?.OriginalString ?? "";
             if (themeSource.Contains("LightMode"))
                 iconTheme.Kind = MahApps.Metro.IconPacks.PackIconBootstrapIconsKind.SunFill;
 
-            // Mở trang phù hợp với vai trò người dùng
             placeHolder.Visibility = Visibility.Collapsed;
             if (CurrentRole == 1)
             {
@@ -52,14 +50,13 @@ namespace Hotel_Management
                 NavigateToPage("Pages/Home.xaml");
             }
 
-            // Đồng bộ dữ liệu hệ thống trong luồng phụ khi khởi động
             System.Threading.Tasks.Task.Run(() =>
             {
                 try
                 {
                     using (var conn = DatabaseHelper.GetConnection())
                     {
-                        conn.Open();
+                        DatabaseHelper.OpenConnection(conn);
                         DatabaseHelper.SyncAllDataToCurrentDate(conn, force: false);
                     }
                 }
@@ -69,8 +66,6 @@ namespace Hotel_Management
 
         private void ApplyRolePermissions()
         {
-            // Role 0: Quản lý (Admin kiêm Lễ tân) - Toàn quyền quản trị, đặt phòng, thu ngân, giao việc
-            // Role 1: Nhân viên - Chỉ xem lịch làm việc, nhận việc dọn dẹp và báo cáo hoàn thành
             txtRole.Text = CurrentRole == 0 ? "Quản lý" : "Nhân viên";
             if (CurrentRole == 1)
             {
@@ -92,10 +87,74 @@ namespace Hotel_Management
 
         private void btnMinimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
 
+        private readonly System.Collections.Generic.Dictionary<string, Page> _pageCache = new System.Collections.Generic.Dictionary<string, Page>();
+
+        private Page GetOrCreatePage(string key, Func<Page> factory)
+        {
+            if (!_pageCache.TryGetValue(key, out var page))
+            {
+                page = factory();
+                _pageCache[key] = page;
+            }
+            return page;
+        }
+
         private void NavigateToPage(string pageUri)
         {
             placeHolder.Visibility = Visibility.Collapsed;
-            PagesNavigation.Navigate(new Uri(pageUri, UriKind.RelativeOrAbsolute));
+            Page targetPage = null;
+
+            switch (pageUri)
+            {
+                case "Pages/Home.xaml":
+                    targetPage = GetOrCreatePage("Home", () => new Pages.Home());
+                    break;
+                case "Pages/Rooms.xaml":
+                    var roomsPage = (Pages.Rooms)GetOrCreatePage("Rooms", () => new Pages.Rooms());
+                    roomsPage.LoadData();
+                    targetPage = roomsPage;
+                    break;
+                case "Pages/Bills.xaml":
+                    var billsPage = (Pages.Bills)GetOrCreatePage("Bills", () => new Pages.Bills());
+                    billsPage.LoadData();
+                    targetPage = billsPage;
+                    break;
+                case "Pages/Users.xaml":
+                    var usersPage = (Pages.Users)GetOrCreatePage("Users", () => new Pages.Users());
+                    usersPage.LoadData();
+                    targetPage = usersPage;
+                    break;
+                case "Pages/Services.xaml":
+                    var servicesPage = (Pages.Services)GetOrCreatePage("Services", () => new Pages.Services());
+                    servicesPage.LoadData();
+                    targetPage = servicesPage;
+                    break;
+                case "Pages/Stats.xaml":
+                    var statsPage = (Pages.Stats)GetOrCreatePage("Stats", () => new Pages.Stats());
+                    statsPage.TriggerLoadData();
+                    targetPage = statsPage;
+                    break;
+                case "Pages/Booking.xaml":
+                    var bookingPage = (Pages.Booking)GetOrCreatePage("Booking", () => new Pages.Booking());
+                    bookingPage.LoadRoomStatusBoard();
+                    targetPage = bookingPage;
+                    break;
+                case "Pages/WorkSchedule.xaml":
+                    var schedulePage = (Pages.WorkSchedule)GetOrCreatePage("WorkSchedule", () => new Pages.WorkSchedule());
+                    schedulePage.LoadData();
+                    targetPage = schedulePage;
+                    break;
+                case "Pages/MyTasks.xaml":
+                    var tasksPage = (Pages.MyTasks)GetOrCreatePage("MyTasks", () => new Pages.MyTasks());
+                    tasksPage.LoadData();
+                    targetPage = tasksPage;
+                    break;
+                default:
+                    PagesNavigation.Navigate(new Uri(pageUri, UriKind.RelativeOrAbsolute));
+                    return;
+            }
+
+            PagesNavigation.Navigate(targetPage);
         }
 
         private void rdHome_Click(object sender, RoutedEventArgs e) => NavigateToPage("Pages/Home.xaml");
@@ -112,7 +171,18 @@ namespace Hotel_Management
         {
             rdBills.IsChecked = true;
             placeHolder.Visibility = Visibility.Collapsed;
-            PagesNavigation.Navigate(new Pages.Bills(selectedBillId));
+            if (selectedBillId.HasValue)
+            {
+                var billsPage = new Pages.Bills(selectedBillId);
+                _pageCache["Bills"] = billsPage;
+                PagesNavigation.Navigate(billsPage);
+            }
+            else
+            {
+                var page = (Pages.Bills)GetOrCreatePage("Bills", () => new Pages.Bills());
+                page.LoadData();
+                PagesNavigation.Navigate(page);
+            }
         }
 
         public void NavigateToBooking()
@@ -180,7 +250,8 @@ namespace Hotel_Management
             rdUsers.IsChecked = false;
             rdStats.IsChecked = false;
             placeHolder.Visibility = Visibility.Collapsed;
-            PagesNavigation.Navigate(new Pages.Profile(CurrentUserId));
+            var page = GetOrCreatePage("Profile", () => new Pages.Profile(CurrentUserId));
+            PagesNavigation.Navigate(page);
         }
 
         #region Thu Phóng Nội Dung (Zoom)
@@ -189,7 +260,6 @@ namespace Hotel_Management
         private const double MaxZoom = 1.8;
         private const double ZoomStep = 0.1;
 
-        // Kích thước tối thiểu của trang (trước khi zoom). Nhỏ hơn mức này sẽ hiện thanh cuộn thay vì bóp méo/cắt mất nội dung.
         private const double MinPageWidth = 760;
         private const double MinPageHeight = 540;
 
@@ -211,7 +281,6 @@ namespace Hotel_Management
 
             if (!needHScroll && !needVScroll)
             {
-                // Khi đủ không gian (mặc định 100% ở cả Cửa sổ & Toàn màn hình), để WPF tự co giãn 100% không qua thanh cuộn ngoài
                 pageScroller.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
                 pageScroller.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
                 PagesNavigation.Width = double.NaN;
@@ -221,7 +290,6 @@ namespace Hotel_Management
             }
             else
             {
-                // Khi Zoom lớn khiến không gian thực nhỏ hơn mức tối thiểu, bật thanh cuộn để giữ nguyên bố cục trang
                 pageScroller.HorizontalScrollBarVisibility = needHScroll ? ScrollBarVisibility.Auto : ScrollBarVisibility.Disabled;
                 pageScroller.VerticalScrollBarVisibility = needVScroll ? ScrollBarVisibility.Auto : ScrollBarVisibility.Disabled;
 

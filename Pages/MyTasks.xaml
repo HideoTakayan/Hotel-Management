@@ -8,7 +8,6 @@
       d:DesignHeight="566" d:DesignWidth="920" Title="Nhiệm Vụ Của Tôi" FontFamily="Segoe UI">
 
     <Page.Resources>
-        <!-- Nút hành động chính trong DataGrid (Duyệt / Nhận việc / Báo cáo) -->
         <Style x:Key="TaskActionPrimaryButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="{Binding PrimaryActionBgColor}"/>
             <Setter Property="Foreground" Value="White"/>
@@ -36,7 +35,6 @@
             </Setter>
         </Style>
 
-        <!-- Nút Làm lại (Amber Warning Outline) -->
         <Style x:Key="TaskActionRejectButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="#F59E0B"/>
@@ -66,7 +64,6 @@
             </Setter>
         </Style>
 
-        <!-- Nút Hủy (Red Danger Outline) -->
         <Style x:Key="TaskActionDeleteButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="#EF4444"/>
@@ -115,7 +112,6 @@
                     HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,20,0"
                     Style="{DynamicResource SecondaryButtonStyle}" Click="btnRefresh_Click"/>
 
-            <!-- Form Giao Việc Mới cho Quản lý (Ẩn đối với Nhân viên) -->
             <Border Grid.Row="1" x:Name="AdminAssignPanel" Background="{DynamicResource PrimaryBackgroundColor}" CornerRadius="5" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1" Padding="15,12" Margin="20,0,20,12" Visibility="Collapsed">
                 <StackPanel>
                     <TextBlock Text="Giao việc mới" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextPrimaryColor}" Margin="0,0,0,10"/>
@@ -179,7 +175,6 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="2,0,0,0">
-                                    <!-- Nút Thao tác chính (Duyệt / Nhận việc / Báo cáo) -->
                                     <Button Content="{Binding PrimaryActionText}"
                                             Click="btnUpdateTask_Click" Tag="{Binding TaskId}" Margin="0,0,6,0">
                                         <Button.Style>
@@ -193,7 +188,6 @@
                                         </Button.Style>
                                     </Button>
 
-                                    <!-- Nút Làm lại (chỉ hiển thị cho Quản lý khi task Chờ xác nhận) -->
                                     <Button Content="Làm lại"
                                             Click="btnRejectTask_Click" Tag="{Binding TaskId}" Margin="0,0,6,0">
                                         <Button.Style>
@@ -207,7 +201,6 @@
                                         </Button.Style>
                                     </Button>
 
-                                    <!-- Nút Hủy nhiệm vụ (chỉ hiển thị cho Quản lý khi task chưa hoàn thành) -->
                                     <Button Content="Hủy"
                                             Click="btnDeleteTask_Click" Tag="{Binding TaskId}">
                                         <Button.Style>

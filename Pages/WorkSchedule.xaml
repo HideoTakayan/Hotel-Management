@@ -22,14 +22,12 @@
                 Margin="40 0 0 0" Padding="10 5 0 5"
                 BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="4 0 0 0"/>    
             
-            <!-- Form nhập thông tin phân ca chia 2 cột đồng bộ -->
             <Grid x:Name="AdminPanel" Grid.Row="1" Margin="20,6,20,4">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Cột trái: Ngày làm & Ca trực -->
                 <StackPanel Grid.Column="0" Margin="10,0,20,0">
                     <Grid Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
@@ -52,7 +50,6 @@
                     </Grid>
                 </StackPanel>
 
-                <!-- Cột phải: Nhân viên 1 & Nhân viên 2 -->
                 <StackPanel Grid.Column="1" Margin="20,0,10,0">
                     <Grid Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>

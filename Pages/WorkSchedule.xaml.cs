@@ -21,37 +21,41 @@ namespace Hotel_Management.Pages
         private void CheckPermissions()
         {
             var mainWindow = Application.Current.MainWindow as MainWindow;
-            if (mainWindow == null || mainWindow.CurrentRole == 1) // Nhân viên (hoặc không xác định) -> chỉ được xem
+            if (mainWindow == null || mainWindow.CurrentRole == 1)
             {
-                AdminPanel.Visibility = Visibility.Collapsed;     // Ẩn form phân ca
-                btnAddShift.Visibility = Visibility.Collapsed;    // Ẩn nút tạo ca mới
-                btnUpdateShift.Visibility = Visibility.Collapsed; // Ẩn nút cập nhật ca
-                btnDelShift.Visibility = Visibility.Collapsed;    // Ẩn nút xóa ca
+                AdminPanel.Visibility = Visibility.Collapsed;
+                btnAddShift.Visibility = Visibility.Collapsed;
+                btnUpdateShift.Visibility = Visibility.Collapsed;
+                btnDelShift.Visibility = Visibility.Collapsed;
             }
         }
 
-        private void LoadEmployees()
+        private async void LoadEmployees()
         {
             try
             {
-                var employees = new List<User>();
-                using (MySqlConnection conn = DatabaseHelper.GetConnection())
+                var employees = await System.Threading.Tasks.Task.Run(() =>
                 {
-                    conn.Open();
-                    string query = "SELECT Id, FullName FROM Users WHERE Role = 1 ORDER BY FullName";
-                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
-                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    var list = new List<User>();
+                    using (MySqlConnection conn = DatabaseHelper.GetConnection())
                     {
-                        while (reader.Read())
+                        DatabaseHelper.OpenConnection(conn);
+                        string query = "SELECT Id, FullName FROM Users WHERE Role = 1 ORDER BY FullName";
+                        using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
                         {
-                            employees.Add(new User
+                            while (reader.Read())
                             {
-                                Id = reader.GetInt32("Id"),
-                                FullName = reader.GetString("FullName")
-                            });
+                                list.Add(new User
+                                {
+                                    Id = reader.GetInt32("Id"),
+                                    FullName = reader.GetString("FullName")
+                                });
+                            }
                         }
                     }
-                }
+                    return list;
+                });
 
                 comboboxEmp1.ItemsSource = employees;
                 comboboxEmp1.DisplayMemberPath = "FullName";
@@ -71,43 +75,48 @@ namespace Hotel_Management.Pages
             }
         }
 
-        private void LoadData()
+        internal async void LoadData()
         {
             try
             {
-                using (MySqlConnection conn = DatabaseHelper.GetConnection())
+                var dt = await System.Threading.Tasks.Task.Run(() =>
                 {
-                    conn.Open();
-                    string query = @"
-                        SELECT s.ShiftId, s.WorkDate, s.ShiftType,
-                               s.Employee1_Id, s.Employee2_Id,
-                               u1.FullName AS Employee1_Name, 
-                               u2.FullName AS Employee2_Name 
-                        FROM Shifts s
-                        JOIN Users u1 ON s.Employee1_Id = u1.Id
-                        JOIN Users u2 ON s.Employee2_Id = u2.Id
-                        ORDER BY s.WorkDate DESC, s.ShiftType ASC";
-
-                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
-                    using (MySqlDataAdapter da = new MySqlDataAdapter(cmd))
+                    DataTable table = new DataTable();
+                    using (MySqlConnection conn = DatabaseHelper.GetConnection())
                     {
-                        DataTable dt = new DataTable();
-                        da.Fill(dt);
+                        DatabaseHelper.OpenConnection(conn);
+                        DatabaseHelper.EnsureTodayShifts(conn);
+                        string query = @"
+                            SELECT s.ShiftId, s.WorkDate, s.ShiftType,
+                                   s.Employee1_Id, s.Employee2_Id,
+                                   u1.FullName AS Employee1_Name, 
+                                   u2.FullName AS Employee2_Name 
+                            FROM Shifts s
+                            JOIN Users u1 ON s.Employee1_Id = u1.Id
+                            JOIN Users u2 ON s.Employee2_Id = u2.Id
+                            ORDER BY s.WorkDate DESC, s.ShiftType ASC";
 
-                        // Add helper columns for DataGrid display
-                        dt.Columns.Add("ShiftName", typeof(string));
-                        dt.Columns.Add("TimeRange", typeof(string));
-
-                        foreach (DataRow row in dt.Rows)
+                        using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                        using (MySqlDataAdapter da = new MySqlDataAdapter(cmd))
                         {
-                            int shiftType = Convert.ToInt32(row["ShiftType"]);
-                            row["ShiftName"] = shiftType == 0 ? "Ca Sáng" : "Ca Tối";
-                            row["TimeRange"] = shiftType == 0 ? "07:00 - 15:00" : "15:00 - 23:00";
+                            da.Fill(table);
                         }
-
-                        dgShifts.ItemsSource = dt.DefaultView;
                     }
-                }
+
+                    table.Columns.Add("ShiftName", typeof(string));
+                    table.Columns.Add("TimeRange", typeof(string));
+
+                    foreach (DataRow row in table.Rows)
+                    {
+                        int shiftType = Convert.ToInt32(row["ShiftType"]);
+                        row["ShiftName"] = shiftType == 0 ? "Ca Sáng" : "Ca Tối";
+                        row["TimeRange"] = shiftType == 0 ? "07:00 - 15:00" : "15:00 - 23:00";
+                    }
+
+                    return table;
+                });
+
+                dgShifts.ItemsSource = dt.DefaultView;
             }
             catch (MySqlException ex)
             {
@@ -193,9 +202,8 @@ namespace Hotel_Management.Pages
             {
                 using (MySqlConnection conn = DatabaseHelper.GetConnection())
                 {
-                    conn.Open();
+                    DatabaseHelper.OpenConnection(conn);
 
-                    // Kiểm tra xem ca làm việc này đã được phân trong ngày chưa
                     string checkQuery = "SELECT COUNT(*) FROM Shifts WHERE WorkDate = @Date AND ShiftType = @Type";
                     using (MySqlCommand checkCmd = new MySqlCommand(checkQuery, conn))
                     {
@@ -284,7 +292,7 @@ namespace Hotel_Management.Pages
             {
                 using (MySqlConnection conn = DatabaseHelper.GetConnection())
                 {
-                    conn.Open();
+                    DatabaseHelper.OpenConnection(conn);
 
                     string checkQuery = "SELECT COUNT(*) FROM Shifts WHERE WorkDate = @Date AND ShiftType = @Type AND ShiftId <> @ShiftId";
                     using (MySqlCommand checkCmd = new MySqlCommand(checkQuery, conn))
@@ -355,9 +363,8 @@ namespace Hotel_Management.Pages
                 {
                     using (MySqlConnection conn = DatabaseHelper.GetConnection())
                     {
-                        conn.Open();
+                        DatabaseHelper.OpenConnection(conn);
 
-                        // Cấm xóa nếu ca làm việc này đã có nhiệm vụ (tránh mất nhiệm vụ dọn phòng do CASCADE)
                         string checkQuery = "SELECT COUNT(*) FROM Tasks WHERE ShiftId = @ShiftId";
                         using (MySqlCommand checkCmd = new MySqlCommand(checkQuery, conn))
                         {

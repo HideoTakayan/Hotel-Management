@@ -42,7 +42,6 @@
                        Margin="40 0 0 0" Padding="10 5 0 5"
                        BorderBrush="{DynamicResource PrimaryBlueColor}" BorderThickness="4 0 0 0"/>
 
-                <!-- Form nhập thông tin đặt phòng chia 2 cột đồng bộ -->
                 <Border Grid.Row="1" Margin="30,8,30,8" Padding="25,18" Background="{DynamicResource PrimaryBackgroundColor}" CornerRadius="6" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -50,7 +49,6 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- Cột trái: Thông tin khách hàng -->
                         <StackPanel Grid.Column="0" Margin="0,0,20,0">
                             <TextBlock Text="Thông tin khách hàng" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryColor}" Margin="0,0,0,12"/>
 
@@ -103,7 +101,6 @@
                             </StackPanel>
                         </StackPanel>
 
-                        <!-- Cột phải: Thông tin phòng & Thời gian lưu trú -->
                         <StackPanel Grid.Column="1" Margin="20,0,0,0">
                             <TextBlock Text="Phòng và thời gian lưu trú" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryColor}" Margin="0,0,0,12"/>
 
@@ -131,7 +128,7 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0" Text="Ngày nhận" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryColor}" FontSize="14"/>
-                                    <DatePicker Grid.Column="1" x:Name="dateNgayNhan" Width="Auto" Style="{DynamicResource DatePickerStyle}" />
+                                    <DatePicker Grid.Column="1" x:Name="dateNgayNhan" Width="Auto" Style="{DynamicResource DatePickerStyle}" SelectedDateChanged="dateNgayNhan_SelectedDateChanged"/>
                                 </Grid>
                                 <TextBlock x:Name="dateNgayNhanError" Text="Vui lòng chọn ngày nhận" Margin="110,2,0,0" Foreground="{DynamicResource ErrorNotification}" FontSize="12" Visibility="Collapsed"/>
                             </StackPanel>
@@ -151,13 +148,11 @@
                     </Grid>
                 </Border>
 
-                <!-- Các nút tác vụ -->
                 <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Center" Margin="0,8,0,12">
                     <Button x:Name="btnDatPhong" Content="Đặt phòng" VerticalAlignment="Center" Width="130" Margin="0,0,12,0" Style="{DynamicResource PrimaryButtonStyle}" Click="BtnDatPhong_Click"/>
                     <Button x:Name="btnRefresh" Content="Làm mới" VerticalAlignment="Center" Width="130" Margin="0,0,0,0" Style="{DynamicResource SecondaryButtonStyle}" Click="BtnRefresh_Click"/>
                 </StackPanel>
 
-                <!-- Bảng sơ đồ trạng thái phòng trực quan (10 phòng khách sạn) -->
                 <Border Grid.Row="3" Margin="30,0,30,10" Padding="20,14" Background="{DynamicResource PrimaryBackgroundColor}" CornerRadius="6" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -166,7 +161,6 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <!-- Banner Cảnh Báo Phòng Đến Hạn Trả Hôm Nay Cho Quản Trị Viên -->
                         <Border Grid.Row="0" x:Name="borderCheckoutNotice" Margin="0,0,0,12" Padding="14,10" Background="#26E74C3C" BorderBrush="#E74C3C" BorderThickness="1.5" CornerRadius="6" Visibility="Collapsed">
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -183,7 +177,6 @@
                             </Grid>
                         </Border>
 
-                        <!-- Tiêu đề + Chú thích trạng thái -->
                         <Grid Grid.Row="1" Margin="0,0,0,12">
                             <TextBlock Text="Sơ đồ phòng" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryColor}" VerticalAlignment="Center" HorizontalAlignment="Left"/>
 
@@ -215,7 +208,6 @@
                             </StackPanel>
                         </Grid>
 
-                        <!-- Danh sách 10 phòng -->
                         <ItemsControl Grid.Row="2" x:Name="icRoomStatus">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
@@ -233,7 +225,6 @@
                                                     <RowDefinition Height="*"/>
                                                 </Grid.RowDefinitions>
 
-                                                <!-- Dòng 1: Số phòng + Huy hiệu trạng thái & Cảnh báo trả phòng -->
                                                 <Grid Grid.Row="0">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="Auto"/>
@@ -250,13 +241,11 @@
                                                     </StackPanel>
                                                 </Grid>
 
-                                                <!-- Dòng 2: Loại phòng & Giá -->
                                                 <StackPanel Grid.Row="1" Margin="0,4,0,0">
                                                     <TextBlock Text="{Binding RoomType}" FontSize="11.5" Foreground="{DynamicResource TextSecondaryColor}" TextTrimming="CharacterEllipsis"/>
                                                     <TextBlock Text="{Binding Price, StringFormat='{}{0:N0} đ/đêm'}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryBlueColor}"/>
                                                 </StackPanel>
 
-                                                <!-- Dòng 3: Thông tin khách hoặc số người tối đa -->
                                                 <TextBlock Grid.Row="2" Text="{Binding DisplaySubtitle}" VerticalAlignment="Bottom" FontSize="11" Foreground="{DynamicResource TextSecondaryColor}" TextTrimming="CharacterEllipsis" FontStyle="Italic"/>
                                             </Grid>
                                         </Border>

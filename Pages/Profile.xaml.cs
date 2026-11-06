@@ -17,28 +17,41 @@ namespace Hotel_Management.Pages
             LoadProfile();
         }
 
-        private void LoadProfile()
+        private async void LoadProfile()
         {
             try
             {
-                using (MySqlConnection conn = DatabaseHelper.GetConnection())
+                int userId = _userId;
+                var info = await System.Threading.Tasks.Task.Run(() =>
                 {
-                    conn.Open();
-                    string query = "SELECT FullName, Email, Phone FROM Users WHERE Id = @Id";
-                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    string fullName = "";
+                    string email = "";
+                    string phone = "";
+
+                    using (MySqlConnection conn = DatabaseHelper.GetConnection())
                     {
-                        cmd.Parameters.Add("@Id", MySqlDbType.Int32).Value = _userId;
-                        using (var reader = cmd.ExecuteReader())
+                        DatabaseHelper.OpenConnection(conn);
+                        string query = "SELECT FullName, Email, Phone FROM Users WHERE Id = @Id";
+                        using (MySqlCommand cmd = new MySqlCommand(query, conn))
                         {
-                            if (reader.Read())
+                            cmd.Parameters.Add("@Id", MySqlDbType.Int32).Value = userId;
+                            using (var reader = cmd.ExecuteReader())
                             {
-                                txtFullName.Text = reader.GetString("FullName");
-                                txtEmail.Text = reader.IsDBNull(reader.GetOrdinal("Email")) ? "" : reader.GetString("Email");
-                                txtPhone.Text = reader.IsDBNull(reader.GetOrdinal("Phone")) ? "" : reader.GetString("Phone");
+                                if (reader.Read())
+                                {
+                                    fullName = reader.GetString("FullName");
+                                    email = reader.IsDBNull(reader.GetOrdinal("Email")) ? "" : reader.GetString("Email");
+                                    phone = reader.IsDBNull(reader.GetOrdinal("Phone")) ? "" : reader.GetString("Phone");
+                                }
                             }
                         }
                     }
-                }
+                    return (fullName, email, phone);
+                });
+
+                txtFullName.Text = info.fullName;
+                txtEmail.Text = info.email;
+                txtPhone.Text = info.phone;
             }
             catch (MySqlException ex)
             {
@@ -88,7 +101,7 @@ namespace Hotel_Management.Pages
             {
                 using (MySqlConnection conn = DatabaseHelper.GetConnection())
                 {
-                    conn.Open();
+                    DatabaseHelper.OpenConnection(conn);
                     string query = "UPDATE Users SET FullName = @FullName, Email = @Email, Phone = @Phone";
                     
                     if (!string.IsNullOrWhiteSpace(newPassword))
@@ -115,7 +128,6 @@ namespace Hotel_Management.Pages
                     }
                 }
                 
-                // Cập nhật tên hiển thị ở góc dưới thanh menu
                 var mainWindow = Application.Current.MainWindow as MainWindow;
                 if (mainWindow != null)
                 {

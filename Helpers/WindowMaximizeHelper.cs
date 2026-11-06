@@ -5,10 +5,6 @@ using System.Windows.Interop;
 
 namespace Hotel_Management.Helpers
 {
-    /// <summary>
-    /// Giúp cửa sổ không viền (WindowStyle="None") khi phóng to (Maximized) vừa khít vùng làm việc
-    /// của màn hình hiện tại: không tràn mép, không che thanh Taskbar, đúng cả với màn hình phụ và DPI cao.
-    /// </summary>
     public static class WindowMaximizeHelper
     {
         private const int WM_GETMINMAXINFO = 0x0024;

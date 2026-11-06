@@ -19,19 +19,13 @@ namespace Hotel_Management.Models
         public int ShiftId { get; set; }
 
         [Required]
-        public int TaskStatus { get; set; } = 0; 
-        // 0: Chờ thực hiện
-        // 1: Đang dọn dẹp
-        // 2: Chờ xác nhận
-        // 3: Hoàn thành
-        // 4: Yêu cầu dọn lại
+        public int TaskStatus { get; set; } = 0;
 
         [Required]
         public DateTime CreatedAt { get; set; }
 
         public DateTime? CompletedAt { get; set; }
 
-        // Mở rộng hiển thị
         public string StatusName
         {
             get

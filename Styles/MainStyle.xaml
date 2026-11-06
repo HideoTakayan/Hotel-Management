@@ -95,7 +95,6 @@
                             <!-- Indicator -->
                             <Rectangle Name="Indicator" HorizontalAlignment="Left" Width="4" Height="40" VerticalAlignment="Center" RadiusX="2" RadiusY="2"/>
 
-                            <!-- Icon căn giữa trong cột 60px để khi thu gọn menu không bị lệch hoặc lòi chữ -->
                             <Path x:Name="Icon" Data="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type RadioButton}}}" Height="24" Width="24" Stretch="None" Fill="{DynamicResource PrimaryGrayColor}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0"/>
 
                             <!-- Text -->
@@ -392,7 +391,6 @@
                     <Grid x:Name="PART_Root">
                         <Border x:Name="dpBorder" Background="{DynamicResource SecondaryBackgroundColor}" BorderBrush="{DynamicResource SecondaryGrayColor}" BorderThickness="1" CornerRadius="5">
                             <Grid>
-                                <!-- Ô nhập ngày với Template trong suốt để không bị nền trắng đè chữ trắng ở DarkMode -->
                                 <DatePickerTextBox x:Name="PART_TextBox"
                                                    VerticalAlignment="Center"
                                                    Background="Transparent"
@@ -416,7 +414,6 @@
                                     </DatePickerTextBox.Template>
                                 </DatePickerTextBox>
 
-                                <!-- Placeholder khi chưa chọn ngày -->
                                 <TextBlock x:Name="DatePlaceholder"
                                            Text="{TemplateBinding Tag}"
                                            Foreground="{DynamicResource PrimaryGrayColor}"
@@ -429,7 +426,6 @@
 
                                 <Rectangle Fill="{DynamicResource PrimaryBlueColor}" RadiusX="4" RadiusY="4" Height="26" Width="26" HorizontalAlignment="Right" Margin="0,0,3,0" IsHitTestVisible="False"/>
 
-                                <!-- Nút mở lịch -->
                                 <Button x:Name="PART_Button"
                                         Width="32"
                                         Background="Transparent"
@@ -452,7 +448,6 @@
                             </Grid>
                         </Border>
 
-                        <!-- Popup chứa Calendar -->
                         <Popup x:Name="PART_Popup"
                                Placement="Bottom"
                                PlacementTarget="{Binding ElementName=PART_Root}"
@@ -493,7 +488,6 @@
         <Setter Property="Padding" Value="5"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Tag" Value="Chọn giá trị"/>
-        <!-- Placeholder mặc định -->
 
         <Setter Property="ItemContainerStyle">
             <Setter.Value>
@@ -529,7 +523,6 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBox">
                     <Grid x:Name="RootGrid">
-                        <!-- Viền của ComboBox -->
                         <Border x:Name="MainBorder"
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
@@ -538,7 +531,6 @@
                             CornerRadius="5">
 
                             <Grid>
-                                <!-- Nút mở dropdown phủ toàn bộ ComboBox -->
                                 <ToggleButton x:Name="PART_DropDownButton"
                                           Background="Transparent"
                                           BorderThickness="0"
@@ -562,7 +554,6 @@
                                     </ToggleButton.Template>
                                 </ToggleButton>
 
-                                <!-- Text hiển thị khi chưa chọn giá trị -->
                                 <TextBlock x:Name="PlaceholderText"
                                        Text="{TemplateBinding Tag}"
                                        Foreground="{DynamicResource PrimaryGrayColor}"
@@ -572,7 +563,6 @@
                                        IsHitTestVisible="False"
                                        Visibility="Collapsed"/>
 
-                                <!-- Nội dung được chọn -->
                                 <ContentPresenter x:Name="SelectedContent"
                                               Content="{TemplateBinding SelectionBoxItem}"
                                               ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
@@ -585,7 +575,6 @@
                             </Grid>
                         </Border>
 
-                        <!-- Popup danh sách Item -->
                         <Popup x:Name="PART_Popup"
                                Placement="Bottom"
                                AllowsTransparency="True"
@@ -607,7 +596,6 @@
                         </Popup>
                     </Grid>
 
-                    <!-- Trigger để ẩn Placeholder khi có giá trị -->
                     <ControlTemplate.Triggers>
                         <Trigger Property="SelectedIndex" Value="-1">
                             <Setter Property="Visibility"
@@ -632,7 +620,6 @@
     
     <!-- DataGridStyle -->
     <Style x:Key="DataGridStyle" TargetType="{x:Type DataGrid}">
-        <!-- Style tổng thể cho DataGrid -->
         <Setter Property="Background" Value="{DynamicResource PrimaryBackgroundColor}"/>
         <Setter Property="Foreground" Value="{DynamicResource TextSecondaryColor}"/>
         <Setter Property="BorderThickness" Value="0"/>
@@ -653,13 +640,11 @@
         <Setter Property="GridLinesVisibility" Value="None"/>
         <Setter Property="AutoGenerateColumns" Value="False"/>
         <Setter Property="IsReadOnly" Value="True"/>
-        <!-- Chiều cao header -->
         <Setter Property="ColumnHeaderHeight" Value="40"/>
 
         <Setter Property="CellStyle">
             <Setter.Value>
                 <Style TargetType="DataGridCell">
-                    <!-- Nền trong trạng thái bình thường -->
                     <Setter Property="Background" Value="Transparent"/>
                     <Setter Property="BorderBrush" Value="Transparent"/>
                     <Setter Property="BorderThickness" Value="0"/>
@@ -680,7 +665,6 @@
                     </Setter>
 
                     <Style.Triggers>
-                        <!-- Khi ô được chọn, giữ nền trong suốt để lộ màu của Row và đổi chữ sang màu sáng -->
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="Background" Value="Transparent"/>
                             <Setter Property="BorderBrush" Value="Transparent"/>
@@ -692,11 +676,9 @@
             </Setter.Value>
         </Setter>
 
-        <!-- Style cho từng Row -->
         <Setter Property="RowStyle">
             <Setter.Value>
                 <Style TargetType="DataGridRow">
-                    <!-- Khoảng cách giữa các row -->
                     <Setter Property="Margin" Value="0,3,0,3"/>
                     <Setter Property="BorderThickness" Value="0"/>
                     <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
@@ -719,7 +701,6 @@
                         </Setter.Value>
                     </Setter>
 
-                    <!-- Hiệu ứng hover và selected -->
                     <Style.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter Property="Background" Value="{DynamicResource DataGridRowHoverColor}"/>
@@ -733,7 +714,6 @@
             </Setter.Value>
         </Setter>
 
-        <!-- Style cho Header -->
         <Setter Property="ColumnHeaderStyle">
             <Setter.Value>
                 <Style TargetType="{x:Type DataGridColumnHeader}">

@@ -27,37 +27,42 @@ namespace Hotel_Management.Pages
             }
         }
 
-        private void LoadData()
+        internal void LoadData()
         {
             LoadServiceList();
             LoadOrderComboboxes();
         }
 
-        private void LoadServiceList()
+        private async void LoadServiceList()
         {
             try
             {
-                var services = new List<Service>();
-                using (var conn = DatabaseHelper.GetConnection())
+                var services = await System.Threading.Tasks.Task.Run(() =>
                 {
-                    conn.Open();
-                    DatabaseHelper.EnsureDefaultOnsenServices(conn);
-                    string query = "SELECT ServiceId, ServiceName, Price, Unit FROM Services ORDER BY ServiceId ASC";
-                    using (var cmd = new MySqlCommand(query, conn))
-                    using (var reader = cmd.ExecuteReader())
+                    var list = new List<Service>();
+                    using (var conn = DatabaseHelper.GetConnection())
                     {
-                        while (reader.Read())
+                        DatabaseHelper.OpenConnection(conn);
+                        DatabaseHelper.EnsureDefaultOnsenServices(conn);
+                        string query = "SELECT ServiceId, ServiceName, Price, Unit FROM Services ORDER BY ServiceId ASC";
+                        using (var cmd = new MySqlCommand(query, conn))
+                        using (var reader = cmd.ExecuteReader())
                         {
-                            services.Add(new Service
+                            while (reader.Read())
                             {
-                                ServiceId = reader.GetInt32("ServiceId"),
-                                ServiceName = reader.GetString("ServiceName"),
-                                Price = reader.GetDecimal("Price"),
-                                Unit = reader.GetString("Unit")
-                            });
+                                list.Add(new Service
+                                {
+                                    ServiceId = reader.GetInt32("ServiceId"),
+                                    ServiceName = reader.GetString("ServiceName"),
+                                    Price = reader.GetDecimal("Price"),
+                                    Unit = reader.GetString("Unit")
+                                });
+                            }
                         }
                     }
-                }
+                    return list;
+                });
+
                 ServicesDataGrid.ItemsSource = services;
                 cbServices.ItemsSource = services;
                 if (services.Count > 0)
@@ -79,73 +84,81 @@ namespace Hotel_Management.Pages
             }
         }
 
-        private void LoadOrderComboboxes()
+        private async void LoadOrderComboboxes()
         {
             try
             {
-                using (var conn = DatabaseHelper.GetConnection())
+                int currentShiftType = (DateTime.Now.Hour >= 15) ? 1 : 0;
+                var (roomList, staffList) = await System.Threading.Tasks.Task.Run(() =>
                 {
-                    conn.Open();
-                    
-                    // Load active rooms with their active BillId
-                    string roomQuery = @"
-                        SELECT b.BillId, r.RoomId, r.RoomNumber 
-                        FROM Bills b 
-                        JOIN Rooms r ON b.RoomId = r.RoomId 
-                        WHERE b.Status = 3"; // Chỉ phòng đang có khách ở (Check-in) mới gọi được dịch vụ
-                    var roomList = new List<OrderRoomItem>();
-                    using (var cmd = new MySqlCommand(roomQuery, conn))
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            roomList.Add(new OrderRoomItem { BillId = reader.GetInt32("BillId"), RoomId = reader.GetInt32("RoomId"), RoomNumber = "Phòng " + reader.GetString("RoomNumber") });
-                        }
-                    }
-                    cbRooms.ItemsSource = roomList;
+                    var rooms = new List<OrderRoomItem>();
+                    var staff = new List<User>();
 
-                    if (roomList.Count == 0)
+                    using (var conn = DatabaseHelper.GetConnection())
                     {
-                        btnOrderService.IsEnabled = false;
-                    }
-                    else
-                    {
-                        btnOrderService.IsEnabled = true;
-                        cbRooms.SelectedIndex = 0;
-                    }
-
-                    // Load staff (Role = 1) và ưu tiên hiển thị nhân viên đang trong ca trực hiện tại
-                    int currentShiftType = (DateTime.Now.Hour >= 15) ? 1 : 0;
-                    string staffQuery = @"
-                        SELECT u.Id, u.FullName,
-                               EXISTS(
-                                   SELECT 1 FROM Shifts s 
-                                   WHERE s.WorkDate = CURDATE() AND s.ShiftType = @ShiftType 
-                                     AND (s.Employee1_Id = u.Id OR s.Employee2_Id = u.Id)
-                               ) AS IsOnDuty
-                        FROM Users u 
-                        WHERE u.Role = 1 
-                        ORDER BY IsOnDuty DESC, u.FullName ASC";
-                    var staffList = new List<User>();
-                    using (var cmd = new MySqlCommand(staffQuery, conn))
-                    {
-                        cmd.Parameters.Add("@ShiftType", MySqlDbType.Int32).Value = currentShiftType;
+                        DatabaseHelper.OpenConnection(conn);
+                        
+                        string roomQuery = @"
+                            SELECT b.BillId, r.RoomId, r.RoomNumber 
+                            FROM Bills b 
+                            JOIN Rooms r ON b.RoomId = r.RoomId 
+                            WHERE b.Status = 3";
+                        using (var cmd = new MySqlCommand(roomQuery, conn))
                         using (var reader = cmd.ExecuteReader())
                         {
-                            staffList.Add(new User { Id = 0, FullName = "-- Chung (Cả ca) --" });
                             while (reader.Read())
                             {
-                                bool onDuty = Convert.ToInt32(reader["IsOnDuty"]) == 1;
-                                string name = reader.GetString("FullName") + (onDuty ? " (Đang trực)" : "");
-                                staffList.Add(new User { Id = reader.GetInt32("Id"), FullName = name });
+                                rooms.Add(new OrderRoomItem { BillId = reader.GetInt32("BillId"), RoomId = reader.GetInt32("RoomId"), RoomNumber = "Phòng " + reader.GetString("RoomNumber") });
+                            }
+                        }
+
+                        string staffQuery = @"
+                            SELECT u.Id, u.FullName,
+                                   EXISTS(
+                                       SELECT 1 FROM Shifts s 
+                                       WHERE s.WorkDate = CURDATE() AND s.ShiftType = @ShiftType 
+                                         AND (s.Employee1_Id = u.Id OR s.Employee2_Id = u.Id)
+                                   ) AS IsOnDuty
+                            FROM Users u 
+                            WHERE u.Role = 1 
+                            ORDER BY IsOnDuty DESC, u.FullName ASC";
+
+                        using (var cmd = new MySqlCommand(staffQuery, conn))
+                        {
+                            cmd.Parameters.Add("@ShiftType", MySqlDbType.Int32).Value = currentShiftType;
+                            using (var reader = cmd.ExecuteReader())
+                            {
+                                staff.Add(new User { Id = 0, FullName = "-- Chung (Cả ca) --" });
+                                while (reader.Read())
+                                {
+                                    bool onDuty = Convert.ToInt32(reader["IsOnDuty"]) == 1;
+                                    string name = reader.GetString("FullName") + (onDuty ? " (Đang trực)" : "");
+                                    staff.Add(new User { Id = reader.GetInt32("Id"), FullName = name });
+                                }
                             }
                         }
                     }
-                    cbStaff.ItemsSource = staffList;
-                    if (staffList.Count > 0)
-                    {
-                        cbStaff.SelectedIndex = 0;
-                    }
+
+                    return (rooms, staff);
+                });
+
+                cbRooms.ItemsSource = roomList;
+                if (roomList.Count == 0)
+                {
+                    btnOrderService.IsEnabled = false;
+                    if (txtNoOccupiedRoomsHint != null) txtNoOccupiedRoomsHint.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    btnOrderService.IsEnabled = true;
+                    if (txtNoOccupiedRoomsHint != null) txtNoOccupiedRoomsHint.Visibility = Visibility.Collapsed;
+                    cbRooms.SelectedIndex = 0;
+                }
+
+                cbStaff.ItemsSource = staffList;
+                if (staffList.Count > 0)
+                {
+                    cbStaff.SelectedIndex = 0;
                 }
             }
             catch (MySqlException ex)
@@ -213,7 +226,7 @@ namespace Hotel_Management.Pages
             {
                 using (var conn = DatabaseHelper.GetConnection())
                 {
-                    conn.Open();
+                    DatabaseHelper.OpenConnection(conn);
                     string query = "INSERT INTO Services (ServiceName, Price, Unit) VALUES (@ServiceName, @Price, @Unit)";
                     using (var cmd = new MySqlCommand(query, conn))
                     {
@@ -262,7 +275,7 @@ namespace Hotel_Management.Pages
             {
                 using (var conn = DatabaseHelper.GetConnection())
                 {
-                    conn.Open();
+                    DatabaseHelper.OpenConnection(conn);
                     string query = "UPDATE Services SET ServiceName = @ServiceName, Price = @Price, Unit = @Unit WHERE ServiceId = @ServiceId";
                     using (var cmd = new MySqlCommand(query, conn))
                     {
@@ -313,9 +326,8 @@ namespace Hotel_Management.Pages
                 {
                     using (var conn = DatabaseHelper.GetConnection())
                     {
-                        conn.Open();
+                        DatabaseHelper.OpenConnection(conn);
 
-                        // Kiểm tra xem dịch vụ đã được sử dụng trong hóa đơn nào chưa để chặn xóa (tránh ON DELETE CASCADE xóa mất lịch sử)
                         string checkQuery = "SELECT COUNT(*) FROM Bill_Services WHERE ServiceId = @ServiceId";
                         using (var checkCmd = new MySqlCommand(checkQuery, conn))
                         {
@@ -405,13 +417,13 @@ namespace Hotel_Management.Pages
                 {
                     if (gridStaffSelect != null) gridStaffSelect.Visibility = Visibility.Visible;
                     if (cbStaff != null) cbStaff.IsEnabled = true;
-                    if (btnOrderService != null) btnOrderService.Content = "Xác nhận và giao việc";
+                    if (btnOrderService != null) btnOrderService.Content = "Thêm dịch vụ";
                 }
                 else
                 {
                     if (gridStaffSelect != null) gridStaffSelect.Visibility = Visibility.Collapsed;
                     if (cbStaff != null) cbStaff.IsEnabled = false;
-                    if (btnOrderService != null) btnOrderService.Content = "Ghi vào hóa đơn";
+                    if (btnOrderService != null) btnOrderService.Content = "Thêm dịch vụ";
                 }
             }
         }
@@ -457,12 +469,11 @@ namespace Hotel_Management.Pages
             {
                 using (var conn = DatabaseHelper.GetConnection())
                 {
-                    conn.Open();
+                    DatabaseHelper.OpenConnection(conn);
                     using (var trans = conn.BeginTransaction())
                     {
                         try
                         {
-                            // 1. Thêm vào Bill_Services
                             string query1 = @"INSERT INTO Bill_Services (BillId, ServiceId, Quantity, Total) 
                                               VALUES (@BillId, @ServiceId, @Quantity, @Total)";
                             using (var cmd1 = new MySqlCommand(query1, conn, trans))
@@ -474,16 +485,17 @@ namespace Hotel_Management.Pages
                                 cmd1.ExecuteNonQuery();
                             }
 
-                            // 2. Cập nhật tổng tiền của Bill an toàn (xử lý trường hợp Total bị NULL)
-                            string queryUpdateBill = "UPDATE Bills SET Total = COALESCE(Total, 0) + @Amount WHERE BillId = @BillId";
+                            string queryUpdateBill = "UPDATE Bills SET Total = COALESCE(Total, 0) + @Amount WHERE BillId = @BillId AND Status = 3";
                             using (var cmdUpdateBill = new MySqlCommand(queryUpdateBill, conn, trans))
                             {
                                 cmdUpdateBill.Parameters.Add("@Amount", MySqlDbType.Decimal).Value = total;
                                 cmdUpdateBill.Parameters.Add("@BillId", MySqlDbType.Int32).Value = billId;
-                                cmdUpdateBill.ExecuteNonQuery();
+                                if (cmdUpdateBill.ExecuteNonQuery() == 0)
+                                {
+                                    throw new InvalidOperationException("Hóa đơn của phòng này đã chuyển sang trả phòng hoặc đã thanh toán, không thể gọi thêm dịch vụ!");
+                                }
                             }
 
-                            // 3. Chỉ tạo Task giao việc NẾU dịch vụ yêu cầu nhân viên giao tận phòng
                             if (requiresDelivery)
                             {
                                 int shiftId = DatabaseHelper.GetOrCreateCurrentShiftId(conn, trans);
@@ -510,7 +522,6 @@ namespace Hotel_Management.Pages
 
                             MessageBox.Show(successMessage, "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                             
-                            // Reset form & tải lại danh sách
                             txtQuantity.Text = "1";
                             LoadOrderComboboxes();
                         }
